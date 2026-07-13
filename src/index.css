@@ -1,0 +1,139 @@
+/**
+ * Genel Uygulama Stilleri
+ * =========================
+ * Tasarım ilkeleri (Kural 15 — saha koşulları):
+ *   - Yüksek kontrast: güneş altında okunabilirlik için koyu metin,
+ *     açık arka plan; ince gri tonlardan kaçınılır.
+ *   - Büyük dokunma hedefleri: en az 48px yükseklik, eldivenle
+ *     kullanılabilir.
+ *   - Sabit, öngörülebilir düzen: tek elle kullanımda parmağın
+ *     ulaşamayacağı yerlerde önemli aksiyon olmaz.
+ */
+
+:root {
+  --color-bg: #f7f5f0;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-muted: #52524d;
+  --color-primary: #2e7d32; /* zeytin yeşili — tarım temasıyla uyumlu, yüksek kontrast */
+  --color-primary-dark: #1b5e20;
+  --color-danger: #b3261e;
+  --color-border: #d9d6cc;
+
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* --- Kilit Ekranı --- */
+
+.lock-screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-primary-dark);
+}
+
+.lock-screen__content {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.lock-screen__title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 24px;
+}
+
+.lock-screen__status {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.lock-screen__warning {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 20px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.lock-screen__button {
+  margin-top: 16px;
+  min-height: 52px;
+  width: 100%;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--color-primary-dark);
+}
+
+.lock-screen__button:active {
+  opacity: 0.85;
+}
+
+/* --- Altyapı Durum Ekranı (Modül 1 tanılama) --- */
+
+.status-screen {
+  flex: 1;
+  padding: 24px;
+  background: var(--color-bg);
+}
+
+.status-screen__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.status-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.status-card__label {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0 0 4px;
+}
+
+.status-card__value {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+  word-break: break-all;
+}
+
+.status-card--error .status-card__value {
+  color: var(--color-danger);
+}
