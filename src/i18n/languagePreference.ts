@@ -5,8 +5,10 @@
  *   1. Kullanıcının daha önce açıkça seçtiği ve kalıcı depoya
  *      (@capacitor/preferences — bkz. native/preferences.ts) yazılmış
  *      dil tercihi.
- *   2. Cihazın işletim sistemi dili (Intl API üzerinden — ek bir
- *      Capacitor eklentisi gerektirmez, WebView'a yerleşik).
+ *   2. Cihazın işletim sistemi dili (@capacitor/device üzerinden,
+ *      native katmandan sorgulanır — bkz. native/device.ts ve
+ *      ADR 0020. `navigator.language` KULLANILMAZ, Android WebView'de
+ *      güvenilmez).
  *   3. Cihaz dili desteklenen diller arasında yoksa: İngilizce
  *      (FALLBACK_LANGUAGE_CODE) — Engineering Protocol gereği.
  *
@@ -42,9 +44,36 @@ async function detectDeviceLanguageCode(): Promise<string> {
 }
 
 /**
+ * ADR 0015 ÖNCESİ kod, cihazdan algılanan dili YANLIŞLIKLA kalıcı
+ * olarak yazıyordu — bu, güncelleme yapan (silip yeniden kurmayan)
+ * kullanıcıların cihazında hâlâ "kalıntı" bir değer olarak durabilir.
+ *
+ * `setLanguagePreference()` şu an hiçbir yerden çağrılmıyor (Ayarlar
+ * ekranı henüz yok) — bu yüzden Preferences'ta bulunan HERHANGİ bir
+ * dil değeri, bu temizlik yapılana kadar, KESİNLİKLE o eski hatalı
+ * koddan kalma olmalıdır, gerçek bir kullanıcı tercihi olamaz.
+ *
+ * Bu fonksiyon, cihaz başına TAM OLARAK BİR KEZ çalışır (bir bayrakla
+ * işaretlenir) ve varsa kalıntı değeri siler. Böylece
+ * `resolveInitialLanguage()`, artık gerçekten cihaz dilini canlı
+ * okuma yoluna düşer (bkz. ADR 0021).
+ */
+async function clearStaleAutoDetectedLanguageOnce(): Promise<void> {
+  const alreadyCleaned = await localPreferences.get(
+    LocalPreferenceKey.LEGACY_AUTO_LANGUAGE_CLEARED
+  );
+  if (alreadyCleaned === "true") {
+    return;
+  }
+  await localPreferences.remove(LocalPreferenceKey.LANGUAGE);
+  await localPreferences.set(LocalPreferenceKey.LEGACY_AUTO_LANGUAGE_CLEARED, "true");
+}
+
+/**
  * Uygulamanın bu oturumda kullanacağı dili belirler.
  *
- * DAVRANIŞ (bkz. ADR 0015 — 2026-07-14 düzeltmesi):
+ * DAVRANIŞ (bkz. ADR 0015 — 2026-07-14 düzeltmesi, ADR 0021 ile
+ * tamamlandı):
  *   - Kullanıcı daha önce AYARLARDAN BİLEREK bir dil seçtiyse
  *     (setLanguagePreference() ile kaydedilmiş), o dil öncelikli ve
  *     kalıcıdır — cihaz dili değişse bile geçerliliğini korur.
@@ -57,9 +86,12 @@ async function detectDeviceLanguageCode(): Promise<string> {
  * Önceki sürüm, otomatik algılanan dili de kalıcı olarak yazıyordu —
  * bu, "kullanıcının bilinçli tercihi" ile "sistemin o anki durumu"nu
  * yanlışlıkla aynı şey gibi ele alan bir tasarım hatasıydı (gerçek
- * cihaz testinde bulundu). Düzeltildi.
+ * cihaz testinde bulundu). Düzeltildi. ADR 0021: bu eski hatalı kodun
+ * bıraktığı KALINTI veri de artık temizleniyor.
  */
 export async function resolveInitialLanguage(): Promise<string> {
+  await clearStaleAutoDetectedLanguageOnce();
+
   const explicitPreference = await localPreferences.get(LocalPreferenceKey.LANGUAGE);
   if (explicitPreference && isSupportedLanguageCode(explicitPreference)) {
     return explicitPreference;

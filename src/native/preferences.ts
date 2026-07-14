@@ -27,6 +27,12 @@ import { Preferences } from "@capacitor/preferences";
 export const LocalPreferenceKey = {
   /** Kullanıcının seçtiği veya cihazdan algılanan dil kodu (ör. 'tr', 'en'). */
   LANGUAGE: "language_preference",
+  /**
+   * Tek seferlik temizlik bayrağı (bkz. ADR 0021). ADR 0015 öncesi kodun
+   * otomatik algılanan dili yanlışlıkla kalıcı yazdığı biliniyor — bu
+   * bayrak, o kalıntı verinin bir kez temizlendiğini işaretler.
+   */
+  LEGACY_AUTO_LANGUAGE_CLEARED: "legacy_auto_language_cleared_v1",
 } as const;
 
 export type LocalPreferenceKeyName =
@@ -41,7 +47,13 @@ async function setPreference(key: LocalPreferenceKeyName, value: string): Promis
   await Preferences.set({ key, value });
 }
 
+/** Verilen anahtarı depodan siler. Anahtar zaten yoksa bu bir hata sayılmaz. */
+async function removePreference(key: LocalPreferenceKeyName): Promise<void> {
+  await Preferences.remove({ key });
+}
+
 export const localPreferences = {
   get: getPreference,
   set: setPreference,
+  remove: removePreference,
 };
