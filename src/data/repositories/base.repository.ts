@@ -19,6 +19,28 @@
  */
 
 import { getDatabase } from "../db/connection";
+import type { DatabaseExecutor } from "../db/databaseExecutor";
+
+type ExecutorProvider = () => Promise<DatabaseExecutor>;
+
+/**
+ * Repository katmanının veritabanına ERİŞTİĞİ TEK NOKTA. Üretimde
+ * varsayılan olarak `getDatabase` (gerçek, şifreli Capacitor SQLite
+ * bağlantısı) kullanılır — bu, uygulama çalışırken hiçbir zaman
+ * değişmez. Sadece testler `setDatabaseExecutorProviderForTesting()`
+ * ile bunu `better-sqlite3` tabanlı bir yürütücüyle değiştirir.
+ */
+let executorProvider: ExecutorProvider = getDatabase;
+
+/** SADECE TESTLER İÇİN: repository katmanının hangi veritabanı yürütücüsünü kullanacağını değiştirir. */
+export function setDatabaseExecutorProviderForTesting(provider: ExecutorProvider): void {
+  executorProvider = provider;
+}
+
+/** SADECE TESTLER İÇİN: üretim sağlayıcısına (gerçek Capacitor bağlantısı) geri döner. */
+export function resetDatabaseExecutorProviderForTesting(): void {
+  executorProvider = getDatabase;
+}
 
 export abstract class BaseRepository {
   /**
@@ -34,7 +56,7 @@ export abstract class BaseRepository {
    * oluşturulmamalıdır (SQL enjeksiyonuna karşı temel savunma).
    */
   protected async query<TRow>(sql: string, values: unknown[] = []): Promise<TRow[]> {
-    const db = await getDatabase();
+    const db = await executorProvider();
     const result = await db.query(sql, values);
     return (result.values ?? []) as TRow[];
   }
@@ -58,7 +80,7 @@ export abstract class BaseRepository {
     sql: string,
     values: unknown[] = []
   ): Promise<{ changes: number; lastId?: number }> {
-    const db = await getDatabase();
+    const db = await executorProvider();
     const result = await db.run(sql, values);
     return {
       changes: result.changes?.changes ?? 0,
@@ -73,7 +95,7 @@ export abstract class BaseRepository {
    * eklerken aynı anda stok düşmek) için kullanılır.
    */
   protected async runInTransaction<T>(work: () => Promise<T>): Promise<T> {
-    const db = await getDatabase();
+    const db = await executorProvider();
     await db.beginTransaction();
     try {
       const result = await work();

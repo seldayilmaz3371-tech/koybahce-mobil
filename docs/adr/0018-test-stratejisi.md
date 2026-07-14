@@ -39,3 +39,13 @@ Repository interface'leri tanımlanırken (`IParcelRepository`, `ITreeRepository
 **Bu, varsayımla kapatılmıyor — açık bir görev olarak işaretleniyor:** `ParcelRepository`'nin ilk testleri yazılacağı adımda, `BaseRepository`'nin veritabanı bağlantısını nasıl enjekte edilebilir/değiştirilebilir hale getireceğimize (ör. constructor injection, bir `DatabaseExecutor` arayüzü) o an karar verilecek — bu implementasyon detayı, gerçek test yazımından önce soyut olarak tasarlanmayacak (YAGNI: henüz kullanılmayan bir soyutlamayı önceden inşa etmek).
 
 Bu commit'te (ParcelRepository implementasyonu) **testler henüz yazılmıyor** — sadece implementasyon, gerçek native bağlantı üzerinden çalışacak şekilde tamamlanıyor. Test altyapısı, ayrı bir sonraki adımda ele alınacak.
+
+## ✅ Çözüldü (2026-07-14) — ParcelRepository Testleri
+
+Yukarıdaki açık sorun çözüldü: `DatabaseExecutor` arayüzü (`src/data/db/databaseExecutor.ts`) eklendi, `BaseRepository`'ye `setDatabaseExecutorProviderForTesting()` ile değiştirilebilir bir "executor provider" kondu (üretim davranışı değişmedi — varsayılan sağlayıcı hâlâ `getDatabase`). `createTestDatabaseExecutor()` (`better-sqlite3` tabanlı) bu arayüzü test ortamında uyguluyor.
+
+Test şeması, `SCHEMA_MIGRATIONS`'daki gerçek SQL'den türetiliyor (kopyalanmıyor) — test/üretim şema sapması riski yok.
+
+7 test yazıldı ve geçti: CRUD, sayfalama (50 kayıt eşiği), soft-delete, kısmi güncelleme, ve **`crop_type` CHECK kısıtının** (ADR 0017) veritabanı seviyesinde gerçekten çalıştığının doğrulanması.
+
+`vitest` + `better-sqlite3` `devDependencies`'e eklendi, `npm run test` script'i eklendi.

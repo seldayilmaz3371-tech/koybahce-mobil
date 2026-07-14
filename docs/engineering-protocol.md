@@ -1,6 +1,6 @@
-# Bahçem Mobile Engineering Protocol v1.8
+# Bahçem Mobile Engineering Protocol v1.9
 
-**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 v1.5'te eklendi; Bölüm 18.5 v1.6'da eklendi; Bölüm 10'a modül durumu takibi v1.7'de eklendi; Bölüm 19 — Erişilebilirlik — v1.8'de eklendi, Modül 2 UI çalışması öncesi, 2026-07-14)
+**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 v1.5'te eklendi; Bölüm 18.5 v1.6'da eklendi; Bölüm 10'a modül durumu takibi v1.7'de eklendi; Bölüm 19 v1.8'de eklendi; Bölüm 9'a `npm run test` adımı — v1.9'da eklendi, ADR 0018'in açık sorunu çözüldü, 2026-07-14)
 
 Bu belge Bahçem Mobile projesinin resmi geliştirme protokolüdür. Modül 2'den itibaren tüm geliştirme süreci için geçerlidir. Modül 1, bu protokolden önce tamamlandığı için geriye dönük olarak bu sıraya zorlanmamıştır — ancak Modül 1'e uygulanan denetim (Kalite Kapısı, Test Kapısı, ADR belgelemesi) protokolün ruhuyla zaten tutarlıydı.
 
@@ -96,7 +96,7 @@ Bu sıra değiştirilemez.
 
 ## 9. Kalite Kapısı
 
-Bir modül; `npm install`, `npm run build`, tip kontrolü, lint, `cap sync`, Android Build başarılı olmadan tamamlandı sayılmaz.
+Bir modül; `npm install`, `npm run build`, tip kontrolü, lint, `npm run test` (bkz. ADR 0018, Modül 2'den itibaren geçerli), `cap sync`, Android Build başarılı olmadan tamamlandı sayılmaz.
 
 > **Operasyonel not:** Bu sürecin "Android Build" adımı, Claude'un çalıştığı sandbox ortamında gerçekleştirilemez (ağ erişimi Gradle/Android SDK dağıtım sunucularına kapalı — bkz. Modül 1 teslimindeki doğrulanmış deneme). Bu adım her zaman kullanıcının kendi ortamında tamamlanır.
 
