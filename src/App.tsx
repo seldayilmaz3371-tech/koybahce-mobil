@@ -103,6 +103,14 @@ function App() {
         <div className="status-card status-card--error">
           <p className="status-card__label">Hata</p>
           <p className="status-card__value">{infrastructure.message}</p>
+          <button
+            type="button"
+            className="lock-screen__button"
+            style={{ marginTop: 12 }}
+            onClick={initializeInfrastructure}
+          >
+            Tekrar Dene
+          </button>
         </div>
       ) : null}
     </main>
