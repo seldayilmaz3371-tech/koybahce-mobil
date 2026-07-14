@@ -18,6 +18,11 @@ yapmıştık?" sorusuna kod kazmadan cevap verebilmektir.
 | [0007](0007-ses-kaydi-eklentisi-secimi.md) | Ses Kaydı Eklentisi Seçimi | Kabul edildi (Modül 3'te uygulanacak) |
 | [0008](0008-yedekleme-stratejisi.md) | Yedekleme Stratejisi | Kabul edildi (ileriki modülde uygulanacak) |
 | [0009](0009-rag-faz2-ertelenmesi.md) | RAG'ın Faz 2'ye Ertelenmesi | Kabul edildi |
+| [0010](0010-android-auto-backup-kapatildi.md) | Android Auto Backup Devre Dışı Bırakıldı | Kabul edildi |
+| [0011](0011-i18n-mimarisi.md) | Uluslararasılaştırma (i18n) Mimarisi | Kabul edildi |
+| [0012](0012-i18n-standartlari-brand-runtime-dil.md) | Translation Key Convention, Brand Config (ilk), Runtime Dil Değiştirme | Kabul edildi |
+| [0013](0013-brand-config-genisletildi.md) | Brand Configuration Tam Kapsama Genişletildi | Kabul edildi |
+| [0014](0014-play-store-yol-haritasi.md) | Play Store Yayını Yol Haritası (Paket Adı Değişimi, Marka Varlıkları) | Belgelendi — uygulanmadı, gelecek çalışma |
 
 ## Yeni bir ADR ne zaman eklenir?
 
