@@ -29,6 +29,13 @@
  *   iç durumunu tutan `app_metadata` tablosu kuruluyor. Bu tablo,
  *   ör. "ilk kurulum ne zaman yapıldı", "uygulama şu an hangi büyük
  *   şema sürümünde" gibi tekil anahtar/değer çiftlerini tutar.
+ *
+ * v2 — Parseller ve Ağaçlar (Modül 2)
+ *   bkz. docs/adr/0016-modul2-veri-modeli.md (şema kararı),
+ *   docs/adr/0017-enum-veri-saklama-kurali.md (crop_type'ın neden
+ *   İngilizce kod olarak saklandığı).
+ *   `tree_count` gibi ayrı bir sayaç YOK — ağaç sayısı her zaman
+ *   `trees` tablosundan anlık hesaplanır (bkz. ADR 0016).
  */
 
 import type { capSQLiteVersionUpgrade } from "@capacitor-community/sqlite";
@@ -40,7 +47,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -51,6 +58,41 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
          value TEXT NOT NULL,
          updated_at TEXT NOT NULL
        );`,
+    ],
+  },
+  {
+    toVersion: 2,
+    statements: [
+      `CREATE TABLE IF NOT EXISTS parcels (
+         id TEXT PRIMARY KEY NOT NULL,
+         name TEXT NOT NULL,
+         crop_type TEXT NOT NULL CHECK (crop_type IN ('olive','vegetable','fruit')),
+         latitude REAL,
+         longitude REAL,
+         area_dekar REAL NOT NULL,
+         soil_type TEXT,
+         irrigation_type TEXT,
+         notes TEXT,
+         is_active INTEGER NOT NULL DEFAULT 1,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `CREATE TABLE IF NOT EXISTS trees (
+         id TEXT PRIMARY KEY NOT NULL,
+         parcel_id TEXT NOT NULL REFERENCES parcels(id),
+         tree_number TEXT NOT NULL,
+         variety TEXT NOT NULL,
+         planting_year INTEGER,
+         latitude REAL,
+         longitude REAL,
+         is_reference_tree INTEGER NOT NULL DEFAULT 0,
+         notes TEXT,
+         is_active INTEGER NOT NULL DEFAULT 1,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `CREATE INDEX IF NOT EXISTS idx_trees_parcel_id ON trees(parcel_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_trees_reference ON trees(is_reference_tree) WHERE is_reference_tree = 1;`,
     ],
   },
 ];
