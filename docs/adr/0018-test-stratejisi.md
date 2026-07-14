@@ -31,3 +31,11 @@ Modül 1'de repository katmanı küçük olduğu için test altyapısı kurulmam
 ## Sonuçlar
 
 Modül 2 kod aşaması başladığında: `vitest` + `better-sqlite3` `devDependencies`'e eklenecek, her repository için karşılık gelen `.test.ts` dosyası yazılacak. Bu, Kalite Kapısı'na (Protocol Bölüm 9) yeni bir adım olarak eklenecek: `npm run test`.
+
+## Uygulama Notu (Modül 2, 2026-07-14) — Açık Mimari Sorunu
+
+Repository interface'leri tanımlanırken (`IParcelRepository`, `ITreeRepository`) şu netleşti: bu ADR'nin planı ("aynı repository sınıfını gerçek SQLite'a karşı test et") gerçekleşmesi için `BaseRepository`'nin veritabanı erişiminin **değiştirilebilir (swappable)** olması gerekiyor — şu an `BaseRepository`, `data/db/connection.ts`'teki `getDatabase()`'i doğrudan çağırıyor ve bu, native Capacitor köprüsüne sabit bağlı.
+
+**Bu, varsayımla kapatılmıyor — açık bir görev olarak işaretleniyor:** `ParcelRepository`'nin ilk testleri yazılacağı adımda, `BaseRepository`'nin veritabanı bağlantısını nasıl enjekte edilebilir/değiştirilebilir hale getireceğimize (ör. constructor injection, bir `DatabaseExecutor` arayüzü) o an karar verilecek — bu implementasyon detayı, gerçek test yazımından önce soyut olarak tasarlanmayacak (YAGNI: henüz kullanılmayan bir soyutlamayı önceden inşa etmek).
+
+Bu commit'te (ParcelRepository implementasyonu) **testler henüz yazılmıyor** — sadece implementasyon, gerçek native bağlantı üzerinden çalışacak şekilde tamamlanıyor. Test altyapısı, ayrı bir sonraki adımda ele alınacak.
