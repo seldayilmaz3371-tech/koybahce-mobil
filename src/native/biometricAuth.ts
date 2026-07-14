@@ -47,15 +47,24 @@ async function checkAvailability(): Promise<CheckBiometryResult> {
  * kararımızın doğrudan uygulamasıdır: biyometri mevcut değilse veya
  * kullanıcı üst üste başarısız olursa, sistem otomatik olarak cihazın
  * PIN/desen ekranına düşer. Ayrı bir uygulama içi şifre asla sorulmaz.
+ *
+ * `reason` ve `cancelLabel` parametre olarak alınır — bu dosya
+ * hiçbir kullanıcıya görünen metni kendi içinde sabit tutmaz
+ * (Globalization Policy, bkz. Engineering Protocol). Çağıran taraf
+ * (LockScreen), bu metinleri i18next üzerinden çevrilmiş olarak sağlar.
+ * "Bahçem Mobile" istisnadır — bu bir marka adıdır, dile göre çevrilmez.
  */
-async function authenticate(reason: string): Promise<AuthenticateResult> {
+async function authenticate(
+  reason: string,
+  cancelLabel: string
+): Promise<AuthenticateResult> {
   try {
     await BiometricAuth.authenticate({
       reason,
       allowDeviceCredential: true,
       androidTitle: "Bahçem Mobile",
       androidSubtitle: reason,
-      cancelTitle: "İptal",
+      cancelTitle: cancelLabel,
     });
     return { success: true, errorType: null };
   } catch (error) {

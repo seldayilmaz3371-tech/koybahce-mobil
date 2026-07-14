@@ -10,9 +10,14 @@
  * SAHA KULLANILABİLİRLİĞİ (Kural 15):
  * Tek dokunuşla doğrulama başlar (otomatik). Buton büyük, tek elle
  * ulaşılabilir konumda. Metin boyutu güneş altında okunabilir kontrastta.
+ *
+ * GLOBALIZATION POLICY: Bu dosyada hiçbir kullanıcıya görünen metin
+ * doğrudan yazılmaz — tümü useTranslation() üzerinden
+ * src/i18n/locales/*.json dosyalarından gelir.
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { biometricAuth, BiometryErrorType } from "../../native/biometricAuth";
 
 type LockScreenStatus = "checking" | "prompting" | "error" | "device-not-secure";
@@ -21,28 +26,32 @@ interface LockScreenProps {
   onUnlocked: () => void;
 }
 
-/** Kullanıcıya gösterilecek Türkçe hata mesajını, hata koduna göre seçer. */
-function describeError(errorType: BiometryErrorType | null): string {
-  switch (errorType) {
-    case BiometryErrorType.userCancel:
-    case BiometryErrorType.appCancel:
-    case BiometryErrorType.systemCancel:
-      return "Doğrulama iptal edildi.";
-    case BiometryErrorType.biometryLockout:
-      return "Çok fazla başarısız deneme. Lütfen biraz bekleyip tekrar deneyin.";
-    case BiometryErrorType.biometryNotEnrolled:
-      return "Cihazınızda kayıtlı bir parmak izi/yüz bulunamadı.";
-    case BiometryErrorType.passcodeNotSet:
-    case BiometryErrorType.noDeviceCredential:
-      return "Cihazınızda PIN, desen veya şifre tanımlı değil.";
-    default:
-      return "Doğrulama başarısız oldu. Lütfen tekrar deneyin.";
-  }
-}
-
 export function LockScreen({ onUnlocked }: LockScreenProps) {
+  const { t } = useTranslation();
   const [status, setStatus] = useState<LockScreenStatus>("checking");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  /** Hata koduna göre çevrilmiş mesajı seçer. */
+  const describeError = useCallback(
+    (errorType: BiometryErrorType | null): string => {
+      switch (errorType) {
+        case BiometryErrorType.userCancel:
+        case BiometryErrorType.appCancel:
+        case BiometryErrorType.systemCancel:
+          return t("lockScreen.errors.cancelled");
+        case BiometryErrorType.biometryLockout:
+          return t("lockScreen.errors.lockout");
+        case BiometryErrorType.biometryNotEnrolled:
+          return t("lockScreen.errors.notEnrolled");
+        case BiometryErrorType.passcodeNotSet:
+        case BiometryErrorType.noDeviceCredential:
+          return t("lockScreen.errors.noDeviceCredential");
+        default:
+          return t("lockScreen.errors.generic");
+      }
+    },
+    [t]
+  );
 
   const attemptUnlock = useCallback(async () => {
     setStatus("prompting");
@@ -61,7 +70,8 @@ export function LockScreen({ onUnlocked }: LockScreenProps) {
     }
 
     const result = await biometricAuth.authenticate(
-      "Bahçem Mobile'a erişmek için kimliğinizi doğrulayın"
+      t("lockScreen.biometricPromptReason"),
+      t("lockScreen.cancelButton")
     );
 
     if (result.success) {
@@ -71,7 +81,7 @@ export function LockScreen({ onUnlocked }: LockScreenProps) {
 
     setErrorMessage(describeError(result.errorType));
     setStatus("error");
-  }, [onUnlocked]);
+  }, [onUnlocked, t, describeError]);
 
   useEffect(() => {
     attemptUnlock();
@@ -83,21 +93,18 @@ export function LockScreen({ onUnlocked }: LockScreenProps) {
         <h1 className="lock-screen__title">Bahçem Mobile</h1>
 
         {status === "checking" || status === "prompting" ? (
-          <p className="lock-screen__status">Kimlik doğrulanıyor…</p>
+          <p className="lock-screen__status">{t("lockScreen.authenticating")}</p>
         ) : null}
 
         {status === "device-not-secure" ? (
           <div className="lock-screen__warning">
-            <p>
-              Cihazınızda ekran kilidi (PIN, desen veya parmak izi) tanımlı
-              değil. Uygulama kilitsiz açılacak.
-            </p>
+            <p>{t("lockScreen.deviceNotSecureWarning")}</p>
             <button
               type="button"
               className="lock-screen__button"
               onClick={() => onUnlocked()}
             >
-              Devam Et
+              {t("lockScreen.continueButton")}
             </button>
           </div>
         ) : null}
@@ -110,7 +117,7 @@ export function LockScreen({ onUnlocked }: LockScreenProps) {
               className="lock-screen__button"
               onClick={attemptUnlock}
             >
-              Tekrar Dene
+              {t("lockScreen.retryButton")}
             </button>
           </div>
         ) : null}

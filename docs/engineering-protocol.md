@@ -1,6 +1,6 @@
-# Bahçem Mobile Engineering Protocol v1.1
+# Bahçem Mobile Engineering Protocol v1.2
 
-**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve Bölüm 16, aşağıda açıklanan teknik gerekçelerle revize edilerek v1.1 olarak onaylandı — 2026-07-14)
+**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve Bölüm 16, teknik gerekçelerle revize edilerek v1.1 olarak onaylandı; Bölüm 18 — Globalization Policy — v1.2'de eklendi, 2026-07-14)
 
 Bu belge Bahçem Mobile projesinin resmi geliştirme protokolüdür. Modül 2'den itibaren tüm geliştirme süreci için geçerlidir. Modül 1, bu protokolden önce tamamlandığı için geriye dönük olarak bu sıraya zorlanmamıştır — ancak Modül 1'e uygulanan denetim (Kalite Kapısı, Test Kapısı, ADR belgelemesi) protokolün ruhuyla zaten tutarlıydı.
 
@@ -137,3 +137,18 @@ Her modülde önce Hakem, sonra Mimar, en son Geliştirici rolü uygulanır. Ken
 ## 17. Teslim Kriteri
 
 Çalışan kod yeterli değildir. Teslim edilen her modül; yüksek kalite, düşük teknik borç, uzun ömür, yüksek güvenlik, yüksek performans, kolay bakım, kolay test edilebilirlik, AI uyumluluğu, offline-first uyumluluğu sağlamalıdır. Kalite hiçbir zaman geliştirme hızına feda edilmez.
+
+## 18. Globalization Policy — *(v1.1'de eklendi, 2026-07-14)*
+
+Bahçem Mobile, Google Play üzerinden dünya çapında yayınlanabilecek bir platform olarak tasarlanır. Çoklu dil desteği sonradan eklenecek bir özellik değil, temel mimarinin bir parçasıdır (bkz. ADR 0011).
+
+- Kullanıcıya görünen hiçbir metin doğrudan kod içine yazılamaz. Tüm kullanıcı metinleri, merkezi i18n sistemi (`react-i18next`, bkz. ADR 0011) üzerinden `src/i18n/locales/` altındaki çeviri dosyalarından yönetilir.
+- Yeni bir dil eklemek mevcut bileşen kodunu değiştirmeyi gerektirmez — yeni bir çeviri dosyası ve `supportedLanguages.ts`'e bir satır yeterlidir.
+- Varsayılan geliştirme dili İngilizcedir (`FALLBACK_LANGUAGE_CODE`).
+- Kod değişkenleri, fonksiyon isimleri, sınıf isimleri, dosya isimleri, SQLite tablo isimleri, kolon isimleri, API isimleri, repository isimleri, servis isimleri İngilizce olur. Türkçe (ve diğer diller) yalnızca çeviri dosyalarında bulunur.
+- Tarih, saat, sayı biçimleri, para birimi, ölçü birimleri, yerelleştirme (localization) katmanından (`Intl` API tabanlı) yönetilir — ilgili modül geldiğinde ayrıca tasarlanacaktır.
+- **RTL (sağdan sola) desteği mimaride hazır olacaktır.** Bunun ön koşulu: tüm CSS, fiziksel yön özellikleri (`margin-left`, `text-align: left` vb.) yerine **mantıksal özelliklerle** (`margin-inline-start` vb.) yazılır. `<html dir="rtl|ltr">` özniteliği, aktif dile göre otomatik ayarlanır (`applyDocumentDirection()`).
+- Yeni dil eklemek kod değişikliği gerektirmez.
+- AI katmanı aynı mimariye uyar — kullanıcının seçtiği dilde konuşur, düşünür ve hafızasını o dilde tutar (bkz. `docs/ai-architecture.md` Bölüm 3, 5).
+- Marka adı ("Bahçem Mobile") istisnadır — çevrilmez.
+- Dil tercihi, kimlik doğrulama öncesi erişilebilir olması gerektiği için `@capacitor/preferences` üzerinde tutulur, SQLite veya Secure Storage'da değil (bkz. ADR 0011 — üç depolama katmanının sorumluluk ayrımı).

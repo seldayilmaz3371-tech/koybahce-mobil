@@ -1,0 +1,28 @@
+{
+  "lockScreen": {
+    "authenticating": "Authenticating…",
+    "biometricPromptReason": "Verify your identity to access Bahçem Mobile",
+    "cancelButton": "Cancel",
+    "deviceNotSecureWarning": "Your device does not have a screen lock (PIN, pattern, or fingerprint) set up. The app will open without a lock.",
+    "continueButton": "Continue",
+    "retryButton": "Try Again",
+    "errors": {
+      "cancelled": "Authentication was cancelled.",
+      "lockout": "Too many failed attempts. Please wait a moment and try again.",
+      "notEnrolled": "No fingerprint or face is registered on this device.",
+      "noDeviceCredential": "No PIN, pattern, or password is set up on this device.",
+      "generic": "Authentication failed. Please try again."
+    }
+  },
+  "infrastructureStatus": {
+    "title": "Module 1 — Infrastructure Status",
+    "preparingDatabase": "Preparing database…",
+    "connectionStatusLabel": "Connection Status",
+    "connectionStatusValue": "✅ Encrypted database connection open",
+    "platformLabel": "Platform",
+    "schemaVersionLabel": "Schema Version",
+    "firstLaunchLabel": "First Setup Time (persisted)",
+    "errorLabel": "Error",
+    "retryButton": "Try Again"
+  }
+}

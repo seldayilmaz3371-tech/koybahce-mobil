@@ -10,9 +10,14 @@
  *
  * İş modülleri (Parseller, Gözlemler, ...) geldiğinde bu durum ekranı
  * kaldırılıp yerine gerçek uygulama gezinmesi (navigation) gelecek.
+ *
+ * GLOBALIZATION POLICY: Bu dosyada hiçbir kullanıcıya görünen metin
+ * doğrudan yazılmaz — tümü useTranslation() üzerinden
+ * src/i18n/locales/*.json dosyalarından gelir.
  */
 
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { LockScreen } from "./modules/auth/LockScreen";
 import { getDatabase, getRuntimePlatform } from "./data/db/connection";
 import { appMetadataRepository } from "./data/repositories/appMetadata.repository";
@@ -30,6 +35,7 @@ type InfrastructureStatus =
   | { phase: "failed"; message: string };
 
 function App() {
+  const { t } = useTranslation();
   const [unlocked, setUnlocked] = useState(false);
   const [infrastructure, setInfrastructure] = useState<InfrastructureStatus>({
     phase: "idle",
@@ -70,30 +76,30 @@ function App() {
 
   return (
     <main className="status-screen">
-      <h1 className="status-screen__title">Modül 1 — Altyapı Durumu</h1>
+      <h1 className="status-screen__title">{t("infrastructureStatus.title")}</h1>
 
       {infrastructure.phase === "initializing" || infrastructure.phase === "idle" ? (
         <div className="status-card">
-          <p className="status-card__value">Veritabanı hazırlanıyor…</p>
+          <p className="status-card__value">{t("infrastructureStatus.preparingDatabase")}</p>
         </div>
       ) : null}
 
       {infrastructure.phase === "ready" ? (
         <>
           <div className="status-card">
-            <p className="status-card__label">Bağlantı Durumu</p>
-            <p className="status-card__value">✅ Şifreli veritabanı bağlantısı açık</p>
+            <p className="status-card__label">{t("infrastructureStatus.connectionStatusLabel")}</p>
+            <p className="status-card__value">{t("infrastructureStatus.connectionStatusValue")}</p>
           </div>
           <div className="status-card">
-            <p className="status-card__label">Platform</p>
+            <p className="status-card__label">{t("infrastructureStatus.platformLabel")}</p>
             <p className="status-card__value">{infrastructure.platform}</p>
           </div>
           <div className="status-card">
-            <p className="status-card__label">Şema Sürümü</p>
+            <p className="status-card__label">{t("infrastructureStatus.schemaVersionLabel")}</p>
             <p className="status-card__value">{infrastructure.schemaVersion}</p>
           </div>
           <div className="status-card">
-            <p className="status-card__label">İlk Kurulum Zamanı (kalıcı kayıt)</p>
+            <p className="status-card__label">{t("infrastructureStatus.firstLaunchLabel")}</p>
             <p className="status-card__value">{infrastructure.firstLaunchAt}</p>
           </div>
         </>
@@ -101,7 +107,7 @@ function App() {
 
       {infrastructure.phase === "failed" ? (
         <div className="status-card status-card--error">
-          <p className="status-card__label">Hata</p>
+          <p className="status-card__label">{t("infrastructureStatus.errorLabel")}</p>
           <p className="status-card__value">{infrastructure.message}</p>
           <button
             type="button"
@@ -109,7 +115,7 @@ function App() {
             style={{ marginTop: 12 }}
             onClick={initializeInfrastructure}
           >
-            Tekrar Dene
+            {t("infrastructureStatus.retryButton")}
           </button>
         </div>
       ) : null}

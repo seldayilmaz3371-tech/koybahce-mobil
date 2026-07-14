@@ -1,6 +1,6 @@
 # AI Master Architecture Document — Bahçem Mobile
 
-**Durum:** Onaylandı
+**Durum:** Onaylandı (Bölüm 17 — Çok Dilli AI Mimarisi — Globalization kararı sonrası eklendi)
 **Tarih:** 2026-07-14
 **Kapsam:** Bu belge, AI ile ilgili tüm modüllerin (AI Tavsiye Sistemi, Gelişim Analizi, Sesli Asistan, RAG/Faz 2) referans mimarisidir. Hiçbir AI modülü bu belgeyle çelişemez.
 
@@ -226,6 +226,22 @@ Bulut STT/TTS servisi eklenmiyor (Kural 17).
 | Zararlı tespiti | Ayrı analiz tool'u / adapter yeteneği |
 | Verim tahmini | Mevcut Knowledge Engine + yeni prompt şablonu yeterli |
 | Çoklu çiftlik yönetimi | **En büyük değişiklik** — her tabloya `farm_id` (migration ile), Context Engine'in "hangi çiftlik" bilmesi gerekir. Bugün eklenmiyor (YAGNI) ama şema buna kapalı değil |
+
+---
+
+## 17. Çok Dilli AI Mimarisi — *(Globalization kararı sonrası eklendi, 2026-07-14)*
+
+Bu bölüm, Engineering Protocol Bölüm 18 (Globalization Policy) ve ADR 0011 (i18n Mimarisi) sonrası AI katmanının dil davranışını netleştirir.
+
+| Soru | Karar | Gerekçe |
+|---|---|---|
+| **AI hangi dilde yanıt üretmeli?** | Her zaman kullanıcının aktif arayüz dili (i18next `language`) | Bölüm 15'teki (AI Ayarları) kullanıcı deneyimi ilkesiyle tutarlı — bildirimler, hata mesajları, AI cevapları hep aynı dilde |
+| **Bu, sistem promptuna nasıl yansır?** | Sistem promptunun kendisi **tek, sabit bir iç dilde** (İngilizce) yazılır; sona "Kullanıcının dili: {dil_kodu}. Yanıtını bu dilde ver." talimatı eklenir | N farklı dilde N farklı sistem promptu bakımı (Kural 8: kod tekrarından kaçınma) yerine tek kaynak — yeni dil eklemek sistem promptunu değiştirmez |
+| **Hafızada (SQLite `ai_messages`) hangi dil saklanır?** | Mesaj **orijinal yazıldığı dilde** saklanır — çeviri yapılıp saklanmaz | Çeviri hem ekstra AI çağrısı (Kural 16 ihlali) hem bilgi kaybı riski taşır. Kullanıcı dil değiştirirse geçmiş konuşmalar eski dilde kalır — bu normal ve beklenen bir davranıştır |
+| **AI hangi dili "hafızasında" tutmalı?** | Ayrı bir "AI hafızası" dili yok — Bölüm 3'teki `ai_facts` tablosu da orijinal üretildiği dilde saklanır | Ayrı bir çeviri katmanı, gereksiz karmaşıklık (Kural 4) |
+| **Kullanıcıya hangi dil gösterilir?** | UI, i18next; AI yanıtları, AI'nin ürettiği dil (yukarıdaki kuralla aynı) — ikisi her zaman senkron | — |
+| **SQLite şeması dil için ayrı bir sütun gerektirir mi?** | Hayır, bugün gerekmez (YAGNI) — gerekirse ileride analitik amaçlı opsiyonel bir `detected_language` sütunu eklenebilir, bugün eklenmiyor | — |
+| **Embedding (Faz 2, RAG) hangi dilde çalışacak?** | **Açık araştırma konusu — şimdi çözülmüyor.** Çok dilli embedding modelleri mevcut, hangisinin seçileceği Faz 2 kapsamında ayrıca araştırılacak | Varsayımla kapatılmıyor (Kural 30) |
 
 ---
 
