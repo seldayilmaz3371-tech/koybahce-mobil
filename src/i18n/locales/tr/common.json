@@ -26,7 +26,9 @@
     "formTitleCreate": "Yeni Parsel",
     "formTitleEdit": "Parseli Düzenle",
     "nameRequired": "Ad alanı zorunludur.",
-    "areaRequired": "Alan pozitif bir sayı olmalıdır."
+    "areaRequired": "Alan pozitif bir sayı olmalıdır.",
+    "deleteButton": "Parseli Sil",
+    "deleteConfirm": "Bu parsel silinsin mi? Listelerinizden kaldırılacak."
   },
   "auth": {
     "authenticating": "Kimlik doğrulanıyor…",

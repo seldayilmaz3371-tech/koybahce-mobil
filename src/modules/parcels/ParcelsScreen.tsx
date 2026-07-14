@@ -1,9 +1,8 @@
 /**
  * ParcelsScreen
  * ===============
- * Liste görünümü + oluşturma/düzenleme akışı (basit view-state ile
- * `ParcelForm`'a geçiş). Silme yok — sadece pasife alma (deactivate),
- * ileride ayrı bir eylem olarak eklenecek (bugün UI'da yok, YAGNI).
+ * Liste görünümü + oluşturma/düzenleme/silme (soft-delete) akışı
+ * (basit view-state ile `ParcelForm`'a geçiş).
  *
  * NAVİGASYON KARARI: Bilerek bir router kütüphanesi YOK — bu modülde
  * tek bir gerçek ekran var, Modül 1'in App.tsx'indeki basit "view
@@ -25,7 +24,8 @@ type ScreenView = { mode: "list" } | { mode: "create" } | { mode: "edit"; parcel
 
 export function ParcelsScreen() {
   const { t } = useTranslation();
-  const { parcels, status, errorMessage, createParcel, updateParcel } = useParcels();
+  const { parcels, status, errorMessage, createParcel, updateParcel, deactivateParcel } =
+    useParcels();
   const [view, setView] = useState<ScreenView>({ mode: "list" });
 
   const handleSelect = (parcel: Parcel) => {
@@ -41,12 +41,19 @@ export function ParcelsScreen() {
     setView({ mode: "list" });
   };
 
+  const handleDelete = async () => {
+    if (view.mode !== "edit") return;
+    await deactivateParcel(view.parcel.id);
+    setView({ mode: "list" });
+  };
+
   if (view.mode === "create" || view.mode === "edit") {
     return (
       <ParcelForm
         initialValue={view.mode === "edit" ? view.parcel : undefined}
         onSubmit={handleSubmit}
         onCancel={() => setView({ mode: "list" })}
+        onDelete={view.mode === "edit" ? handleDelete : undefined}
       />
     );
   }

@@ -26,7 +26,9 @@
     "formTitleCreate": "New Parcel",
     "formTitleEdit": "Edit Parcel",
     "nameRequired": "Name is required.",
-    "areaRequired": "Area must be a positive number."
+    "areaRequired": "Area must be a positive number.",
+    "deleteButton": "Delete Parcel",
+    "deleteConfirm": "Delete this parcel? It will be removed from your lists."
   },
   "auth": {
     "authenticating": "Authenticating…",

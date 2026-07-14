@@ -211,3 +211,9 @@ button {
   font-weight: 600;
   margin: 0 0 12px;
 }
+
+.lock-screen__button--danger {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+}

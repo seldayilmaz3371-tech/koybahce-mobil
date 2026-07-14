@@ -27,9 +27,11 @@ interface ParcelFormProps {
   initialValue?: Parcel;
   onSubmit: (input: NewParcelInput) => Promise<void>;
   onCancel: () => void;
+  /** Sadece düzenleme modunda sağlanır — oluşturma modunda silinecek bir kayıt henüz yok. */
+  onDelete?: () => Promise<void>;
 }
 
-export function ParcelForm({ initialValue, onSubmit, onCancel }: ParcelFormProps) {
+export function ParcelForm({ initialValue, onSubmit, onCancel, onDelete }: ParcelFormProps) {
   const { t } = useTranslation();
 
   const [name, setName] = useState(initialValue?.name ?? "");
@@ -71,6 +73,22 @@ export function ParcelForm({ initialValue, onSubmit, onCancel }: ParcelFormProps
         latitude: latitude.trim() ? Number(latitude) : null,
         longitude: longitude.trim() ? Number(longitude) : null,
       });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!onDelete) return;
+    // window.confirm, Capacitor WebView'de native tarzı bir onay
+    // diyaloğu gösterir — bu aşamada özel bir modal bileşeni
+    // gerekmiyor (YAGNI). Yanlışlıkla silmeye karşı tek koruma bu.
+    const confirmed = window.confirm(t("parcel.deleteConfirm"));
+    if (!confirmed) return;
+
+    setIsSubmitting(true);
+    try {
+      await onDelete();
     } finally {
       setIsSubmitting(false);
     }
@@ -130,6 +148,18 @@ export function ParcelForm({ initialValue, onSubmit, onCancel }: ParcelFormProps
       >
         {t("common.cancel")}
       </button>
+
+      {onDelete ? (
+        <button
+          type="button"
+          className="lock-screen__button lock-screen__button--danger"
+          style={{ marginTop: 8 }}
+          onClick={handleDelete}
+          disabled={isSubmitting}
+        >
+          {t("parcel.deleteButton")}
+        </button>
+      ) : null}
     </form>
   );
 }
