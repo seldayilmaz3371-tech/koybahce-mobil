@@ -17,7 +17,16 @@
       "vegetable": "Sebze",
       "fruit": "Meyve"
     },
-    "areaDekar": "Alan (dekar)"
+    "areaDekar": "Alan (dekar)",
+    "soilType": "Toprak Tipi",
+    "irrigationType": "Sulama Tipi",
+    "notes": "Notlar",
+    "latitude": "Enlem",
+    "longitude": "Boylam",
+    "formTitleCreate": "Yeni Parsel",
+    "formTitleEdit": "Parseli Düzenle",
+    "nameRequired": "Ad alanı zorunludur.",
+    "areaRequired": "Alan pozitif bir sayı olmalıdır."
   },
   "auth": {
     "authenticating": "Kimlik doğrulanıyor…",

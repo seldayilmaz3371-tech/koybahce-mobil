@@ -171,3 +171,43 @@ button {
   font-size: 14px;
   color: var(--color-text-muted);
 }
+
+/* --- Form Alanları (Modül 2) --- */
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.form-field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  min-height: 48px;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.form-field textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.form-field__error {
+  color: var(--color-danger);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}

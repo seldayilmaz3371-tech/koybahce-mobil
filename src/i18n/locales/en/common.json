@@ -17,7 +17,16 @@
       "vegetable": "Vegetable",
       "fruit": "Fruit"
     },
-    "areaDekar": "Area (decares)"
+    "areaDekar": "Area (decares)",
+    "soilType": "Soil Type",
+    "irrigationType": "Irrigation Type",
+    "notes": "Notes",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "formTitleCreate": "New Parcel",
+    "formTitleEdit": "Edit Parcel",
+    "nameRequired": "Name is required.",
+    "areaRequired": "Area must be a positive number."
   },
   "auth": {
     "authenticating": "Authenticating…",
