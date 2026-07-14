@@ -25,24 +25,34 @@ function detectDeviceLanguageCode(): string {
 }
 
 /**
- * Uygulamanın bu oturumda kullanacağı dili belirler. Daha önce kayıtlı
- * bir tercih yoksa, cihaz dilini algılayıp bunu KALICI OLARAK KAYDEDER
- * (böylece bir sonraki açılışta aynı mantığı tekrar çalıştırmaya gerek
- * kalmaz ve kullanıcı isterse bunu ayarlardan değiştirebilir).
+ * Uygulamanın bu oturumda kullanacağı dili belirler.
+ *
+ * DAVRANIŞ (bkz. ADR 0015 — 2026-07-14 düzeltmesi):
+ *   - Kullanıcı daha önce AYARLARDAN BİLEREK bir dil seçtiyse
+ *     (setLanguagePreference() ile kaydedilmiş), o dil öncelikli ve
+ *     kalıcıdır — cihaz dili değişse bile geçerliliğini korur.
+ *   - Kullanıcı hiç bilinçli bir seçim yapmadıysa, HER AÇILIŞTA
+ *     cihazın o anki sistem dili canlı olarak okunur ve kullanılır —
+ *     bu değer KALICI OLARAK YAZILMAZ. Böylece kullanıcı Ayarlar'dan
+ *     Türkçe→İngilizce değiştirirse, uygulama bir sonraki açılışta
+ *     bunu otomatik yansıtır.
+ *
+ * Önceki sürüm, otomatik algılanan dili de kalıcı olarak yazıyordu —
+ * bu, "kullanıcının bilinçli tercihi" ile "sistemin o anki durumu"nu
+ * yanlışlıkla aynı şey gibi ele alan bir tasarım hatasıydı (gerçek
+ * cihaz testinde bulundu). Düzeltildi.
  */
 export async function resolveInitialLanguage(): Promise<string> {
-  const storedPreference = await localPreferences.get(LocalPreferenceKey.LANGUAGE);
-  if (storedPreference && isSupportedLanguageCode(storedPreference)) {
-    return storedPreference;
+  const explicitPreference = await localPreferences.get(LocalPreferenceKey.LANGUAGE);
+  if (explicitPreference && isSupportedLanguageCode(explicitPreference)) {
+    return explicitPreference;
   }
 
+  // Bilinçli bir kullanıcı tercihi yok — cihaz dilini CANLI olarak
+  // takip et, kalıcı yazma. Bu sayede kullanıcı işletim sistemi
+  // dilini değiştirirse, uygulama bir sonraki açılışta bunu yansıtır.
   const deviceLanguage = detectDeviceLanguageCode();
-  const resolved = isSupportedLanguageCode(deviceLanguage)
-    ? deviceLanguage
-    : FALLBACK_LANGUAGE_CODE;
-
-  await localPreferences.set(LocalPreferenceKey.LANGUAGE, resolved);
-  return resolved;
+  return isSupportedLanguageCode(deviceLanguage) ? deviceLanguage : FALLBACK_LANGUAGE_CODE;
 }
 
 /** Kullanıcının ayarlar ekranından açıkça bir dil seçmesi durumunda çağrılır. */

@@ -23,6 +23,7 @@ yapmıştık?" sorusuna kod kazmadan cevap verebilmektir.
 | [0012](0012-i18n-standartlari-brand-runtime-dil.md) | Translation Key Convention, Brand Config (ilk), Runtime Dil Değiştirme | Kabul edildi |
 | [0013](0013-brand-config-genisletildi.md) | Brand Configuration Tam Kapsama Genişletildi | Kabul edildi |
 | [0014](0014-play-store-yol-haritasi.md) | Play Store Yayını Yol Haritası (Paket Adı Değişimi, Marka Varlıkları) | Belgelendi — uygulanmadı, gelecek çalışma |
+| [0015](0015-dil-algilama-kalicilik-duzeltmesi.md) | Dil Algılama Kalıcılığı Düzeltmesi | Kabul edildi — gerçek cihaz testinde bulundu |
 
 ## Yeni bir ADR ne zaman eklenir?
 
