@@ -1,6 +1,6 @@
-# Bahçem Mobile Engineering Protocol v1.7
+# Bahçem Mobile Engineering Protocol v1.8
 
-**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 v1.5'te eklendi; Bölüm 18.5 v1.6'da eklendi; Bölüm 10'a modül durumu takip referansı — v1.7'de eklendi, Modül 1 resmen ACCEPTED/FROZEN/COMPLETED, 2026-07-14)
+**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 v1.5'te eklendi; Bölüm 18.5 v1.6'da eklendi; Bölüm 10'a modül durumu takibi v1.7'de eklendi; Bölüm 19 — Erişilebilirlik — v1.8'de eklendi, Modül 2 UI çalışması öncesi, 2026-07-14)
 
 Bu belge Bahçem Mobile projesinin resmi geliştirme protokolüdür. Modül 2'den itibaren tüm geliştirme süreci için geçerlidir. Modül 1, bu protokolden önce tamamlandığı için geriye dönük olarak bu sıraya zorlanmamıştır — ancak Modül 1'e uygulanan denetim (Kalite Kapısı, Test Kapısı, ADR belgelemesi) protokolün ruhuyla zaten tutarlıydı.
 
@@ -180,3 +180,13 @@ Sabit, önceden bilinen seçenek kümesi içeren (dropdown/seçim listesi) her a
 ### 18.3 Runtime Dil Değiştirme *(ADR 0012 ile eklendi, gelecek geliştirme)*
 
 Mimari buna hazırdır (`i18n.changeLanguage()` + `setLanguagePreference()` + `applyDocumentDirection()` — hepsi mevcut). Ayarlar modülü geldiğinde bu üç fonksiyonu çağıran bir UI eklenecek — bugün yazılmıyor.
+
+## 19. Erişilebilirlik (Accessibility) — *(v1.8'de eklendi, 2026-07-14)*
+
+Bölüm 14'ün (Kullanıcı Deneyimi) doğal bir tamamlayıcısı: saha koşulları için tasarlanan büyük dokunma alanları, ekran okuyucu ve motor engelli kullanıcılar için de bir temel oluşturur, ama bu tek başına yeterli değildir. Bundan sonraki tüm UI bileşenleri şu kurallara uyar:
+
+- Her form alanı, gerçek bir `<label>` (HTML `for`/`id` ilişkisiyle) veya `aria-label` ile ilişkilendirilir — asla sadece placeholder metnine güvenilmez (placeholder, ekran okuyucu tarafından tutarlı şekilde okunmaz ve odaklanınca kaybolur).
+- Yalnızca ikon içeren butonlar (metin etiketi olmayanlar) mutlaka `aria-label` taşır.
+- Native Android tarafında (ileride WebView dışı native bileşen gerekirse) `contentDescription` eşdeğeri sağlanır.
+- Minimum dokunma hedefi 48x48dp korunur (zaten Modül 1'den beri CSS'te uygulanıyor — Kural 15).
+- Etkileşimli öğeler için her zaman semantik HTML elementleri kullanılır (`<button>`, `<label>`) — `onClick`'li `<div>` gibi ekran okuyucunun tanımadığı yapılar kullanılmaz.
