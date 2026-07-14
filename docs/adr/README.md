@@ -1,5 +1,7 @@
 # Mimari Karar Kayıtları (ADR)
 
+> **Üst düzey referans belgeleri:** [Bahçem Mobile Engineering Protocol](../engineering-protocol.md) · [AI Master Architecture Document](../ai-architecture.md)
+
 Bu klasör, Bahçem Mobile projesinde alınan önemli mimari kararları
 belgeler. Her karar, neden alındığını ve hangi alternatiflerin neden
 reddedildiğini içerir — amaç, bir yıl sonra "biz bunu neden böyle
