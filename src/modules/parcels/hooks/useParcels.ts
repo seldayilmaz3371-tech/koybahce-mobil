@@ -40,7 +40,7 @@ export interface UseParcelsResult {
 }
 
 export function useParcels(options: ParcelListOptions = {}): UseParcelsResult {
-  const { activeOnly, limit, offset } = options;
+  const { activeOnly, limit, offset, search } = options;
 
   const [parcels, setParcels] = useState<Parcel[]>([]);
   const [status, setStatus] = useState<ParcelsStatus>("idle");
@@ -50,7 +50,7 @@ export function useParcels(options: ParcelListOptions = {}): UseParcelsResult {
     setStatus("loading");
     setErrorMessage(null);
     try {
-      const result = await parcelRepository.list({ activeOnly, limit, offset });
+      const result = await parcelRepository.list({ activeOnly, limit, offset, search });
       setParcels(result);
       setStatus("ready");
     } catch (error) {
@@ -61,7 +61,7 @@ export function useParcels(options: ParcelListOptions = {}): UseParcelsResult {
     // (çağıran taraf literal `{}` geçebilir), bağımlılık dizisinde
     // nesnenin kendisi değil, ilkel alanları kullanılıyor — sonsuz
     // döngüyü önlemek için bilinçli bir tercih.
-  }, [activeOnly, limit, offset]);
+  }, [activeOnly, limit, offset, search]);
 
   useEffect(() => {
     refetch();

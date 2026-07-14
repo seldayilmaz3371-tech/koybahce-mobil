@@ -28,7 +28,10 @@
     "nameRequired": "Name is required.",
     "areaRequired": "Area must be a positive number.",
     "deleteButton": "Delete Parcel",
-    "deleteConfirm": "Delete this parcel? It will be removed from your lists."
+    "deleteConfirm": "Delete this parcel? It will be removed from your lists.",
+    "searchLabel": "Search parcels",
+    "searchPlaceholder": "Search by name…",
+    "noSearchResults": "No parcels match your search."
   },
   "auth": {
     "authenticating": "Authenticating…",

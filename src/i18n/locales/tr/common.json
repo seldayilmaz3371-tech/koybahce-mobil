@@ -28,7 +28,10 @@
     "nameRequired": "Ad alanı zorunludur.",
     "areaRequired": "Alan pozitif bir sayı olmalıdır.",
     "deleteButton": "Parseli Sil",
-    "deleteConfirm": "Bu parsel silinsin mi? Listelerinizden kaldırılacak."
+    "deleteConfirm": "Bu parsel silinsin mi? Listelerinizden kaldırılacak.",
+    "searchLabel": "Parsellerde ara",
+    "searchPlaceholder": "Ada göre ara…",
+    "noSearchResults": "Aramanızla eşleşen parsel yok."
   },
   "auth": {
     "authenticating": "Kimlik doğrulanıyor…",

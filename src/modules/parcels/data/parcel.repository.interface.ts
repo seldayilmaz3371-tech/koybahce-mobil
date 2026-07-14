@@ -23,6 +23,8 @@ export interface ParcelListOptions {
    */
   limit?: number;
   offset?: number;
+  /** Parsel adında (büyük/küçük harf duyarsız) arama. Boş/undefined ise filtre uygulanmaz. */
+  search?: string;
 }
 
 export interface IParcelRepository {

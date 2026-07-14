@@ -13,7 +13,7 @@
  * doğrudan yazılmaz.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParcels } from "./hooks/useParcels";
 import { ParcelList } from "./components/ParcelList";
@@ -22,10 +22,21 @@ import type { NewParcelInput, Parcel } from "./domain/parcel.types";
 
 type ScreenView = { mode: "list" } | { mode: "create" } | { mode: "edit"; parcel: Parcel };
 
+/** Kullanıcı yazmayı bıraktıktan bu kadar ms sonra arama tetiklenir — her tuş vuruşunda sorgu çalıştırmamak için (Kural 9). */
+const SEARCH_DEBOUNCE_MS = 300;
+
 export function ParcelsScreen() {
   const { t } = useTranslation();
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => setDebouncedSearch(searchInput), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeoutId);
+  }, [searchInput]);
+
   const { parcels, status, errorMessage, createParcel, updateParcel, deactivateParcel } =
-    useParcels();
+    useParcels({ search: debouncedSearch || undefined });
   const [view, setView] = useState<ScreenView>({ mode: "list" });
 
   const handleSelect = (parcel: Parcel) => {
@@ -70,6 +81,19 @@ export function ParcelsScreen() {
         {t("parcel.addButton")}
       </button>
 
+      <div className="search-field form-field">
+        <label htmlFor="parcel-search" className="sr-only">
+          {t("parcel.searchLabel")}
+        </label>
+        <input
+          id="parcel-search"
+          type="search"
+          placeholder={t("parcel.searchPlaceholder")}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+        />
+      </div>
+
       {status === "loading" || status === "idle" ? (
         <p className="status-card__value">{t("common.loading")}</p>
       ) : null}
@@ -81,7 +105,9 @@ export function ParcelsScreen() {
       ) : null}
 
       {status === "ready" && parcels.length === 0 ? (
-        <p className="status-card__value">{t("parcel.emptyState")}</p>
+        <p className="status-card__value">
+          {debouncedSearch ? t("parcel.noSearchResults") : t("parcel.emptyState")}
+        </p>
       ) : null}
 
       {status === "ready" && parcels.length > 0 ? (

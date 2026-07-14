@@ -80,11 +80,27 @@ class ParcelRepository extends BaseRepository implements IParcelRepository {
     const activeOnly = options.activeOnly ?? true;
     const limit = options.limit ?? DEFAULT_LIST_LIMIT;
     const offset = options.offset ?? 0;
+    const search = options.search?.trim();
 
-    const whereClause = activeOnly ? "WHERE is_active = 1" : "";
+    const conditions: string[] = [];
+    const values: unknown[] = [];
+
+    if (activeOnly) {
+      conditions.push("is_active = 1");
+    }
+    if (search) {
+      // LIKE deseni parametreli geçiliyor — SQL enjeksiyonuna kapalı.
+      // '%'/'_' gibi LIKE joker karakterlerini kullanıcı girdisinde
+      // kaçırmıyoruz (bilinçli, düşük risk): en kötü ihtimalle arama
+      // beklenenden biraz geniş/dar sonuç verir, güvenlik açığı oluşmaz.
+      conditions.push("name LIKE ? COLLATE NOCASE");
+      values.push(`%${search}%`);
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
     const rows = await this.query<ParcelRow>(
       `SELECT * FROM parcels ${whereClause} ORDER BY name COLLATE NOCASE LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [...values, limit, offset]
     );
     return rows.map(mapRowToParcel);
   }
