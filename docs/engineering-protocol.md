@@ -1,6 +1,6 @@
-# Bahçem Mobile Engineering Protocol v1.6
+# Bahçem Mobile Engineering Protocol v1.7
 
-**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 v1.5'te eklendi; Bölüm 18.5 — Cihaz Dili Sorgulama Kuralı — v1.6'da eklendi, 2026-07-14)
+**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 v1.5'te eklendi; Bölüm 18.5 v1.6'da eklendi; Bölüm 10'a modül durumu takip referansı — v1.7'de eklendi, Modül 1 resmen ACCEPTED/FROZEN/COMPLETED, 2026-07-14)
 
 Bu belge Bahçem Mobile projesinin resmi geliştirme protokolüdür. Modül 2'den itibaren tüm geliştirme süreci için geçerlidir. Modül 1, bu protokolden önce tamamlandığı için geriye dönük olarak bu sıraya zorlanmamıştır — ancak Modül 1'e uygulanan denetim (Kalite Kapısı, Test Kapısı, ADR belgelemesi) protokolün ruhuyla zaten tutarlıydı.
 
@@ -107,6 +107,8 @@ Kod hazır olmak, modülün tamamlandığı anlamına gelmez. Modül ancak gerç
 ```
 Kod Yazılıyor → Kod Hazır → Gerçek Android Testi Bekleniyor → Test Başarılı → Modül Tamamlandı
 ```
+
+**Resmi kayıt:** Her modülün bu yaşam döngüsündeki güncel durumu `docs/module-status.md`'de tutulur — yeni bir modüle başlamadan önce bu belge kontrol edilir.
 
 ## 11. Dokümantasyon
 

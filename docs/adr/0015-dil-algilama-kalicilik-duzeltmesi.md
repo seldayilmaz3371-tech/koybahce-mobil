@@ -1,6 +1,6 @@
 # ADR 0015 — Dil Algılama Kalıcılığı Düzeltmesi
 
-**Durum:** Kabul edildi — ADR 0011'in bir davranışını düzeltir
+**Durum:** Kabul edildi — ADR 0011'in bir davranışını düzeltir. **Not: Bu düzeltme tek başına yeterli değildi, asıl kök neden ADR 0020/0021'de bulundu ve gerçek cihazda doğrulandı.**
 **Tarih:** 2026-07-14
 **Bulan:** Kullanıcı, gerçek Android cihaz testinde (Test Kapısı — Engineering Protocol Bölüm 10)
 **İlgili:** ADR 0011 (i18n Mimarisi), ADR 0012 Karar 3 (Runtime Dil Değiştirme)

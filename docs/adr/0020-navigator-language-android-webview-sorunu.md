@@ -1,6 +1,6 @@
 # ADR 0020 — `navigator.language` Android WebView Güvenilirlik Sorunu
 
-**Durum:** Kabul edildi — ADR 0015'in kök nedenini tamamlar ve düzeltir
+**Durum:** Kabul edildi — **Gerçek Android cihazda doğrulandı (Verified on Physical Android Device, 2026-07-14, bkz. ADR 0021)**
 **Tarih:** 2026-07-14
 **Bulan:** Kullanıcı, gerçek Android cihaz testinde (ADR 0015'ten SONRA bile sorun devam etti)
 **İlgili:** ADR 0011 (i18n Mimarisi), ADR 0015 (Dil Algılama Kalıcılığı Düzeltmesi)

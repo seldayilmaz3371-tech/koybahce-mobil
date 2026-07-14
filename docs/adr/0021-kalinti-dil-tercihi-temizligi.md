@@ -1,6 +1,6 @@
 # ADR 0021 — Kalıntı Dil Tercihi Verisi Temizliği
 
-**Durum:** Kabul edildi — asıl kök neden, ADR 0020'yi tamamlıyor
+**Durum:** Kabul edildi — **Gerçek Android cihazda doğrulandı (Verified on Physical Android Device, 2026-07-14)**
 **Tarih:** 2026-07-14
 **Bulan:** Kullanıcının istediği kod-seviyesi akış izleme talebi sırasında
 **İlgili:** ADR 0015, ADR 0020
@@ -41,3 +41,12 @@ Bu, `@capacitor/preferences`'a yeni bir `remove()` metodu eklenmesini gerektirdi
 - Bu güncelleme sonrası **ilk açılışta**, cihazdaki her ne kalıntı varsa temizlenecek ve `Device.getLanguageCode()` gerçekten çalışacak.
 - **Kesin doğrulama, kullanıcının test sonucuyla gelecek** — bu ADR de o sonuca göre güncellenecek.
 - `native/preferences.ts`'e `remove()` eklendi — ilerideki modüller (Ayarlar dahil) için de kullanılabilir genel bir yetenek.
+
+## ✅ Doğrulama Sonucu (2026-07-14)
+
+Kullanıcı, `d9145f0` commit'i ile derlenen APK'yı gerçek Android cihazda test etti:
+- Telefon sistem dili İngilizce'ye alındı
+- Uygulama **güncelleme olarak** kuruldu (temiz kurulum değil — tam olarak riskli senaryo)
+- Uygulama tamamen İngilizce açıldı, tüm metinler ve tarih/saat biçimi doğru
+
+Bu, hem ADR 0020'nin (native Device sorgusu) hem ADR 0021'in (kalıntı veri temizliği) **birlikte doğru çalıştığını** kanıtlıyor — özellikle en riskli senaryo (güncelleme, kalıntı veri) test edildiği için sonuç güvenilir.

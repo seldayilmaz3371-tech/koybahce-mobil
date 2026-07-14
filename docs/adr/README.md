@@ -23,13 +23,13 @@ yapmıştık?" sorusuna kod kazmadan cevap verebilmektir.
 | [0012](0012-i18n-standartlari-brand-runtime-dil.md) | Translation Key Convention, Brand Config (ilk), Runtime Dil Değiştirme | Kabul edildi |
 | [0013](0013-brand-config-genisletildi.md) | Brand Configuration Tam Kapsama Genişletildi | Kabul edildi |
 | [0014](0014-play-store-yol-haritasi.md) | Play Store Yayını Yol Haritası (Paket Adı Değişimi, Marka Varlıkları) | Belgelendi — uygulanmadı, gelecek çalışma |
-| [0015](0015-dil-algilama-kalicilik-duzeltmesi.md) | Dil Algılama Kalıcılığı Düzeltmesi | Kabul edildi — gerçek cihaz testinde bulundu |
+| [0015](0015-dil-algilama-kalicilik-duzeltmesi.md) | Dil Algılama Kalıcılığı Düzeltmesi | Kabul edildi — ADR 0020/0021 ile tamamlandı |
 | [0016](0016-modul2-veri-modeli.md) | Modül 2 Veri Modeli: Parseller ve Ağaçlar | Kabul edildi — kod geliştirme onay bekliyor |
 | [0017](0017-enum-veri-saklama-kurali.md) | Sabit Küme (Enum) Verilerinin Saklama Kuralı | Kabul edildi — tüm modüller için bağlayıcı |
 | [0018](0018-test-stratejisi.md) | Test Stratejisi (Vitest + Node SQLite Sürücüsü) | Kabul edildi — kurulum Modül 2'de |
 | [0019](0019-log-sistemi.md) | Log Sistemi (Minimal, Yerel) | Kabul edildi — kurulum Modül 2'de |
-| [0020](0020-navigator-language-android-webview-sorunu.md) | `navigator.language` Android WebView Güvenilirlik Sorunu | Kabul edildi — gerçek cihaz testinde bulundu, doğrulama bekleniyor |
-| [0021](0021-kalinti-dil-tercihi-temizligi.md) | Kalıntı Dil Tercihi Verisi Temizliği | Kabul edildi — asıl kök neden, doğrulama bekleniyor |
+| [0020](0020-navigator-language-android-webview-sorunu.md) | `navigator.language` Android WebView Güvenilirlik Sorunu | ✅ Gerçek cihazda doğrulandı |
+| [0021](0021-kalinti-dil-tercihi-temizligi.md) | Kalıntı Dil Tercihi Verisi Temizliği | ✅ Gerçek cihazda doğrulandı |
 
 ## Yeni bir ADR ne zaman eklenir?
 

@@ -2,6 +2,7 @@
 
 **Durum:** Onaylandı (Bölüm 17 — Çok Dilli AI Mimarisi — Globalization kararı sonrası eklendi)
 **Tarih:** 2026-07-14
+**İlgili modül durumu:** `docs/module-status.md` — Modül 1 tamamlandı, AI modülleri (Modül 6-7) henüz başlamadı.
 **Kapsam:** Bu belge, AI ile ilgili tüm modüllerin (AI Tavsiye Sistemi, Gelişim Analizi, Sesli Asistan, RAG/Faz 2) referans mimarisidir. Hiçbir AI modülü bu belgeyle çelişemez.
 
 Bu belge, önceki ADR'lerde (bkz. `docs/adr/`) alınan kararlara (offline-first, tek kullanıcı, sunucu yok, minimum API çağrısı — Kural 16, minimum harici bağımlılık — Kural 17, Keystore güvenliği — ADR 0004/0006) sadıktır; hiçbirini geçersiz kılmaz.
