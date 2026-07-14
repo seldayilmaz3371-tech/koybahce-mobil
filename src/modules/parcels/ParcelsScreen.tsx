@@ -109,7 +109,7 @@ export function ParcelsScreen() {
         ]}
       />
 
-      {status === "loading" || status === "idle" ? (
+      {status === "idle" || (status === "loading" && parcels.length === 0) ? (
         <p className="status-card__value">{t("common.loading")}</p>
       ) : null}
 
@@ -125,10 +125,13 @@ export function ParcelsScreen() {
         </p>
       ) : null}
 
-      {status === "ready" && parcels.length > 0 ? (
+      {parcels.length > 0 ? (
         <>
           <ParcelList parcels={parcels} onSelect={handleSelect} />
-          {hasMore ? (
+          {status === "loading" ? (
+            <p className="status-card__value">{t("common.loading")}</p>
+          ) : null}
+          {hasMore && status !== "loading" ? (
             <button type="button" className="lock-screen__button" onClick={loadMore}>
               {t("parcel.loadMoreButton")}
             </button>
