@@ -2,7 +2,22 @@
   "common": {
     "cancel": "Cancel",
     "continue": "Continue",
-    "retry": "Try Again"
+    "retry": "Try Again",
+    "loading": "Loading…",
+    "save": "Save"
+  },
+  "parcel": {
+    "title": "Parcels",
+    "addButton": "Add Parcel",
+    "emptyState": "No parcels yet. Tap \"Add Parcel\" to create your first one.",
+    "name": "Name",
+    "cropType": {
+      "label": "Crop Type",
+      "olive": "Olive",
+      "vegetable": "Vegetable",
+      "fruit": "Fruit"
+    },
+    "areaDekar": "Area (decares)"
   },
   "auth": {
     "authenticating": "Authenticating…",

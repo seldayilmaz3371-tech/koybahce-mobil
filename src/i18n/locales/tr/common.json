@@ -2,7 +2,22 @@
   "common": {
     "cancel": "İptal",
     "continue": "Devam Et",
-    "retry": "Tekrar Dene"
+    "retry": "Tekrar Dene",
+    "loading": "Yükleniyor…",
+    "save": "Kaydet"
+  },
+  "parcel": {
+    "title": "Parseller",
+    "addButton": "Parsel Ekle",
+    "emptyState": "Henüz parsel yok. İlk parselinizi eklemek için \"Parsel Ekle\"ye dokunun.",
+    "name": "Ad",
+    "cropType": {
+      "label": "Mahsul Türü",
+      "olive": "Zeytin",
+      "vegetable": "Sebze",
+      "fruit": "Meyve"
+    },
+    "areaDekar": "Alan (dekar)"
   },
   "auth": {
     "authenticating": "Kimlik doğrulanıyor…",
