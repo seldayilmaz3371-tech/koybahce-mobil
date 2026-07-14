@@ -3,26 +3,27 @@
  * ============
  * Yeni parsel oluşturma / mevcut parseli düzenleme formu.
  *
- * BİLİNÇLİ TASARIM SIRASI: Bu adımda alanlar INLINE yazılıyor (henüz
- * ortak bileşenlere çıkarılmadı). Gerekçe: soyutlamayı, gerçek bir
- * kullanım örneği olmadan önceden tahmin etmek yerine, ilk somut
- * formdan ÇIKARMAK (extract, don't predict) — bir sonraki adımda
- * (Ortak Form Bileşenleri) bu alanlar `src/shared/components/form/`
- * altına taşınacak ve bu dosya onları kullanacak şekilde güncellenecek.
+ * Bu sürüm, src/shared/components/form/ altındaki ortak bileşenleri
+ * kullanacak şekilde REFAKTÖR edildi (Modül 2 Mimari Doğrulaması
+ * madde 3-4) — önceki sürümde alanlar inline yazılmıştı, bilerek
+ * (extract, don't predict). Davranış DEĞİŞMEDİ, sadece işaretleme
+ * ortak bileşenlere taşındı.
  *
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
- * ERİŞİLEBİLİRLİK (Protocol Bölüm 19): Her alan gerçek <label
- * htmlFor>'a sahip, hata mesajları `role="alert"` ile duyuruluyor.
  */
 
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { TextField } from "../../shared/components/form/TextField";
+import { NumberField } from "../../shared/components/form/NumberField";
+import { SelectField } from "../../shared/components/form/SelectField";
+import { TextAreaField } from "../../shared/components/form/TextAreaField";
+import { FormError } from "../../shared/components/form/FormError";
 import type { CropType, NewParcelInput, Parcel } from "./domain/parcel.types";
 
 const CROP_TYPES: CropType[] = ["olive", "vegetable", "fruit"];
 
 interface ParcelFormProps {
-  /** Düzenleme modunda mevcut parsel; oluşturma modunda `undefined`. */
   initialValue?: Parcel;
   onSubmit: (input: NewParcelInput) => Promise<void>;
   onCancel: () => void;
@@ -81,99 +82,41 @@ export function ParcelForm({ initialValue, onSubmit, onCancel }: ParcelFormProps
         {initialValue ? t("parcel.formTitleEdit") : t("parcel.formTitleCreate")}
       </h1>
 
-      {validationError ? (
-        <p role="alert" className="form-field__error">
-          {validationError}
-        </p>
-      ) : null}
+      <FormError message={validationError} />
 
-      <div className="form-field">
-        <label htmlFor="parcel-name">{t("parcel.name")}</label>
-        <input
-          id="parcel-name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-      </div>
+      <TextField id="parcel-name" label={t("parcel.name")} value={name} onChange={setName} required />
 
-      <div className="form-field">
-        <label htmlFor="parcel-crop-type">{t("parcel.cropType.label")}</label>
-        <select
-          id="parcel-crop-type"
-          value={cropType}
-          onChange={(e) => setCropType(e.target.value as CropType)}
-        >
-          {CROP_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {t(`parcel.cropType.${type}`)}
-            </option>
-          ))}
-        </select>
-      </div>
+      <SelectField
+        id="parcel-crop-type"
+        label={t("parcel.cropType.label")}
+        value={cropType}
+        onChange={setCropType}
+        options={CROP_TYPES.map((type) => ({ value: type, label: t(`parcel.cropType.${type}`) }))}
+      />
 
-      <div className="form-field">
-        <label htmlFor="parcel-area">{t("parcel.areaDekar")}</label>
-        <input
-          id="parcel-area"
-          type="number"
-          inputMode="decimal"
-          step="0.01"
-          value={areaDekar}
-          onChange={(e) => setAreaDekar(e.target.value)}
-          required
-        />
-      </div>
+      <NumberField
+        id="parcel-area"
+        label={t("parcel.areaDekar")}
+        value={areaDekar}
+        onChange={setAreaDekar}
+        step="0.01"
+        required
+      />
 
-      <div className="form-field">
-        <label htmlFor="parcel-soil-type">{t("parcel.soilType")}</label>
-        <input
-          id="parcel-soil-type"
-          type="text"
-          value={soilType}
-          onChange={(e) => setSoilType(e.target.value)}
-        />
-      </div>
+      <TextField id="parcel-soil-type" label={t("parcel.soilType")} value={soilType} onChange={setSoilType} />
 
-      <div className="form-field">
-        <label htmlFor="parcel-irrigation-type">{t("parcel.irrigationType")}</label>
-        <input
-          id="parcel-irrigation-type"
-          type="text"
-          value={irrigationType}
-          onChange={(e) => setIrrigationType(e.target.value)}
-        />
-      </div>
+      <TextField
+        id="parcel-irrigation-type"
+        label={t("parcel.irrigationType")}
+        value={irrigationType}
+        onChange={setIrrigationType}
+      />
 
-      <div className="form-field">
-        <label htmlFor="parcel-latitude">{t("parcel.latitude")}</label>
-        <input
-          id="parcel-latitude"
-          type="number"
-          inputMode="decimal"
-          step="any"
-          value={latitude}
-          onChange={(e) => setLatitude(e.target.value)}
-        />
-      </div>
+      <NumberField id="parcel-latitude" label={t("parcel.latitude")} value={latitude} onChange={setLatitude} />
 
-      <div className="form-field">
-        <label htmlFor="parcel-longitude">{t("parcel.longitude")}</label>
-        <input
-          id="parcel-longitude"
-          type="number"
-          inputMode="decimal"
-          step="any"
-          value={longitude}
-          onChange={(e) => setLongitude(e.target.value)}
-        />
-      </div>
+      <NumberField id="parcel-longitude" label={t("parcel.longitude")} value={longitude} onChange={setLongitude} />
 
-      <div className="form-field">
-        <label htmlFor="parcel-notes">{t("parcel.notes")}</label>
-        <textarea id="parcel-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
-      </div>
+      <TextAreaField id="parcel-notes" label={t("parcel.notes")} value={notes} onChange={setNotes} />
 
       <button type="submit" className="lock-screen__button" disabled={isSubmitting}>
         {t("common.save")}
