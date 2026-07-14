@@ -34,7 +34,8 @@
     "noSearchResults": "No parcels match your search.",
     "sortLabel": "Sort by",
     "sortByName": "Name",
-    "sortByArea": "Area"
+    "sortByArea": "Area",
+    "loadMoreButton": "Load More"
   },
   "auth": {
     "authenticating": "Authenticating…",

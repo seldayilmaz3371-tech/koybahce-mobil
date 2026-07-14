@@ -42,7 +42,7 @@ interface ParcelRow {
  * `list()` çağrılırken açıkça bir `limit` verilmezse kullanılan
  * varsayılan üst sınırdır.
  */
-const DEFAULT_LIST_LIMIT = 50;
+export const DEFAULT_LIST_LIMIT = 50;
 
 function mapRowToParcel(row: ParcelRow): Parcel {
   return {

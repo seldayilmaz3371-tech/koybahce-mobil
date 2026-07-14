@@ -34,7 +34,8 @@
     "noSearchResults": "Aramanızla eşleşen parsel yok.",
     "sortLabel": "Sırala",
     "sortByName": "Ad",
-    "sortByArea": "Alan"
+    "sortByArea": "Alan",
+    "loadMoreButton": "Daha Fazla Yükle"
   },
   "auth": {
     "authenticating": "Kimlik doğrulanıyor…",

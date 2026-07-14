@@ -39,7 +39,7 @@ export function ParcelsScreen() {
     return () => clearTimeout(timeoutId);
   }, [searchInput]);
 
-  const { parcels, status, errorMessage, createParcel, updateParcel, deactivateParcel } =
+  const { parcels, status, errorMessage, hasMore, loadMore, createParcel, updateParcel, deactivateParcel } =
     useParcels({ search: debouncedSearch || undefined, sortBy });
   const [view, setView] = useState<ScreenView>({ mode: "list" });
 
@@ -126,7 +126,14 @@ export function ParcelsScreen() {
       ) : null}
 
       {status === "ready" && parcels.length > 0 ? (
-        <ParcelList parcels={parcels} onSelect={handleSelect} />
+        <>
+          <ParcelList parcels={parcels} onSelect={handleSelect} />
+          {hasMore ? (
+            <button type="button" className="lock-screen__button" onClick={loadMore}>
+              {t("parcel.loadMoreButton")}
+            </button>
+          ) : null}
+        </>
       ) : null}
     </main>
   );
