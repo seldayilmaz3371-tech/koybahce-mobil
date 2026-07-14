@@ -28,6 +28,7 @@ yapmıştık?" sorusuna kod kazmadan cevap verebilmektir.
 | [0017](0017-enum-veri-saklama-kurali.md) | Sabit Küme (Enum) Verilerinin Saklama Kuralı | Kabul edildi — tüm modüller için bağlayıcı |
 | [0018](0018-test-stratejisi.md) | Test Stratejisi (Vitest + Node SQLite Sürücüsü) | Kabul edildi — kurulum Modül 2'de |
 | [0019](0019-log-sistemi.md) | Log Sistemi (Minimal, Yerel) | Kabul edildi — kurulum Modül 2'de |
+| [0020](0020-navigator-language-android-webview-sorunu.md) | `navigator.language` Android WebView Güvenilirlik Sorunu | Kabul edildi — gerçek cihaz testinde bulundu, doğrulama bekleniyor |
 
 ## Yeni bir ADR ne zaman eklenir?
 

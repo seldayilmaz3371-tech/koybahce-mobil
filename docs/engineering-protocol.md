@@ -1,6 +1,6 @@
-# Bahçem Mobile Engineering Protocol v1.5
+# Bahçem Mobile Engineering Protocol v1.6
 
-**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 — Enum Veri Saklama Kuralı — v1.5'te eklendi, 2026-07-14)
+**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 v1.5'te eklendi; Bölüm 18.5 — Cihaz Dili Sorgulama Kuralı — v1.6'da eklendi, 2026-07-14)
 
 Bu belge Bahçem Mobile projesinin resmi geliştirme protokolüdür. Modül 2'den itibaren tüm geliştirme süreci için geçerlidir. Modül 1, bu protokolden önce tamamlandığı için geriye dönük olarak bu sıraya zorlanmamıştır — ancak Modül 1'e uygulanan denetim (Kalite Kapısı, Test Kapısı, ADR belgelemesi) protokolün ruhuyla zaten tutarlıydı.
 
@@ -170,6 +170,10 @@ Marka ile ilgili TÜM bilgiler (Display Name, Package Name, AI Assistant Name, P
 ### 18.4 Sabit Küme (Enum) Verilerinin Saklama Kuralı *(ADR 0017 ile eklendi)*
 
 Sabit, önceden bilinen seçenek kümesi içeren (dropdown/seçim listesi) her alan, veritabanında **İngilizce, kararlı bir kod** olarak saklanır (ör. `crop_type = 'olive'`). Ekranda gösterilecek metin her zaman çeviri dosyasından gelir, asla veri değeri olarak saklanmaz. Mümkün olduğunda SQL `CHECK` kısıtıyla desteklenir. Bu kural, kullanıcının serbestçe yazdığı metin alanlarına (notlar, çeşit adı vb.) uygulanmaz — onlar zaten kullanıcının kendi dilinde, çeviriye ihtiyaç duymayan ham veridir.
+
+### 18.5 Cihaz Dili Sorgulama Kuralı *(ADR 0020 ile eklendi)*
+
+**`navigator.language` cihaz dilini sorgulamak için KULLANILMAZ.** Android WebView'in renderer süreç önbellekleme davranışı nedeniyle, sistem dili değiştiğinde bu değer güncel kalmayabilir (gerçek cihaz testinde doğrulanmış bir bulgu, bkz. ADR 0020). Cihaz dili her zaman `@capacitor/device`'ın `getLanguageCode()` metodu — native katmandan sorgulanan bir API — üzerinden okunur.
 
 ### 18.3 Runtime Dil Değiştirme *(ADR 0012 ile eklendi, gelecek geliştirme)*
 

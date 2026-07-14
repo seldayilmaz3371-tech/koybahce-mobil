@@ -16,12 +16,29 @@
  */
 
 import { localPreferences, LocalPreferenceKey } from "../native/preferences";
+import { getDeviceLanguageCode } from "../native/device";
 import { FALLBACK_LANGUAGE_CODE, isSupportedLanguageCode } from "./supportedLanguages";
 
-/** Cihazın işletim sistemi dilini, sadece dil kodu (ör. 'tr') olarak döndürür. */
-function detectDeviceLanguageCode(): string {
-  const fullLocale = navigator.language || FALLBACK_LANGUAGE_CODE;
-  return fullLocale.split("-")[0].toLowerCase();
+/**
+ * Cihazın işletim sistemi dilini sorgular.
+ *
+ * DÜZELTME (bkz. ADR 0020, 2026-07-14): Önceki sürüm `navigator.language`
+ * kullanıyordu. Gerçek cihaz testinde, Android sistem dili
+ * değiştirildiğinde bu değerin GÜNCELLENMEDİĞİ tespit edildi — Android
+ * WebView'ın renderer süreç önbellekleme davranışı nedeniyle. Artık
+ * `@capacitor/device` üzerinden native katmandan sorgulanıyor (bkz.
+ * native/device.ts) — WebView önbelleğine bağımlı değil.
+ *
+ * Hata durumunda (ör. eklenti bir nedenle başarısız olursa) İngilizceye
+ * düşülür — dil algılama hiçbir zaman uygulamanın açılmasını
+ * engellememelidir.
+ */
+async function detectDeviceLanguageCode(): Promise<string> {
+  try {
+    return await getDeviceLanguageCode();
+  } catch {
+    return FALLBACK_LANGUAGE_CODE;
+  }
 }
 
 /**
@@ -51,7 +68,7 @@ export async function resolveInitialLanguage(): Promise<string> {
   // Bilinçli bir kullanıcı tercihi yok — cihaz dilini CANLI olarak
   // takip et, kalıcı yazma. Bu sayede kullanıcı işletim sistemi
   // dilini değiştirirse, uygulama bir sonraki açılışta bunu yansıtır.
-  const deviceLanguage = detectDeviceLanguageCode();
+  const deviceLanguage = await detectDeviceLanguageCode();
   return isSupportedLanguageCode(deviceLanguage) ? deviceLanguage : FALLBACK_LANGUAGE_CODE;
 }
 
