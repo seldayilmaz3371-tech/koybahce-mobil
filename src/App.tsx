@@ -22,8 +22,7 @@ import { LockScreen } from "./modules/auth/LockScreen";
 import { getDatabase, getRuntimePlatform } from "./data/db/connection";
 import { appMetadataRepository } from "./data/repositories/appMetadata.repository";
 import { CURRENT_SCHEMA_VERSION } from "./data/db/migrations/schema";
-import { formatDateTime } from "./i18n/formatters";
-import i18n from "./i18n/i18n";
+import { ParcelsScreen } from "./modules/parcels/ParcelsScreen";
 
 type InfrastructureStatus =
   | { phase: "idle" }
@@ -76,6 +75,13 @@ function App() {
     return <LockScreen onUnlocked={handleUnlocked} />;
   }
 
+  // Modül 1 donduruldu (bkz. docs/module-status.md) — tanılama
+  // ekranının görevi bitti. Veritabanı hazır olduğunda artık gerçek
+  // uygulama navigasyonu (bugün: doğrudan ParcelsScreen) gösteriliyor.
+  if (infrastructure.phase === "ready") {
+    return <ParcelsScreen />;
+  }
+
   return (
     <main className="status-screen">
       <h1 className="status-screen__title">{t("diagnostics.title")}</h1>
@@ -84,27 +90,6 @@ function App() {
         <div className="status-card">
           <p className="status-card__value">{t("diagnostics.preparingDatabase")}</p>
         </div>
-      ) : null}
-
-      {infrastructure.phase === "ready" ? (
-        <>
-          <div className="status-card">
-            <p className="status-card__label">{t("diagnostics.connectionStatusLabel")}</p>
-            <p className="status-card__value">{t("diagnostics.connectionStatusValue")}</p>
-          </div>
-          <div className="status-card">
-            <p className="status-card__label">{t("diagnostics.platformLabel")}</p>
-            <p className="status-card__value">{infrastructure.platform}</p>
-          </div>
-          <div className="status-card">
-            <p className="status-card__label">{t("diagnostics.schemaVersionLabel")}</p>
-            <p className="status-card__value">{infrastructure.schemaVersion}</p>
-          </div>
-          <div className="status-card">
-            <p className="status-card__label">{t("diagnostics.firstLaunchLabel")}</p>
-            <p className="status-card__value">{formatDateTime(infrastructure.firstLaunchAt, i18n.language)}</p>
-          </div>
-        </>
       ) : null}
 
       {infrastructure.phase === "failed" ? (
