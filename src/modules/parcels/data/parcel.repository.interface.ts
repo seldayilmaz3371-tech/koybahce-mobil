@@ -25,6 +25,8 @@ export interface ParcelListOptions {
   offset?: number;
   /** Parsel adında (büyük/küçük harf duyarsız) arama. Boş/undefined ise filtre uygulanmaz. */
   search?: string;
+  /** Sıralama alanı. Varsayılan 'name'. */
+  sortBy?: "name" | "areaDekar";
 }
 
 export interface IParcelRepository {

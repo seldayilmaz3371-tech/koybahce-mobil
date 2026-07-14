@@ -126,6 +126,15 @@ describe("ParcelRepository", () => {
     expect(results[0].name).toBe("Kuzey Zeytinliği");
   });
 
+  it("list({ sortBy: 'areaDekar' }) parselleri alana göre artan sıralar", async () => {
+    await parcelRepository.create({ name: "Büyük Parsel", cropType: "olive", areaDekar: 20 });
+    await parcelRepository.create({ name: "Küçük Parsel", cropType: "olive", areaDekar: 3 });
+
+    const results = await parcelRepository.list({ sortBy: "areaDekar" });
+
+    expect(results.map((p) => p.areaDekar)).toEqual([3, 20]);
+  });
+
   it("crop_type CHECK kısıtı geçersiz bir kodu reddeder", async () => {
     // Repository katmanını atlayıp doğrudan geçersiz bir SQL denemesi —
     // ADR 0017'nin veritabanı seviyesindeki garantisini doğrular.

@@ -31,7 +31,10 @@
     "deleteConfirm": "Bu parsel silinsin mi? Listelerinizden kaldırılacak.",
     "searchLabel": "Parsellerde ara",
     "searchPlaceholder": "Ada göre ara…",
-    "noSearchResults": "Aramanızla eşleşen parsel yok."
+    "noSearchResults": "Aramanızla eşleşen parsel yok.",
+    "sortLabel": "Sırala",
+    "sortByName": "Ad",
+    "sortByArea": "Alan"
   },
   "auth": {
     "authenticating": "Kimlik doğrulanıyor…",

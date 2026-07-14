@@ -18,9 +18,12 @@ import { useTranslation } from "react-i18next";
 import { useParcels } from "./hooks/useParcels";
 import { ParcelList } from "./components/ParcelList";
 import { ParcelForm } from "./ParcelForm";
+import { SelectField } from "../../shared/components/form/SelectField";
 import type { NewParcelInput, Parcel } from "./domain/parcel.types";
+import type { ParcelListOptions } from "./data/parcel.repository.interface";
 
 type ScreenView = { mode: "list" } | { mode: "create" } | { mode: "edit"; parcel: Parcel };
+type SortOption = NonNullable<ParcelListOptions["sortBy"]>;
 
 /** Kullanıcı yazmayı bıraktıktan bu kadar ms sonra arama tetiklenir — her tuş vuruşunda sorgu çalıştırmamak için (Kural 9). */
 const SEARCH_DEBOUNCE_MS = 300;
@@ -29,6 +32,7 @@ export function ParcelsScreen() {
   const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("name");
 
   useEffect(() => {
     const timeoutId = setTimeout(() => setDebouncedSearch(searchInput), SEARCH_DEBOUNCE_MS);
@@ -36,7 +40,7 @@ export function ParcelsScreen() {
   }, [searchInput]);
 
   const { parcels, status, errorMessage, createParcel, updateParcel, deactivateParcel } =
-    useParcels({ search: debouncedSearch || undefined });
+    useParcels({ search: debouncedSearch || undefined, sortBy });
   const [view, setView] = useState<ScreenView>({ mode: "list" });
 
   const handleSelect = (parcel: Parcel) => {
@@ -93,6 +97,17 @@ export function ParcelsScreen() {
           onChange={(e) => setSearchInput(e.target.value)}
         />
       </div>
+
+      <SelectField
+        id="parcel-sort"
+        label={t("parcel.sortLabel")}
+        value={sortBy}
+        onChange={setSortBy}
+        options={[
+          { value: "name", label: t("parcel.sortByName") },
+          { value: "areaDekar", label: t("parcel.sortByArea") },
+        ]}
+      />
 
       {status === "loading" || status === "idle" ? (
         <p className="status-card__value">{t("common.loading")}</p>

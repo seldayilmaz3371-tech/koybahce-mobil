@@ -81,6 +81,7 @@ class ParcelRepository extends BaseRepository implements IParcelRepository {
     const limit = options.limit ?? DEFAULT_LIST_LIMIT;
     const offset = options.offset ?? 0;
     const search = options.search?.trim();
+    const sortBy = options.sortBy ?? "name";
 
     const conditions: string[] = [];
     const values: unknown[] = [];
@@ -97,9 +98,14 @@ class ParcelRepository extends BaseRepository implements IParcelRepository {
       values.push(`%${search}%`);
     }
 
+    // `sortBy` yalnızca sabit iki değerden biri olabildiği için (tip
+    // güvenliği), ORDER BY ifadesine doğrudan yerleştirmek güvenli —
+    // kullanıcı girdisinden gelen serbest bir string DEĞİL.
+    const orderByColumn = sortBy === "areaDekar" ? "area_dekar" : "name COLLATE NOCASE";
+
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
     const rows = await this.query<ParcelRow>(
-      `SELECT * FROM parcels ${whereClause} ORDER BY name COLLATE NOCASE LIMIT ? OFFSET ?`,
+      `SELECT * FROM parcels ${whereClause} ORDER BY ${orderByColumn} LIMIT ? OFFSET ?`,
       [...values, limit, offset]
     );
     return rows.map(mapRowToParcel);
