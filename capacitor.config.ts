@@ -1,8 +1,9 @@
 import type { CapacitorConfig } from '@capacitor/cli';
+import { BRAND } from './src/config/brand';
 
 const config: CapacitorConfig = {
-  appId: 'com.bahcem.mobile',
-  appName: 'Bahçem Mobile',
+  appId: BRAND.packageName,
+  appName: BRAND.displayName,
   webDir: 'dist',
   plugins: {
     CapacitorSQLite: {

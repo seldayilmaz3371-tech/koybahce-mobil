@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { initI18n } from './i18n/i18n'
+import { BRAND } from './config/brand'
+
+document.title = BRAND.displayName
 
 /**
  * i18n, ilk render'dan ÖNCE başlatılmalıdır — kilit ekranı bile doğru

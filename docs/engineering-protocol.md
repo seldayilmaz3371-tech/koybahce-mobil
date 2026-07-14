@@ -1,6 +1,6 @@
-# Bahçem Mobile Engineering Protocol v1.3
+# Bahçem Mobile Engineering Protocol v1.4
 
-**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 — Globalization Policy — v1.2'de eklendi; Bölüm 18.1-18.3 — naming convention, brand config, runtime dil değiştirme — v1.3'te eklendi, 2026-07-14)
+**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 — Globalization Policy — v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 — Brand Configuration tam kapsama genişletildi — v1.4'te güncellendi, 2026-07-14)
 
 Bu belge Bahçem Mobile projesinin resmi geliştirme protokolüdür. Modül 2'den itibaren tüm geliştirme süreci için geçerlidir. Modül 1, bu protokolden önce tamamlandığı için geriye dönük olarak bu sıraya zorlanmamıştır — ancak Modül 1'e uygulanan denetim (Kalite Kapısı, Test Kapısı, ADR belgelemesi) protokolün ruhuyla zaten tutarlıydı.
 
@@ -159,9 +159,13 @@ Format: `domain.key` veya `domain.subcontext.key` (nokta ayraçlı, camelCase, e
 
 **Dosya bölme eşiği:** Çeviri dosyası 200 satırı veya 6 domain'i aştığında, i18next namespace mekanizmasıyla domain başına ayrı dosyalara bölünür.
 
-### 18.2 Brand Configuration *(ADR 0012 ile eklendi)*
+### 18.2 Brand Configuration *(ADR 0012 ile başlatıldı, ADR 0013 ile tam kapsama genişletildi)*
 
-Kodda kullanılan tüm marka metinleri (`displayName`, `aiAssistantName`) `src/config/brand.ts`'den gelir — hiçbir dosyada marka adı ikinci kez sabit yazılmaz. Çeviri metinleri içine gömülü marka adları, i18next interpolasyonuyla (`{{brandName}}`) parametreleştirilir.
+Marka ile ilgili TÜM bilgiler (Display Name, Package Name, AI Assistant Name, Play Store Name, Future Global Brand Name) `src/config/brand.ts`'de tek noktadan yönetilir — kod tabanının hiçbir yerinde marka adı ikinci kez sabit yazılmaz. Çeviri metinleri içine gömülü marka adları, i18next interpolasyonuyla (`{{brandName}}`) parametreleştirilir. `capacitor.config.ts` bu dosyayı import eder (native `appId`/`appName` için tek kaynak).
+
+**Teknik sınır:** `packageName`'in native Android projesine (`build.gradle`) yansıması otomatik değildir — `cap add` sonrası değişiklikler elle senkronize edilmelidir (bkz. ADR 0013).
+
+**Bilinçli istisna:** `DATABASE_NAME` marka konfigürasyonuna bağlanmaz — bu bir veri kimliğidir, kozmetik bir marka detayı değildir (Kural 31, veri güvenliği önceliklidir).
 
 ### 18.3 Runtime Dil Değiştirme *(ADR 0012 ile eklendi, gelecek geliştirme)*
 
