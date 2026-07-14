@@ -52,11 +52,6 @@
   "diagnostics": {
     "title": "Module 1 — Infrastructure Status",
     "preparingDatabase": "Preparing database…",
-    "connectionStatusLabel": "Connection Status",
-    "connectionStatusValue": "✅ Encrypted database connection open",
-    "platformLabel": "Platform",
-    "schemaVersionLabel": "Schema Version",
-    "firstLaunchLabel": "First Setup Time (persisted)",
     "errorLabel": "Error"
   }
 }

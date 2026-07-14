@@ -52,11 +52,6 @@
   "diagnostics": {
     "title": "Modül 1 — Altyapı Durumu",
     "preparingDatabase": "Veritabanı hazırlanıyor…",
-    "connectionStatusLabel": "Bağlantı Durumu",
-    "connectionStatusValue": "✅ Şifreli veritabanı bağlantısı açık",
-    "platformLabel": "Platform",
-    "schemaVersionLabel": "Şema Sürümü",
-    "firstLaunchLabel": "İlk Kurulum Zamanı (kalıcı kayıt)",
     "errorLabel": "Hata"
   }
 }
