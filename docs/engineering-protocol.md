@@ -1,6 +1,6 @@
-# Bahçem Mobile Engineering Protocol v1.2
+# Bahçem Mobile Engineering Protocol v1.3
 
-**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve Bölüm 16, teknik gerekçelerle revize edilerek v1.1 olarak onaylandı; Bölüm 18 — Globalization Policy — v1.2'de eklendi, 2026-07-14)
+**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 — Globalization Policy — v1.2'de eklendi; Bölüm 18.1-18.3 — naming convention, brand config, runtime dil değiştirme — v1.3'te eklendi, 2026-07-14)
 
 Bu belge Bahçem Mobile projesinin resmi geliştirme protokolüdür. Modül 2'den itibaren tüm geliştirme süreci için geçerlidir. Modül 1, bu protokolden önce tamamlandığı için geriye dönük olarak bu sıraya zorlanmamıştır — ancak Modül 1'e uygulanan denetim (Kalite Kapısı, Test Kapısı, ADR belgelemesi) protokolün ruhuyla zaten tutarlıydı.
 
@@ -152,3 +152,17 @@ Bahçem Mobile, Google Play üzerinden dünya çapında yayınlanabilecek bir pl
 - AI katmanı aynı mimariye uyar — kullanıcının seçtiği dilde konuşur, düşünür ve hafızasını o dilde tutar (bkz. `docs/ai-architecture.md` Bölüm 3, 5).
 - Marka adı ("Bahçem Mobile") istisnadır — çevrilmez.
 - Dil tercihi, kimlik doğrulama öncesi erişilebilir olması gerektiği için `@capacitor/preferences` üzerinde tutulur, SQLite veya Secure Storage'da değil (bkz. ADR 0011 — üç depolama katmanının sorumluluk ayrımı).
+
+### 18.1 Translation Key Naming Convention *(ADR 0012 ile eklendi)*
+
+Format: `domain.key` veya `domain.subcontext.key` (nokta ayraçlı, camelCase, en fazla 3 seviye derinlik). `domain` modül adını yansıtır (`common`, `auth`, `parcel`, `tree`, `finance`, `ai`, `settings`...). **Genel/tekrar eden aksiyonlar (kaydet, iptal, tekrar dene, sil, düzenle) her zaman `common.*` altındadır** — hiçbir domain kendi "cancel"/"retry" metnini tekrar tanımlamaz.
+
+**Dosya bölme eşiği:** Çeviri dosyası 200 satırı veya 6 domain'i aştığında, i18next namespace mekanizmasıyla domain başına ayrı dosyalara bölünür.
+
+### 18.2 Brand Configuration *(ADR 0012 ile eklendi)*
+
+Kodda kullanılan tüm marka metinleri (`displayName`, `aiAssistantName`) `src/config/brand.ts`'den gelir — hiçbir dosyada marka adı ikinci kez sabit yazılmaz. Çeviri metinleri içine gömülü marka adları, i18next interpolasyonuyla (`{{brandName}}`) parametreleştirilir.
+
+### 18.3 Runtime Dil Değiştirme *(ADR 0012 ile eklendi, gelecek geliştirme)*
+
+Mimari buna hazırdır (`i18n.changeLanguage()` + `setLanguagePreference()` + `applyDocumentDirection()` — hepsi mevcut). Ayarlar modülü geldiğinde bu üç fonksiyonu çağıran bir UI eklenecek — bugün yazılmıyor.

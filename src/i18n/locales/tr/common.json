@@ -1,11 +1,13 @@
 {
-  "lockScreen": {
+  "common": {
+    "cancel": "İptal",
+    "continue": "Devam Et",
+    "retry": "Tekrar Dene"
+  },
+  "auth": {
     "authenticating": "Kimlik doğrulanıyor…",
-    "biometricPromptReason": "Bahçem Mobile'a erişmek için kimliğinizi doğrulayın",
-    "cancelButton": "İptal",
+    "biometricPromptReason": "{{brandName}}'a erişmek için kimliğinizi doğrulayın",
     "deviceNotSecureWarning": "Cihazınızda ekran kilidi (PIN, desen veya parmak izi) tanımlı değil. Uygulama kilitsiz açılacak.",
-    "continueButton": "Devam Et",
-    "retryButton": "Tekrar Dene",
     "errors": {
       "cancelled": "Doğrulama iptal edildi.",
       "lockout": "Çok fazla başarısız deneme. Lütfen biraz bekleyip tekrar deneyin.",
@@ -14,7 +16,7 @@
       "generic": "Doğrulama başarısız oldu. Lütfen tekrar deneyin."
     }
   },
-  "infrastructureStatus": {
+  "diagnostics": {
     "title": "Modül 1 — Altyapı Durumu",
     "preparingDatabase": "Veritabanı hazırlanıyor…",
     "connectionStatusLabel": "Bağlantı Durumu",
@@ -22,7 +24,6 @@
     "platformLabel": "Platform",
     "schemaVersionLabel": "Şema Sürümü",
     "firstLaunchLabel": "İlk Kurulum Zamanı (kalıcı kayıt)",
-    "errorLabel": "Hata",
-    "retryButton": "Tekrar Dene"
+    "errorLabel": "Hata"
   }
 }

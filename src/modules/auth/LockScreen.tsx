@@ -19,6 +19,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { biometricAuth, BiometryErrorType } from "../../native/biometricAuth";
+import { BRAND } from "../../config/brand";
 
 type LockScreenStatus = "checking" | "prompting" | "error" | "device-not-secure";
 
@@ -38,16 +39,16 @@ export function LockScreen({ onUnlocked }: LockScreenProps) {
         case BiometryErrorType.userCancel:
         case BiometryErrorType.appCancel:
         case BiometryErrorType.systemCancel:
-          return t("lockScreen.errors.cancelled");
+          return t("auth.errors.cancelled");
         case BiometryErrorType.biometryLockout:
-          return t("lockScreen.errors.lockout");
+          return t("auth.errors.lockout");
         case BiometryErrorType.biometryNotEnrolled:
-          return t("lockScreen.errors.notEnrolled");
+          return t("auth.errors.notEnrolled");
         case BiometryErrorType.passcodeNotSet:
         case BiometryErrorType.noDeviceCredential:
-          return t("lockScreen.errors.noDeviceCredential");
+          return t("auth.errors.noDeviceCredential");
         default:
-          return t("lockScreen.errors.generic");
+          return t("auth.errors.generic");
       }
     },
     [t]
@@ -70,8 +71,8 @@ export function LockScreen({ onUnlocked }: LockScreenProps) {
     }
 
     const result = await biometricAuth.authenticate(
-      t("lockScreen.biometricPromptReason"),
-      t("lockScreen.cancelButton")
+      t("auth.biometricPromptReason", { brandName: BRAND.displayName }),
+      t("common.cancel")
     );
 
     if (result.success) {
@@ -90,21 +91,21 @@ export function LockScreen({ onUnlocked }: LockScreenProps) {
   return (
     <div className="lock-screen">
       <div className="lock-screen__content">
-        <h1 className="lock-screen__title">Bahçem Mobile</h1>
+        <h1 className="lock-screen__title">{BRAND.displayName}</h1>
 
         {status === "checking" || status === "prompting" ? (
-          <p className="lock-screen__status">{t("lockScreen.authenticating")}</p>
+          <p className="lock-screen__status">{t("auth.authenticating")}</p>
         ) : null}
 
         {status === "device-not-secure" ? (
           <div className="lock-screen__warning">
-            <p>{t("lockScreen.deviceNotSecureWarning")}</p>
+            <p>{t("auth.deviceNotSecureWarning")}</p>
             <button
               type="button"
               className="lock-screen__button"
               onClick={() => onUnlocked()}
             >
-              {t("lockScreen.continueButton")}
+              {t("common.continue")}
             </button>
           </div>
         ) : null}
@@ -117,7 +118,7 @@ export function LockScreen({ onUnlocked }: LockScreenProps) {
               className="lock-screen__button"
               onClick={attemptUnlock}
             >
-              {t("lockScreen.retryButton")}
+              {t("common.retry")}
             </button>
           </div>
         ) : null}

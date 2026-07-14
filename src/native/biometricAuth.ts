@@ -25,6 +25,7 @@ import {
   BiometryErrorType,
   type CheckBiometryResult,
 } from "@aparajita/capacitor-biometric-auth";
+import { BRAND } from "../config/brand";
 
 export interface AuthenticateResult {
   success: boolean;
@@ -62,7 +63,7 @@ async function authenticate(
     await BiometricAuth.authenticate({
       reason,
       allowDeviceCredential: true,
-      androidTitle: "Bahçem Mobile",
+      androidTitle: BRAND.displayName,
       androidSubtitle: reason,
       cancelTitle: cancelLabel,
     });
