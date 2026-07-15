@@ -45,3 +45,25 @@ Sprint 3.5 UX Doğrulamasında bulundu: `ObservationScreen`'de kullanıcıya "ka
 ## 10) Test Dosyalarının Kendi Tip Doğruluğu Hiç Kontrol Edilmiyor
 
 Sprint 3.5'te gerçek bir metodolojik boşluk bulundu: `.test.ts(x)` dosyaları `tsconfig.app.json`'da bilerek `exclude` edildiği için (üretim derlemesinin test paketlerine bağımlı olmaması — bkz. `f632df1` commit'i), **hiçbir zaman** `npm run build`/`tsc -b` tarafından tip kontrolünden geçmiyorlar. Bu sprintte, `TreesScreen`/`ObservationScreen`'e yeni zorunlu prop eklendiğinde, ilgili test dosyalarındaki **6+ çağrı noktası eksik prop'la sessizce "geçiyordu"** — sadece geçici, kapsam dışı bir kontrolle (`exclude`'suz bir tsconfig ile tek seferlik `tsc --noEmit`) yakalandı. **Öneri (bugün uygulanmadı):** `package.json`'a `"typecheck:tests"` gibi ayrı bir script eklenip, Release & QA Checklist'e (Belge 5) bir madde olarak eklenmesi — üretim derlemesini test bağımlılıklarına bağlamadan, test dosyalarının kendi tip doğruluğunu periyodik kontrol etmek için.
+
+## 11) Photo Kimliği Her Zaman `photo.id` — Asla `file_path` Değil
+
+Sprint 3.6 onayında kaydedildi: `file_path`, sadece fiziksel dosyanın **o anki** konumudur — kalıcı kimlik değildir (dosya taşınabilir/yeniden adlandırılabilir bir depolama düzenine geçilirse `file_path` değişebilir). Tüm ilişkiler, önbellekleme, referanslar **her zaman** `photo.id` (UUID) üzerinden kurulmalı. Bu, bugünkü tasarımda zaten doğal olarak böyle (repository `id`'yi PK olarak kullanıyor) — bu madde, gelecekte biri yanlışlıkla `file_path`'i bir kimlik gibi kullanmaya kalkışırsa hatırlatma amaçlı.
+
+## 12) Photo Veri Modeli — Gelecekteki AI Metadata Genişletilebilirliği
+
+Sprint 3.6 onayında kaydedildi: `quality_score`, `blur_score`, `ai_processed`, `analysis_version` gibi alanlar **bugün eklenmiyor** ama şema, bunların ADR 0005'in additive migration deseniyle (yeni nullable sütunlar) sancısız eklenmesine açık kalmalı. Bugünkü `photos` tablosu (Sprint 3.6) bu ilkeye uygun tasarlandı — hiçbir alan bu genişlemeyi engellemiyor.
+
+## 13) `taken_at` İçin EXIF Öncelik Sırası (Sprint 3.7'de Uygulanacak)
+
+Sprint 3.6 onayında kesinleşen öncelik sırası — kamera entegrasyonu (Sprint 3.7) bu sırayla `taken_at` değerini belirleyecek:
+
+1. **EXIF zamanı** (varsa ve güvenilir ise) — fotoğrafın gerçekte çekildiği an, en kanonik kaynak.
+2. **Uygulamanın oluşturduğu `taken_at`** — EXIF yoksa/güvenilmezse, kayıt anında `new Date().toISOString()` (bugünkü Sprint 3.6 implementasyonunun varsayılan davranışı).
+3. **`created_at`** — sadece "bu satır ne zaman veritabanına yazıldı" bilgisi, asla `taken_at`'ın yerine geçmez, ayrı kalır.
+
+Bugün (Sprint 3.6) sadece madde 2 uygulanıyor — EXIF çıkarımı (madde 1), kamera/galeri entegrasyonu henüz olmadığı için Sprint 3.7'ye bırakıldı.
+
+## 14) Fotoğraf Sayısı / Depolama Sınırı
+
+Sprint 3.6 Veri Modeli Doğrulamasında değerlendirildi: bir gözleme bağlı fotoğraf sayısında veya toplam cihaz depolama kullanımında bugün bir sınır yok. **Bugün eklenmiyor** (YAGNI) — gerçek saha kullanımında depolama sorunu gözlemlenirse ele alınacak.
