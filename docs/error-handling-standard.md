@@ -93,3 +93,70 @@ Basit, okunabilir, harici bağımlılık gerektirmeyen, mevcut mimariyle (reposi
 ## Sonuç
 
 Standart tanımlandı. **Mevcut kod bu standarda tam uymuyor** — bu dürüstçe belgelendi, teknik borç olarak işaretlendi, bugün düzeltilmiyor (talimat: kod yazma). Ağaç modülü kod aşamasında hem yeni kod bu standarda uygun yazılmalı hem de Parsel'deki boşluk kapatılmalı.
+
+---
+
+## Uygulama Planı (2026-07-15 Eklendi) — Henüz Uygulanmıyor
+
+### Error Code Namespace Yapısı
+
+Tek, merkezi bir dosya: `src/core/errors/errorCodes.ts`. Domain başına ayrı dosyalara **bölünmüyor** (bugün ~20-30 kod bekleniyor, bu ölçekte bölmek gereksiz dolaylılık olurdu — i18n çeviri dosyaları için belirlediğimiz "200 satır/6 domain" bölme eşiğiyle (ADR 0012) tutarlı bir gelecekteki tetikleyici burada da geçerli olacak).
+
+### 🔴 Kesin Teknik Karar: `enum` DEĞİL, `as const` Nesnesi — Bu Bir Tercih Değil, Zorunluluk
+
+Projenin `tsconfig.app.json`'ında **`"erasableSyntaxOnly": true`** ayarı var (doğrulandı, dosyadan okundu). Bu TypeScript derleyici seçeneği, gerçek (`enum`, `const enum`) gibi çalışma zamanında kod üreten "saf olmayan" söz dizimini **derleme hatası olarak reddeder**. Yani burada "enum mu const object mi" bir stil tercihi değil — **`enum` kullanmak projeyi derlenemez hale getirir.**
+
+```typescript
+// src/core/errors/errorCodes.ts — PLANLANAN ŞEKİL
+export const ErrorCode = {
+  VAL_001: "VAL_001", // Zorunlu alan boş
+  VAL_002: "VAL_002", // Sayısal alan geçersiz/negatif
+  DB_001: "DB_001",   // Bağlantı kurulamadı
+  DB_002: "DB_002",   // Migration başarısız
+  DB_003: "DB_003",   // CHECK kısıtı ihlali
+  PARCEL_001: "PARCEL_001",
+  TREE_001: "TREE_001",
+  TREE_002: "TREE_002",
+  NATIVE_001: "NATIVE_001",
+  SYS_001: "SYS_001",
+} as const;
+
+export type ErrorCodeValue = (typeof ErrorCode)[keyof typeof ErrorCode];
+```
+
+Bu, projede zaten kurulu bir desenle **birebir tutarlı**: `LocalPreferenceKey`, `SecureStorageKey` (Modül 1) zaten aynı `as const` desenini kullanıyor — yeni bir desen icat edilmiyor, var olan tekrarlanıyor (Kural 12).
+
+### Dosya Organizasyonu
+
+```
+src/core/errors/
+├── errorCodes.ts       # Yukarıdaki sabit liste
+├── AppError.ts          # Error alt sınıfı: { code: ErrorCodeValue, cause?: unknown }
+└── mapSqliteError.ts     # Ham SQLite hata mesajını (ör. "CHECK constraint failed") en yakın ErrorCode'a eşler
+```
+
+### Katman Katman Uygulama
+
+| Katman | Sorumluluk |
+|---|---|
+| **Repository** | Ham hatayı **olduğu gibi** fırlatır — kendi sınıflandırmasını yapmaz (Belge 2 kararıyla tutarlı: repository, çeviri/UI kavramlarını bilmez) |
+| **Hook** | `catch` bloğunda `mapSqliteError(error)` çağırır, ham hatayı bir `ErrorCodeValue`'ya çevirir, state'e **kodu** koyar (`errorCode`, artık ham `error.message` değil) |
+| **UI** | `t('errors.' + errorCode)` ile çevrilmiş metni gösterir |
+| **AI (gelecek)** | Kendi `AI_xxx` kodlarını üretir, aynı `t('errors.' + code)` deseniyle gösterilir |
+
+### i18n Entegrasyonu
+
+Çeviri dosyalarına yeni bir `errors` namespace'i eklenecek:
+```json
+"errors": {
+  "VAL_001": "Bu alan zorunludur.",
+  "PARCEL_001": "Parsel bulunamadı.",
+  "SYS_001": "Beklenmeyen bir hata oluştu."
+}
+```
+Mevcut çeviri denetim script'i (Modül 2'de kurulan Python taraması), bu namespace'i de otomatik kapsayacak — yeni bir araç gerekmez.
+
+### İlk Uygulanacağı Modül
+
+**Ağaç modülü kod aşamasının bir parçası olarak, TreeRepository ile AYNI ANDA.** Gerekçe: bu altyapı (errorCodes.ts, AppError, mapSqliteError) bir kez kurulacak; kurulurken hem yeni Ağaç kodu hem de mevcut Parsel kodu (useParcels/ParcelsScreen) aynı geçişte bu standarda taşınacak — dağınık, iki ayrı zamana yayılmış bir düzeltme yerine (Kural 11).
+

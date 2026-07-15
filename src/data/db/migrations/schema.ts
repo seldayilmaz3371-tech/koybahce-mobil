@@ -36,6 +36,12 @@
  *   İngilizce kod olarak saklandığı).
  *   `tree_count` gibi ayrı bir sayaç YOK — ağaç sayısı her zaman
  *   `trees` tablosundan anlık hesaplanır (bkz. ADR 0016).
+ *
+ * v3 — Ağaç Numarası Benzersizlik Kısıtı (Modül 2, Sprint 2.1)
+ *   bkz. docs/database-master-schema.md ("Gerçek Bulgu" bölümü).
+ *   Bir parselde aynı ağaç numarasının iki kez kullanılmasını önler.
+ *   `WHERE is_active = 1`: pasife alınmış bir ağacın numarası, yeni
+ *   bir ağaca tekrar verilebilir.
  */
 
 import type { capSQLiteVersionUpgrade } from "@capacitor-community/sqlite";
@@ -47,7 +53,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -93,6 +99,12 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
        );`,
       `CREATE INDEX IF NOT EXISTS idx_trees_parcel_id ON trees(parcel_id);`,
       `CREATE INDEX IF NOT EXISTS idx_trees_reference ON trees(is_reference_tree) WHERE is_reference_tree = 1;`,
+    ],
+  },
+  {
+    toVersion: 3,
+    statements: [
+      `CREATE UNIQUE INDEX IF NOT EXISTS idx_trees_parcel_number ON trees(parcel_id, tree_number) WHERE is_active = 1;`,
     ],
   },
 ];
