@@ -42,6 +42,14 @@
  *   Bir parselde aynı ağaç numarasının iki kez kullanılmasını önler.
  *   `WHERE is_active = 1`: pasife alınmış bir ağacın numarası, yeni
  *   bir ağaca tekrar verilebilir.
+ *
+ * v4 — Gözlemler (Modül 3, Sprint 3.1)
+ *   bkz. docs/observation-domain-review.md (onaylandı 2026-07-15).
+ *   `tree_id` nullable: parsel geneli bir gözlem olabilir.
+ *   `observation_type`: enum-kod (ADR 0017). `weather_impact` ismi
+ *   bilinçli olarak korundu — bkz. docs/modul-3-backlog.md madde 4
+ *   (gelecekte 'environment'e yeniden adlandırma değerlendirilecek,
+ *   bugün uygulanmıyor).
  */
 
 import type { capSQLiteVersionUpgrade } from "@capacitor-community/sqlite";
@@ -53,7 +61,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 3;
+export const CURRENT_SCHEMA_VERSION = 4;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -105,6 +113,26 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
     toVersion: 3,
     statements: [
       `CREATE UNIQUE INDEX IF NOT EXISTS idx_trees_parcel_number ON trees(parcel_id, tree_number) WHERE is_active = 1;`,
+    ],
+  },
+  {
+    toVersion: 4,
+    statements: [
+      `CREATE TABLE IF NOT EXISTS observations (
+         id TEXT PRIMARY KEY NOT NULL,
+         parcel_id TEXT NOT NULL REFERENCES parcels(id) ON DELETE RESTRICT,
+         tree_id TEXT REFERENCES trees(id) ON DELETE RESTRICT,
+         observation_type TEXT NOT NULL CHECK (observation_type IN
+           ('general','health_concern','growth_stage','weather_impact','other')),
+         note TEXT,
+         observed_at TEXT NOT NULL,
+         is_active INTEGER NOT NULL DEFAULT 1,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `CREATE INDEX IF NOT EXISTS idx_observations_parcel_id ON observations(parcel_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_observations_tree_id ON observations(tree_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_observations_observed_at ON observations(observed_at);`,
     ],
   },
 ];
