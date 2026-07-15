@@ -50,6 +50,16 @@ export abstract class BaseRepository {
   protected abstract readonly tableName: string;
 
   /**
+   * Bu repository instance'ının şu an açık, dıştan yönetilen bir
+   * transaction içinde olup olmadığını izler (Sprint 3.10.1 kök neden
+   * düzeltmesi). `execute()`, bu bayrağa göre native `run()`'a doğru
+   * `transaction` parametresini geçirir — aksi halde her `execute()`
+   * çağrısı kendi native transaction'ını açmaya çalışıp "Already in
+   * transaction" hatasına yol açardı (gerçek Android cihazda bulundu).
+   */
+  private inTransaction = false;
+
+  /**
    * Parametreli bir SELECT sorgusu çalıştırır ve satırları verilen tipte
    * döndürür. Değerler her zaman `values` dizisiyle (`?` yer
    * tutucularıyla) geçilmelidir — asla string birleştirme ile SQL
@@ -75,13 +85,20 @@ export abstract class BaseRepository {
    * INSERT/UPDATE/DELETE gibi veri değiştiren ifadeleri çalıştırır.
    * Etkilenen satır sayısını ve (varsa) yeni oluşturulan satırın id'sini
    * döndürür.
+   *
+   * `transaction` parametresi native `run()`'a AÇIKÇA geçiriliyor
+   * (Sprint 3.10.1 kök neden düzeltmesi): `runInTransaction()` içinde
+   * çağrılıyorsak (`this.inTransaction === true`) `false` — native
+   * kendi transaction'ını AÇMAZ, dıştaki transaction'a katılır. Tek
+   * başına çağrılıyorsak `true` — native kendi transaction'ını açıp
+   * kapatır (önceki, tek-INSERT davranışıyla birebir aynı).
    */
   protected async execute(
     sql: string,
     values: unknown[] = []
   ): Promise<{ changes: number; lastId?: number }> {
     const db = await executorProvider();
-    const result = await db.run(sql, values);
+    const result = await db.run(sql, values, !this.inTransaction);
     return {
       changes: result.changes?.changes ?? 0,
       lastId: result.changes?.lastId,
@@ -93,10 +110,18 @@ export abstract class BaseRepository {
    * çalıştırır: ya hepsi başarılı olur ya da hiçbiri kalıcı olmaz. Veri
    * bütünlüğü gerektiren çok adımlı işlemler (ör. bir hasat kaydı
    * eklerken aynı anda stok düşmek) için kullanılır.
+   *
+   * `this.inTransaction` bayrağı, `work()` çalışırken `true` tutulur —
+   * bu sayede `work()` içindeki her `execute()` çağrısı native'e kendi
+   * transaction'ını AÇMAMASI gerektiğini doğru şekilde bildirir
+   * (Sprint 3.10.1). Bayrak, başarı/hata fark etmeksizin `finally`
+   * içinde sıfırlanır — bir hata durumunda bile repository'nin
+   * "kilitli" kalmaması için.
    */
   protected async runInTransaction<T>(work: () => Promise<T>): Promise<T> {
     const db = await executorProvider();
     await db.beginTransaction();
+    this.inTransaction = true;
     try {
       const result = await work();
       await db.commitTransaction();
@@ -104,6 +129,8 @@ export abstract class BaseRepository {
     } catch (error) {
       await db.rollbackTransaction();
       throw error;
+    } finally {
+      this.inTransaction = false;
     }
   }
 }

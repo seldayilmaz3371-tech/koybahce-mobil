@@ -23,6 +23,7 @@ import { usePhotos } from "./hooks/usePhotos";
 import { photoRepository } from "./data/photo.repository";
 import { capturePhoto, type PhotoSource } from "../../native/camera";
 import { persistPhotoFile } from "../../native/filesystem";
+import { toDisplaySrc } from "../../native/displaySrc";
 import { addBackButtonListener } from "../../native/appBackButton";
 import type { Photo } from "./domain/photo.types";
 
@@ -191,7 +192,7 @@ function PhotoListItem({ photo, onDelete }: { photo: Photo; onDelete: (id: strin
     <li>
       <div className="parcel-list__item">
         <img
-          src={photo.filePath}
+          src={toDisplaySrc(photo.filePath)}
           alt=""
           style={{ width: "100%", maxHeight: 200, objectFit: "cover", borderRadius: 8 }}
         />

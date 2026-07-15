@@ -44,6 +44,15 @@ vi.mock("@capacitor/camera", () => ({
   },
 }));
 
+vi.mock("@capacitor/core", () => ({
+  Capacitor: {
+    // Gerçek WebView dönüşümünü simüle ediyor — girdi yolunun
+    // KENDİSİNİ değil, dönüştürülmüş olduğunu ayırt edilebilir kılan
+    // bir öneki test edebilmemiz için (Sprint 3.10.1, Hata 2 kanıtı).
+    convertFileSrc: (filePath: string) => `capacitor://localhost/_capacitor_file_${filePath}`,
+  },
+}));
+
 vi.mock("@capacitor/filesystem", () => ({
   Filesystem: {
     mkdir: vi.fn().mockResolvedValue(undefined),
@@ -234,5 +243,27 @@ describe("PhotoGalleryScreen", () => {
     pressBackButton();
 
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("PhotoGalleryScreen — Sprint 3.10.1 Hotfix (Hata 2: Fotoğraf Görünmüyor)", () => {
+  it("kaydedilmiş bir fotoğrafın <img> src'i, ham file_path DEĞİL, Capacitor.convertFileSrc() ÇIKTISI", async () => {
+    // KÖK NEDEN KANITI: `photo.filePath` (Filesystem.copy()'nin ham
+    // çıktısı) Android WebView'de `<img src>` olarak YÜKLENEMEZ.
+    // `Capacitor.convertFileSrc()` çağrılmadan bu test BAŞARISIZ olurdu
+    // (src, ham `filePath`'e eşit kalırdı) — gerçek cihazdaki boş
+    // görsel hatasının doğrudan kanıtı.
+    const observationId = await createTestChain();
+    const rawFilePath = "/data/data/app/files/bahcem-photos/existing.jpg";
+    await photoRepository.create({ observationId, filePath: rawFilePath });
+
+    render(<PhotoGalleryScreen observationId={observationId} onBack={() => {}} />);
+    await waitFor(() => expect(screen.getByText("Delete Photo")).toBeTruthy());
+
+    const img = document.querySelector("img") as HTMLImageElement;
+    expect(img).toBeTruthy();
+    expect(img.src).toContain("_capacitor_file_");
+    expect(img.src).not.toBe(rawFilePath); // HAM yol asla doğrudan kullanılmamalı
+    expect(img.src).toContain(rawFilePath); // ama dönüştürülmüş yol, orijinal yolu İÇERMELİ
   });
 });
