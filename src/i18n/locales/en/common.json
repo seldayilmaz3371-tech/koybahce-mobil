@@ -40,6 +40,10 @@
     "referenceTreesButton": "Reference Trees"
   },
   "observation": {
+    "screenTitle": "Observations",
+    "emptyState": "No observations yet.",
+    "addButton": "Add Observation",
+    "loadMoreButton": "Load More",
     "formTitleCreate": "New Observation",
     "formTitleEdit": "Edit Observation",
     "type": {

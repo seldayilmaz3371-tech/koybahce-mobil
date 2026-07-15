@@ -40,6 +40,10 @@
     "referenceTreesButton": "Referans Ağaçlar"
   },
   "observation": {
+    "screenTitle": "Gözlemler",
+    "emptyState": "Henüz gözlem yok.",
+    "addButton": "Gözlem Ekle",
+    "loadMoreButton": "Daha Fazla Yükle",
     "formTitleCreate": "Yeni Gözlem",
     "formTitleEdit": "Gözlemi Düzenle",
     "type": {
