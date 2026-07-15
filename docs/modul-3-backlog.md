@@ -37,3 +37,7 @@ UI akışı, "önce fotoğraf çek, sonra isteğe bağlı not ekle" sırasını 
 ## 8) Gözlem Arama/Filtreleme
 
 Sprint 3.4 UX Doğrulamasında bulundu: bugünkü tasarımla (sadece sayfalama + kronolojik sıralama), kullanıcı **son birkaç gözlemi** hızlıca bulabilir ama **aylar önceki** bir gözlemi aramak için bir mekanizma yok. **Mimari buna kapalı değil** — Sprint 3.2'de zaten kanıtlandığı gibi, `ObservationListOptions`'a tarih aralığı/`observation_type` filtresi eklemek, `ParcelListOptions`'ın `search`/`sortBy` ile genişlediği aynı yöntemle mümkün. **Bugün uygulanmıyor.**
+
+## 9) Gözlem Sayısı Gösterimi
+
+Sprint 3.5 UX Doğrulamasında bulundu: `ObservationScreen`'de kullanıcıya "kaç gözlem var" bilgisi gösterilmiyor. **Bugün eklenmiyor** çünkü `observations.length`, sayfalama nedeniyle sadece yüklenen sayıyı yansıtıyor — yanlış/eksik bir toplam göstermek, hiç göstermemekten daha kötü bir kullanıcı deneyimi olurdu. Doğru çözüm, Repository Contract Matrix'te zaten bilinen `count()` eksikliğinin kapatılmasını gerektiriyor — o tamamlanınca bu madde de değerlendirilebilir.
