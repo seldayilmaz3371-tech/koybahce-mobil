@@ -38,6 +38,8 @@
     "loadMoreButton": "Load More"
   },
   "tree": {
+    "title": "Trees",
+    "emptyState": "No trees yet.",
     "formTitleCreate": "New Tree",
     "formTitleEdit": "Edit Tree",
     "treeNumber": "Tree Number",

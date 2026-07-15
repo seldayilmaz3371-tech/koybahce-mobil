@@ -38,6 +38,8 @@
     "loadMoreButton": "Daha Fazla Yükle"
   },
   "tree": {
+    "title": "Ağaçlar",
+    "emptyState": "Henüz ağaç yok.",
     "formTitleCreate": "Yeni Ağaç",
     "formTitleEdit": "Ağacı Düzenle",
     "treeNumber": "Ağaç Numarası",
