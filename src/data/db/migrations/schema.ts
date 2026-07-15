@@ -50,6 +50,16 @@
  *   bilinçli olarak korundu — bkz. docs/modul-3-backlog.md madde 4
  *   (gelecekte 'environment'e yeniden adlandırma değerlendirilecek,
  *   bugün uygulanmıyor).
+ *
+ * v5 — Fotoğraflar (Modül 3, Sprint 3.6)
+ *   bkz. Sprint 3.6 Veri Modeli Doğrulaması (onaylandı 2026-07-15).
+ *   `observation_id NOT NULL` — her fotoğraf mutlaka bir gözleme
+ *   bağlı (Seçenek B, Sprint 3.1'de zaten onaylanmıştı). Sahipsiz
+ *   fotoğraf oluşamaz (FOREIGN KEY, ADR 0022 ile artık zorlanıyor).
+ *   `taken_at`: fotoğrafın çekildiği an (bugün uygulama zamanı,
+ *   Sprint 3.7'de EXIF önceliği eklenecek — bkz. backlog madde 13).
+ *   `created_at`'tan BİLEREK AYRI (kayıt zamanı ile çekim zamanı
+ *   farklı anlamlar taşıyor).
  */
 
 import type { capSQLiteVersionUpgrade } from "@capacitor-community/sqlite";
@@ -61,7 +71,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 4;
+export const CURRENT_SCHEMA_VERSION = 5;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -133,6 +143,22 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
       `CREATE INDEX IF NOT EXISTS idx_observations_parcel_id ON observations(parcel_id);`,
       `CREATE INDEX IF NOT EXISTS idx_observations_tree_id ON observations(tree_id);`,
       `CREATE INDEX IF NOT EXISTS idx_observations_observed_at ON observations(observed_at);`,
+    ],
+  },
+  {
+    toVersion: 5,
+    statements: [
+      `CREATE TABLE IF NOT EXISTS photos (
+         id TEXT PRIMARY KEY NOT NULL,
+         observation_id TEXT NOT NULL REFERENCES observations(id) ON DELETE RESTRICT,
+         file_path TEXT NOT NULL,
+         taken_at TEXT NOT NULL,
+         is_active INTEGER NOT NULL DEFAULT 1,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `CREATE INDEX IF NOT EXISTS idx_photos_observation_id ON photos(observation_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_photos_taken_at ON photos(taken_at);`,
     ],
   },
 ];
