@@ -184,4 +184,20 @@ describe("TreeRepository", () => {
       treeRepository.create({ parcelId: parcelB, treeNumber: "A-1", variety: "Ayvalık" })
     ).resolves.toBeTruthy();
   });
+
+  it("ADR 0022: foreign key zorlaması etkin — var olmayan bir parcel_id ile ağaç oluşturmak reddedilir", async () => {
+    // Bu test, testDatabaseExecutor'da 'PRAGMA foreign_keys = ON'
+    // etkinleştirildikten SONRA yazıldı — gerçek native bağlantıda
+    // (connection.ts) da aynı PRAGMA artık çalıştırılıyor (ADR 0022
+    // düzeltmesi). Bu test, şema tanımlarımızın (REFERENCES
+    // parcels(id)) sözdizimsel olarak doğru olduğunu ve FK zorlaması
+    // AÇIKKEN gerçekten çalıştığını kanıtlıyor.
+    await expect(
+      treeRepository.create({
+        parcelId: "var-olmayan-parsel-id",
+        treeNumber: "A-1",
+        variety: "Gemlik",
+      })
+    ).rejects.toThrow();
+  });
 });

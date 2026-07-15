@@ -85,6 +85,15 @@ async function establishConnection(): Promise<SQLiteDBConnection> {
   );
 
   await db.open();
+
+  // ADR 0022: SQLite foreign key kısıtları her bağlantıda VARSAYILAN
+  // OLARAK KAPALI (sqlite.org resmi dokümantasyonunda kesin
+  // doğrulandı). Eklentinin bunu otomatik açtığına dair kesin bir
+  // kanıt bulunamadı (araştırma 3 kez tekrarlandı) — bu yüzden kendimiz
+  // açıkça etkinleştiriyoruz. Bu çağrı risksiz: plugin zaten açıksa
+  // no-op, kapalıysa gerçek bir düzeltme.
+  await db.execute("PRAGMA foreign_keys = ON;");
+
   return db;
 }
 

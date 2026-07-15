@@ -24,6 +24,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { treeRepository } from "../data/tree.repository";
 import type { NewTreeInput, Tree, TreeUpdateInput } from "../domain/tree.types";
+import { mapSqliteError } from "../../../core/errors/mapSqliteError";
+import type { ErrorCodeValue } from "../../../core/errors/errorCodes";
 
 export type UseTreesOptions = { mode: "parcel"; parcelId: string } | { mode: "reference" };
 
@@ -34,6 +36,8 @@ export interface UseTreesResult {
   status: TreesStatus;
   /** Hata mesajı (varsa) — çevrilmiş metin ÇAĞIRAN bileşende üretilmeli (bkz. Error Handling Standard, bugünkü bilinen boşluk). */
   errorMessage: string | null;
+  /** Error Code (varsa) — bkz. docs/error-handling-standard.md. `errorMessage`'ın YANINA eklendi (Sprint 2.6), yerine değil — mevcut davranış değişmedi. */
+  errorCode: ErrorCodeValue | null;
   refetch: () => Promise<void>;
   createTree: (input: NewTreeInput) => Promise<void>;
   updateTree: (id: string, changes: TreeUpdateInput) => Promise<void>;
@@ -51,10 +55,12 @@ export function useTrees(options: UseTreesOptions): UseTreesResult {
   const [trees, setTrees] = useState<Tree[]>([]);
   const [status, setStatus] = useState<TreesStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<ErrorCodeValue | null>(null);
 
   const refetch = useCallback(async () => {
     setStatus("loading");
     setErrorMessage(null);
+    setErrorCode(null);
     try {
       const result =
         mode === "parcel" && parcelId !== null
@@ -64,6 +70,7 @@ export function useTrees(options: UseTreesOptions): UseTreesResult {
       setStatus("ready");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : String(error));
+      setErrorCode(mapSqliteError(error));
       setStatus("error");
     }
   }, [mode, parcelId]);
@@ -96,5 +103,5 @@ export function useTrees(options: UseTreesOptions): UseTreesResult {
     [refetch]
   );
 
-  return { trees, status, errorMessage, refetch, createTree, updateTree, deactivateTree };
+  return { trees, status, errorMessage, errorCode, refetch, createTree, updateTree, deactivateTree };
 }

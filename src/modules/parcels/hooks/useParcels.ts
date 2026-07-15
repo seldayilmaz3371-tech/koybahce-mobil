@@ -30,6 +30,8 @@ import { useCallback, useEffect, useState } from "react";
 import { parcelRepository, DEFAULT_LIST_LIMIT } from "../data/parcel.repository";
 import type { ParcelListOptions } from "../data/parcel.repository.interface";
 import type { NewParcelInput, Parcel, ParcelUpdateInput } from "../domain/parcel.types";
+import { mapSqliteError } from "../../../core/errors/mapSqliteError";
+import type { ErrorCodeValue } from "../../../core/errors/errorCodes";
 
 type ParcelsStatus = "idle" | "loading" | "ready" | "error";
 
@@ -38,6 +40,14 @@ export interface UseParcelsResult {
   status: ParcelsStatus;
   /** Hata mesajı (varsa) — kullanıcıya gösterilecek metin `t()` ile ÇAĞIRAN bileşende üretilmeli, burada ham hata metni tutulur. */
   errorMessage: string | null;
+  /**
+   * Error Code (varsa) — bkz. docs/error-handling-standard.md.
+   * SPRINT 2.6 İLE EKLENDİ, `errorMessage`'ın YERİNE DEĞİL, YANINA —
+   * mevcut UI davranışı (ham mesaj gösterimi) hiç değişmedi. Bu alan,
+   * ileride `t('errors.' + errorCode)` deseniyle çevrilmiş mesajlara
+   * geçilecek zaman kullanılacak (bugün UI'da henüz tüketilmiyor).
+   */
+  errorCode: ErrorCodeValue | null;
   /** Son sayfa tam `limit` kadar sonuç döndüyse `true` — büyük ihtimalle daha fazla kayıt var demektir. */
   hasMore: boolean;
   /** Listeyi sıfırdan yükler (ilk sayfaya döner). Mutasyonlardan sonra otomatik çağrılır. */
@@ -56,11 +66,13 @@ export function useParcels(options: ParcelListOptions = {}): UseParcelsResult {
   const [parcels, setParcels] = useState<Parcel[]>([]);
   const [status, setStatus] = useState<ParcelsStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<ErrorCodeValue | null>(null);
   const [hasMore, setHasMore] = useState(false);
 
   const refetch = useCallback(async () => {
     setStatus("loading");
     setErrorMessage(null);
+    setErrorCode(null);
     try {
       const result = await parcelRepository.list({
         activeOnly,
@@ -74,6 +86,7 @@ export function useParcels(options: ParcelListOptions = {}): UseParcelsResult {
       setStatus("ready");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : String(error));
+      setErrorCode(mapSqliteError(error));
       setStatus("error");
     }
     // `options` nesnesinin referansı her render'da değişebileceği için
@@ -96,6 +109,7 @@ export function useParcels(options: ParcelListOptions = {}): UseParcelsResult {
       setHasMore(result.length === pageSize);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : String(error));
+      setErrorCode(mapSqliteError(error));
       setStatus("error");
     }
   }, [status, hasMore, activeOnly, pageSize, search, sortBy, parcels.length]);
@@ -132,6 +146,7 @@ export function useParcels(options: ParcelListOptions = {}): UseParcelsResult {
     parcels,
     status,
     errorMessage,
+    errorCode,
     hasMore,
     refetch,
     loadMore,

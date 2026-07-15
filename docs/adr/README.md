@@ -30,7 +30,7 @@ yapmıştık?" sorusuna kod kazmadan cevap verebilmektir.
 | [0019](0019-log-sistemi.md) | Log Sistemi (Minimal, Yerel) | Kabul edildi — kurulum Modül 2'de |
 | [0020](0020-navigator-language-android-webview-sorunu.md) | `navigator.language` Android WebView Güvenilirlik Sorunu | ✅ Gerçek cihazda doğrulandı |
 | [0021](0021-kalinti-dil-tercihi-temizligi.md) | Kalıntı Dil Tercihi Verisi Temizliği | ✅ Gerçek cihazda doğrulandı |
-| [0022](0022-foreign-key-zorlamasi-bulgusu.md) | Foreign Key Zorlaması Muhtemelen Etkin Değil (Kritik Bulgu) | Kabul edildi — düzeltme Ağaç modülünde uygulanacak |
+| [0022](0022-foreign-key-zorlamasi-bulgusu.md) | Foreign Key Zorlaması Muhtemelen Etkin Değil (Kritik Bulgu) | ✅ Düzeltme uygulandı (Sprint 2.6) |
 
 ## Yeni bir ADR ne zaman eklenir?
 

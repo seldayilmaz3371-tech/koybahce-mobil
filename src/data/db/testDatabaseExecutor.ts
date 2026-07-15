@@ -30,6 +30,11 @@ import type { DatabaseExecutor } from "./databaseExecutor";
 
 export function createTestDatabaseExecutor(schemaStatements: string[]): DatabaseExecutor {
   const db = new Database(":memory:");
+  // ADR 0022 ile tutarlı: gerçek bağlantı da bunu açıkça etkinleştiriyor
+  // (bkz. data/db/connection.ts). Burada da açık tutmak, FK kısıtlarımızın
+  // gerçekten doğru tanımlandığını (syntax + davranış) test edebilmemizi
+  // sağlıyor.
+  db.pragma("foreign_keys = ON");
   for (const statement of schemaStatements) {
     db.exec(statement);
   }
