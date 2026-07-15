@@ -143,3 +143,82 @@ describe("PhotoRepository", () => {
     expect(result).toBeNull();
   });
 });
+
+describe("PhotoRepository — Sprint 3.8 Doğrulaması", () => {
+  it("Madde 1 — bir gözleme 'sınırsız' (pratikte yüksek sayıda) fotoğraf eklenebilir", async () => {
+    const { observationId } = await createTestChain();
+    for (let i = 0; i < 30; i++) {
+      await photoRepository.create({
+        observationId,
+        filePath: `/data/photos/${i}.jpg`,
+        takenAt: `2026-01-01T10:${String(i).padStart(2, "0")}:00.000Z`,
+      });
+    }
+
+    const list = await photoRepository.listByObservation(observationId);
+
+    expect(list).toHaveLength(30);
+  });
+
+  it("Madde 4 — bir fotoğraf silindiğinde, KALAN fotoğrafların kronolojik sırası bozulmaz", async () => {
+    const { observationId } = await createTestChain();
+    const first = await photoRepository.create({
+      observationId,
+      filePath: "/data/photos/1.jpg",
+      takenAt: "2026-01-01T10:00:00.000Z",
+    });
+    const second = await photoRepository.create({
+      observationId,
+      filePath: "/data/photos/2.jpg",
+      takenAt: "2026-01-01T10:05:00.000Z",
+    });
+    const third = await photoRepository.create({
+      observationId,
+      filePath: "/data/photos/3.jpg",
+      takenAt: "2026-01-01T10:10:00.000Z",
+    });
+    void first;
+
+    // ORTADAKİ fotoğrafı sil — "boşluk/yeniden numaralama" sorunu
+    // olmadığını kanıtlamak için bilerek ortadaki seçildi.
+    await photoRepository.deactivate(second.id);
+
+    const list = await photoRepository.listByObservation(observationId);
+
+    expect(list.map((p) => p.id)).toEqual([first.id, third.id]);
+    // Kalan ikisi arasındaki GÖRECELİ sıra hâlâ doğru (eski önce).
+    expect(new Date(list[0].takenAt).getTime()).toBeLessThan(new Date(list[1].takenAt).getTime());
+  });
+
+  it("Madde 3/16 — listByObservation()'ın ilk elemanı her zaman kronolojik olarak en eski (kapak fotoğrafı adayı) — yeni bir şema alanı GEREKMİYOR", async () => {
+    const { observationId } = await createTestChain();
+    const oldest = await photoRepository.create({
+      observationId,
+      filePath: "/data/photos/oldest.jpg",
+      takenAt: "2026-01-01T09:00:00.000Z",
+    });
+    await photoRepository.create({
+      observationId,
+      filePath: "/data/photos/newer.jpg",
+      takenAt: "2026-01-01T10:00:00.000Z",
+    });
+
+    const list = await photoRepository.listByObservation(observationId);
+
+    expect(list[0].id).toBe(oldest.id);
+  });
+
+  it("Madde 5 — aynı gözlemde sıralı eklenen fotoğrafların GÖRECELİ kronolojik sırası güvenilir (AI karşılaştırması için)", async () => {
+    const { observationId } = await createTestChain();
+    // takenAt AÇIKÇA verilmiyor — gerçek akıştaki gibi (PhotoGalleryScreen),
+    // her create() çağrısı arasında gerçek zaman geçtiği için otomatik
+    // atanan zaman damgaları sıralı olmalı.
+    const first = await photoRepository.create({ observationId, filePath: "/data/photos/a.jpg" });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    const second = await photoRepository.create({ observationId, filePath: "/data/photos/b.jpg" });
+
+    const list = await photoRepository.listByObservation(observationId);
+
+    expect(list.map((p) => p.id)).toEqual([first.id, second.id]);
+  });
+});
