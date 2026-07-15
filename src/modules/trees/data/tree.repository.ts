@@ -9,7 +9,13 @@
 
 import { BaseRepository } from "../../../data/repositories/base.repository";
 import type { ITreeRepository } from "./tree.repository.interface";
-import type { NewTreeInput, Tree, TreeUpdateInput } from "../domain/tree.types";
+import type {
+  BulkCreateTreesInput,
+  NewTreeInput,
+  Tree,
+  TreeUpdateInput,
+} from "../domain/tree.types";
+import { TreeNumberConflictError } from "../domain/tree.types";
 
 interface TreeRow {
   id: string;
@@ -124,6 +130,54 @@ class TreeRepository extends BaseRepository implements ITreeRepository {
     );
 
     return tree;
+  }
+
+  /**
+   * Toplu ağaç oluşturma (Sprint 3.10). İki aşama:
+   *   1. ÖN KONTROL — önerilen aralıktaki numaralardan halihazırda
+   *      aktif olanları tespit eder. Çakışma varsa hiçbir INSERT
+   *      denenmeden `TreeNumberConflictError` fırlatılır (ham SQLite
+   *      hatasına güvenilmiyor — Sprint 3.10 onayı madde 2).
+   *   2. `runInTransaction()` — TÜM ağaçlar tek işlemde oluşturulur;
+   *      herhangi bir adım başarısız olursa hiçbiri kalıcı olmaz
+   *      (Sprint 3.10 Veri Bütünlüğü gereksinimi).
+   *
+   * Üretilen her `Tree`, `create()` ile oluşturulanla TAMAMEN AYNI
+   * veri modeline sahiptir — özel bir "toplu oluşturuldu" işareti YOK
+   * (Dijital Bahçe Hafızası ilkesi, Sprint 3.10 onayı).
+   */
+  async createMany(input: BulkCreateTreesInput): Promise<Tree[]> {
+    const candidateNumbers = Array.from({ length: input.count }, (_, i) =>
+      String(input.startNumber + i)
+    );
+
+    // Aday numaraları tek bir sorguyla (parametreli IN yerine JS'te
+    // filtreleme — SQLite'ın değişken sayısı sınırından bilerek
+    // kaçınmak için, bir parselin aktif ağaç sayısı zaten sınırlı).
+    const existingRows = await this.query<{ tree_number: string }>(
+      `SELECT tree_number FROM trees WHERE parcel_id = ? AND is_active = 1`,
+      [input.parcelId]
+    );
+    const existingNumbers = new Set(existingRows.map((r) => r.tree_number));
+    const conflicts = candidateNumbers.filter((n) => existingNumbers.has(n));
+    if (conflicts.length > 0) {
+      throw new TreeNumberConflictError(conflicts);
+    }
+
+    return this.runInTransaction(async () => {
+      const created: Tree[] = [];
+      for (const treeNumber of candidateNumbers) {
+        created.push(
+          await this.create({
+            parcelId: input.parcelId,
+            treeNumber,
+            variety: input.variety ?? "",
+            isReferenceTree: input.isReferenceTree ?? false,
+          })
+        );
+      }
+      return created;
+    });
   }
 
   async update(id: string, changes: TreeUpdateInput): Promise<void> {

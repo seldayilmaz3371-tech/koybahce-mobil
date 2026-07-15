@@ -75,3 +75,7 @@ Sprint 3.8'de doğrulandı: `listByObservation()[0]` (kronolojik ilk fotoğraf) 
 ## 17) Fotoğraf Galerisi — Thumbnail İhtiyacı (Performans)
 
 Sprint 3.8'de bulundu: `PhotoGalleryScreen`, bugün **tam çözünürlüklü** görselleri doğrudan `<img>` ile render ediyor — küçük önizleme (thumbnail) yok. Bir gözlemin doğası (tek kısa çekim oturumu) gereği bugün düşük risk, ama gerçek saha kullanımında bir gözleme çok sayıda fotoğraf eklenirse düşük performanslı cihazlarda sorun yaratabilir. **Dijital Bahçe Hafızası ilkesiyle uyumlu çözüm (bugün uygulanmıyor):** orijinal dosya asla değiştirilmez, ayrı bir küçük `thumbnailPath` alanı (additive migration) ileride eklenip galeri onu kullanabilir — bu, hem performans hem gelecekteki AI thumbnail ihtiyacını (kullanıcının kendi talimatında belirttiği gibi) aynı çözümle karşılar.
+
+## 18) Toplu Oluşturmanın Toplu Geri Alınması
+
+Sprint 3.10'da dürüstçe belirtildi (Madde 8): başarısız bir toplu oluşturma zaten tam olarak geri alınıyor (transaction rollback, gerçek testle kanıtlandı). Ama **başarıyla tamamlanmış** bir toplu oluşturmayı SONRADAN topluca geri almak (ör. "yanlış aralık girdim, hepsini geri al") için özel bir mekanizma bugün yok — kullanıcı isterse ağaçları tek tek pasife alabilir. **Bugün eklenmiyor** (YAGNI) — gerçek bir ihtiyaç doğarsa (`restore()` eksikliğiyle — backlog Modül 2 Kapanış Raporu madde 1 — birlikte) değerlendirilebilir.

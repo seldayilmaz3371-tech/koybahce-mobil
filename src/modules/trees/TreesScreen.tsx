@@ -30,10 +30,16 @@ import { useTranslation } from "react-i18next";
 import { useTrees, type UseTreesOptions } from "./hooks/useTrees";
 import { TreeList } from "./components/TreeList";
 import { TreeForm } from "./TreeForm";
+import { BulkTreeCreateForm } from "./BulkTreeCreateForm";
 import { addBackButtonListener } from "../../native/appBackButton";
 import type { NewTreeInput, Tree } from "./domain/tree.types";
 
-type TreesView = { mode: "list" } | { mode: "create" } | { mode: "edit"; tree: Tree };
+type TreesView =
+  | { mode: "list" }
+  | { mode: "create" }
+  | { mode: "edit"; tree: Tree }
+  | { mode: "bulk-create" }
+  | { mode: "bulk-success"; count: number; startNumber: number; endNumber: number };
 
 interface TreesScreenProps {
   mode: UseTreesOptions;
@@ -45,7 +51,8 @@ interface TreesScreenProps {
 
 export function TreesScreen({ mode, onBack, onViewObservations }: TreesScreenProps) {
   const { t } = useTranslation();
-  const { trees, status, errorMessage, createTree, updateTree, deactivateTree } = useTrees(mode);
+  const { trees, status, errorMessage, createTree, createManyTrees, updateTree, deactivateTree } =
+    useTrees(mode);
   const [view, setView] = useState<TreesView>({ mode: "list" });
 
   useEffect(() => {
@@ -90,6 +97,37 @@ export function TreesScreen({ mode, onBack, onViewObservations }: TreesScreenPro
     setView({ mode: "list" });
   };
 
+  if (view.mode === "bulk-create") {
+    // Sadece Parcel Mode'dan erişilebilir (buton zaten sadece o modda
+    // gösteriliyor) — bkz. aşağıdaki buton koşulu.
+    const parcelId = mode.mode === "parcel" ? mode.parcelId : "";
+    return (
+      <BulkTreeCreateForm
+        parcelId={parcelId}
+        onSubmit={createManyTrees}
+        onSuccess={(summary) => setView({ mode: "bulk-success", ...summary })}
+        onCancel={() => setView({ mode: "list" })}
+      />
+    );
+  }
+
+  if (view.mode === "bulk-success") {
+    return (
+      <main className="status-screen">
+        <h1 className="status-screen__title">{t("tree.bulkSuccessTitle")}</h1>
+        <p className="status-card__value">
+          {t("tree.bulkSuccessMessage", {
+            count: view.count,
+            range: `${view.startNumber}-${view.endNumber}`,
+          })}
+        </p>
+        <button type="button" className="lock-screen__button" onClick={() => setView({ mode: "list" })}>
+          {t("common.ok")}
+        </button>
+      </main>
+    );
+  }
+
   if (view.mode === "create" || view.mode === "edit") {
     // Oluşturma modu sadece Parcel Mode'dan erişilebilir (Ekle butonu
     // zaten sadece o modda gösteriliyor) — bu yüzden `mode.mode ===
@@ -124,6 +162,17 @@ export function TreesScreen({ mode, onBack, onViewObservations }: TreesScreenPro
           onClick={() => setView({ mode: "create" })}
         >
           {t("tree.addButton")}
+        </button>
+      ) : null}
+
+      {mode.mode === "parcel" ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          style={{ marginTop: 8 }}
+          onClick={() => setView({ mode: "bulk-create" })}
+        >
+          {t("tree.bulkCreateButton")}
         </button>
       ) : null}
 

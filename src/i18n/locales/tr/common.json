@@ -7,7 +7,8 @@
     "save": "Kaydet",
     "latitude": "Enlem",
     "longitude": "Boylam",
-    "notes": "Notlar"
+    "notes": "Notlar",
+    "ok": "Tamam"
   },
   "parcel": {
     "title": "Parseller",
@@ -76,6 +77,16 @@
     "title": "Ağaçlar",
     "emptyState": "Henüz ağaç yok.",
     "addButton": "Ağaç Ekle",
+    "bulkCreateButton": "Toplu Oluştur",
+    "bulkCreateTitle": "Toplu Ağaç Oluştur",
+    "startNumber": "Başlangıç Numarası",
+    "count": "Ağaç Sayısı",
+    "bulkPreview": "{{start}} → {{end}} · Toplam: {{count}} Ağaç",
+    "bulkConflictError": "Bu parselde aşağıdaki ağaç numaraları zaten var: {{numbers}}",
+    "bulkSuccessTitle": "Ağaçlar Oluşturuldu",
+    "bulkSuccessMessage": "{{count}} ağaç oluşturuldu ({{range}})",
+    "startNumberInvalid": "Başlangıç numarası pozitif bir tam sayı olmalıdır.",
+    "countInvalid": "Ağaç sayısı pozitif bir tam sayı olmalıdır.",
     "backButton": "Parsellere Dön",
     "formTitleCreate": "Yeni Ağaç",
     "formTitleEdit": "Ağacı Düzenle",

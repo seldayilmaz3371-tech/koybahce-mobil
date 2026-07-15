@@ -10,7 +10,7 @@
  * şimdiden sabitliyor.
  */
 
-import type { NewTreeInput, Tree, TreeUpdateInput } from "../domain/tree.types";
+import type { BulkCreateTreesInput, NewTreeInput, Tree, TreeUpdateInput } from "../domain/tree.types";
 
 export interface ITreeRepository {
   listByParcel(parcelId: string): Promise<Tree[]>;
@@ -18,6 +18,12 @@ export interface ITreeRepository {
   listReferenceTrees(): Promise<Tree[]>;
   getById(id: string): Promise<Tree | null>;
   create(input: NewTreeInput): Promise<Tree>;
+  /**
+   * Toplu ağaç oluşturma (Sprint 3.10) — tek transaction, ya hepsi ya
+   * hiçbiri. Numara çakışması varsa `TreeNumberConflictError` fırlatır
+   * (hiçbir INSERT denemeden, ön kontrolle).
+   */
+  createMany(input: BulkCreateTreesInput): Promise<Tree[]>;
   update(id: string, changes: TreeUpdateInput): Promise<void>;
   deactivate(id: string): Promise<void>;
   /** Web projesindeki ayrı sayaç deseni yerine anlık hesaplama (bkz. ADR 0016). */

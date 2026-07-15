@@ -254,3 +254,107 @@ describe("TreesScreen — Gözlemlere Yönlendirme (Sprint 3.5)", () => {
     expect(onViewObservations.mock.calls[0][0]).toMatchObject({ treeNumber: "A-1", parcelId });
   });
 });
+
+describe("TreesScreen — Toplu Ağaç Oluşturma (Sprint 3.10)", () => {
+  it("'Bulk Create' butonu SADECE Parcel Mode'da gösterilir", async () => {
+    const parcelId = await createTestParcel();
+    render(
+      <TreesScreen
+        mode={{ mode: "parcel", parcelId }}
+        onBack={() => {}}
+        onViewObservations={vi.fn()}
+      />
+    );
+    await waitFor(() => expect(screen.getByText("Bulk Create")).toBeTruthy());
+
+    cleanup();
+
+    render(<TreesScreen mode={{ mode: "reference" }} onBack={() => {}} onViewObservations={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
+    expect(screen.queryByText("Bulk Create")).toBeNull();
+  });
+
+  it("Madde 3 — canlı önizleme, başlangıç/adet girilirken güncellenir ('151 → 155 · Total: 5 Trees')", async () => {
+    const parcelId = await createTestParcel();
+    render(
+      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} />
+    );
+    await waitFor(() => expect(screen.getByText("Bulk Create")).toBeTruthy());
+    fireEvent.click(screen.getByText("Bulk Create"));
+
+    fireEvent.change(screen.getByLabelText("Start Number"), { target: { value: "151" } });
+    fireEvent.change(screen.getByLabelText("Number of Trees"), { target: { value: "5" } });
+
+    expect(screen.getByText("151 → 155 · Total: 5 Trees")).toBeTruthy();
+  });
+
+  it("variety BOŞ bırakılarak (isteğe bağlı) toplu oluşturma başarıyla tamamlanır", async () => {
+    const parcelId = await createTestParcel();
+    render(
+      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} />
+    );
+    await waitFor(() => expect(screen.getByText("Bulk Create")).toBeTruthy());
+    fireEvent.click(screen.getByText("Bulk Create"));
+
+    fireEvent.change(screen.getByLabelText("Start Number"), { target: { value: "1" } });
+    fireEvent.change(screen.getByLabelText("Number of Trees"), { target: { value: "3" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
+
+    // Madde 4 — başarı özeti gösterilir.
+    await waitFor(() => expect(screen.getByText("Trees Created")).toBeTruthy());
+    expect(screen.getByText("3 trees created (1-3)")).toBeTruthy();
+
+    fireEvent.click(screen.getByText("OK"));
+
+    await waitFor(() => expect(screen.getByText("1")).toBeTruthy());
+    const created = await treeRepository.listByParcel(parcelId);
+    expect(created).toHaveLength(3);
+    created.forEach((t) => expect(t.variety).toBe(""));
+  });
+
+  it("Madde 2 — çakışan numara varsa, ÇEVRİLMİŞ ve AÇIK bir hata gösterilir, ham SQLite hatası GÖSTERİLMEZ", async () => {
+    const parcelId = await createTestParcel();
+    await treeRepository.create({ parcelId, treeNumber: "5", variety: "Gemlik" });
+
+    render(
+      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} />
+    );
+    await waitFor(() => expect(screen.getByText("Bulk Create")).toBeTruthy());
+    fireEvent.click(screen.getByText("Bulk Create"));
+
+    fireEvent.change(screen.getByLabelText("Start Number"), { target: { value: "1" } });
+    fireEvent.change(screen.getByLabelText("Number of Trees"), { target: { value: "10" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
+
+    expect(
+      screen.getByText("The following tree numbers already exist in this parcel: 5")
+    ).toBeTruthy();
+    expect(screen.queryByText(/UNIQUE constraint/)).toBeNull();
+    expect(screen.queryByText("Trees Created")).toBeNull(); // başarı ekranına GEÇİLMEDİ
+
+    // Hiçbir yeni ağaç oluşmadı — sadece önceden var olan "5".
+    const allTrees = await treeRepository.listByParcel(parcelId);
+    expect(allTrees).toHaveLength(1);
+  });
+
+  it("Cancel: toplu oluşturma formunda vazgeçmek listeye döner, HİÇBİR ağaç oluşturulmaz", async () => {
+    const parcelId = await createTestParcel();
+    render(
+      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} />
+    );
+    await waitFor(() => expect(screen.getByText("Bulk Create")).toBeTruthy());
+    fireEvent.click(screen.getByText("Bulk Create"));
+
+    fireEvent.change(screen.getByLabelText("Start Number"), { target: { value: "1" } });
+    fireEvent.change(screen.getByLabelText("Number of Trees"), { target: { value: "5" } });
+    fireEvent.click(screen.getByText("Cancel"));
+
+    await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
+    const allTrees = await treeRepository.listByParcel(parcelId);
+    expect(allTrees).toHaveLength(0);
+  });
+});

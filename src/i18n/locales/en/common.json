@@ -7,7 +7,8 @@
     "save": "Save",
     "latitude": "Latitude",
     "longitude": "Longitude",
-    "notes": "Notes"
+    "notes": "Notes",
+    "ok": "OK"
   },
   "parcel": {
     "title": "Parcels",
@@ -76,6 +77,16 @@
     "title": "Trees",
     "emptyState": "No trees yet.",
     "addButton": "Add Tree",
+    "bulkCreateButton": "Bulk Create",
+    "bulkCreateTitle": "Bulk Create Trees",
+    "startNumber": "Start Number",
+    "count": "Number of Trees",
+    "bulkPreview": "{{start}} → {{end}} · Total: {{count}} Trees",
+    "bulkConflictError": "The following tree numbers already exist in this parcel: {{numbers}}",
+    "bulkSuccessTitle": "Trees Created",
+    "bulkSuccessMessage": "{{count}} trees created ({{range}})",
+    "startNumberInvalid": "Start number must be a positive whole number.",
+    "countInvalid": "Number of trees must be a positive whole number.",
     "backButton": "Back to Parcels",
     "formTitleCreate": "New Tree",
     "formTitleEdit": "Edit Tree",

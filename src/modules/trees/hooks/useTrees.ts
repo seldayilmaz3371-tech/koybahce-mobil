@@ -23,7 +23,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { treeRepository } from "../data/tree.repository";
-import type { NewTreeInput, Tree, TreeUpdateInput } from "../domain/tree.types";
+import type {
+  BulkCreateTreesInput,
+  NewTreeInput,
+  Tree,
+  TreeUpdateInput,
+} from "../domain/tree.types";
 import { mapSqliteError } from "../../../core/errors/mapSqliteError";
 import type { ErrorCodeValue } from "../../../core/errors/errorCodes";
 
@@ -40,6 +45,12 @@ export interface UseTreesResult {
   errorCode: ErrorCodeValue | null;
   refetch: () => Promise<void>;
   createTree: (input: NewTreeInput) => Promise<void>;
+  /**
+   * Toplu ağaç oluşturma (Sprint 3.10). `createTree` ile AYNI desen —
+   * hata yakalamaz, doğrudan çağırana fırlatır (`TreeNumberConflictError`
+   * dahil) — çağıran (BulkTreeCreateForm) kendi try/catch'ini yapar.
+   */
+  createManyTrees: (input: BulkCreateTreesInput) => Promise<Tree[]>;
   updateTree: (id: string, changes: TreeUpdateInput) => Promise<void>;
   deactivateTree: (id: string) => Promise<void>;
 }
@@ -87,6 +98,15 @@ export function useTrees(options: UseTreesOptions): UseTreesResult {
     [refetch]
   );
 
+  const createManyTrees = useCallback(
+    async (input: BulkCreateTreesInput) => {
+      const created = await treeRepository.createMany(input);
+      await refetch();
+      return created;
+    },
+    [refetch]
+  );
+
   const updateTree = useCallback(
     async (id: string, changes: TreeUpdateInput) => {
       await treeRepository.update(id, changes);
@@ -103,5 +123,15 @@ export function useTrees(options: UseTreesOptions): UseTreesResult {
     [refetch]
   );
 
-  return { trees, status, errorMessage, errorCode, refetch, createTree, updateTree, deactivateTree };
+  return {
+    trees,
+    status,
+    errorMessage,
+    errorCode,
+    refetch,
+    createTree,
+    createManyTrees,
+    updateTree,
+    deactivateTree,
+  };
 }

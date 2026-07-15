@@ -8,7 +8,7 @@
  * otomatik olarak kapsıyor.
  */
 
-import { beforeEach, afterEach, describe, expect, it } from "vitest";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import {
   setDatabaseExecutorProviderForTesting,
   resetDatabaseExecutorProviderForTesting,
@@ -199,5 +199,116 @@ describe("TreeRepository", () => {
         variety: "Gemlik",
       })
     ).rejects.toThrow();
+  });
+});
+
+describe("TreeRepository.createMany — Sprint 3.10 (Toplu Ağaç Oluşturma)", () => {
+  it("başlangıç numarasından ardışık N ağaç oluşturur, hepsi aynı veri modeline sahip", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 10 });
+
+    const created = await treeRepository.createMany({
+      parcelId: parcel.id,
+      startNumber: 151,
+      count: 5,
+    });
+
+    expect(created).toHaveLength(5);
+    expect(created.map((t) => t.treeNumber)).toEqual(["151", "152", "153", "154", "155"]);
+    // Toplu oluşturulan her ağaç, tek-tek oluşturulanla AYNI şekle sahip
+    // — özel bir "toplu oluşturuldu" alanı YOK (Dijital Bahçe Hafızası).
+    created.forEach((t) => {
+      expect(t).toHaveProperty("id");
+      expect(t).toHaveProperty("createdAt");
+      expect(t.parcelId).toBe(parcel.id);
+      expect(t.isActive).toBe(true);
+    });
+  });
+
+  it("variety verilmezse boş string olarak saklanır (Minimum Dokunuş İlkesi — Tree.variety hâlâ string, asla null)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 10 });
+
+    const created = await treeRepository.createMany({ parcelId: parcel.id, startNumber: 1, count: 3 });
+
+    created.forEach((t) => expect(t.variety).toBe(""));
+  });
+
+  it("isReferenceTree true verilirse TÜM partiye uygulanır", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 10 });
+
+    const created = await treeRepository.createMany({
+      parcelId: parcel.id,
+      startNumber: 1,
+      count: 3,
+      isReferenceTree: true,
+    });
+
+    created.forEach((t) => expect(t.isReferenceTree).toBe(true));
+  });
+
+  it("Madde 9 — çakışan numaralar varsa TreeNumberConflictError fırlatır, çakışanları AÇIKÇA listeler", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 10 });
+    await treeRepository.create({ parcelId: parcel.id, treeNumber: "153", variety: "Gemlik" });
+
+    await expect(
+      treeRepository.createMany({ parcelId: parcel.id, startNumber: 151, count: 5 })
+    ).rejects.toMatchObject({
+      name: "TreeNumberConflictError",
+      conflictingNumbers: ["153"],
+    });
+  });
+
+  it("Madde 9 — çakışma tespit edildiğinde HİÇBİR ağaç oluşturulmaz (ön kontrol, INSERT denenmeden)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 10 });
+    await treeRepository.create({ parcelId: parcel.id, treeNumber: "153", variety: "Gemlik" });
+
+    await expect(
+      treeRepository.createMany({ parcelId: parcel.id, startNumber: 151, count: 5 })
+    ).rejects.toThrow();
+
+    const allTrees = await treeRepository.listByParcel(parcel.id);
+    expect(allTrees).toHaveLength(1); // sadece önceden var olan "153"
+  });
+
+  it("Veri Bütünlüğü — transaction ORTADA başarısız olursa, ÖNCESİNDE oluşan ağaçlar da geri alınır (gerçek rollback kanıtı)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 10 });
+
+    // GERÇEK bir ortadaki hata enjekte ediyoruz: `create()`'in 3.
+    // çağrısı (5 ağaçlık bir partide) başarısız olacak şekilde spy
+    // ediliyor. Bu, transaction'ın gerçekten atomik olduğunu — 1. ve
+    // 2. ağaçların da geri alındığını — kanıtlıyor.
+    let callCount = 0;
+    const originalCreate = treeRepository.create.bind(treeRepository);
+    const createSpy = vi.spyOn(treeRepository, "create").mockImplementation(async (input) => {
+      callCount++;
+      if (callCount === 3) {
+        throw new Error("Simüle edilmiş ortadaki hata");
+      }
+      return originalCreate(input);
+    });
+
+    await expect(
+      treeRepository.createMany({ parcelId: parcel.id, startNumber: 1, count: 5 })
+    ).rejects.toThrow("Simüle edilmiş ortadaki hata");
+
+    createSpy.mockRestore();
+
+    // 1. ve 2. ağaç başarıyla "oluşturulmuştu" ama transaction'ın
+    // TAMAMI geri alındığı için veritabanında HİÇBİRİ kalıcı olmamalı.
+    const allTrees = await treeRepository.listByParcel(parcel.id);
+    expect(allTrees).toHaveLength(0);
+  });
+
+  it("Performans — 1000 ağaç makul sürede (test ortamında <2 saniye) ve doğru sayıda oluşturulur", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 100 });
+
+    const start = Date.now();
+    const created = await treeRepository.createMany({ parcelId: parcel.id, startNumber: 1, count: 1000 });
+    const durationMs = Date.now() - start;
+
+    expect(created).toHaveLength(1000);
+    expect(durationMs).toBeLessThan(2000);
+
+    const allTrees = await treeRepository.listByParcel(parcel.id);
+    expect(allTrees).toHaveLength(1000);
   });
 });
