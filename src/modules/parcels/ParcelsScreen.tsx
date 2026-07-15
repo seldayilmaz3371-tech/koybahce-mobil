@@ -28,7 +28,14 @@ type SortOption = NonNullable<ParcelListOptions["sortBy"]>;
 /** Kullanıcı yazmayı bıraktıktan bu kadar ms sonra arama tetiklenir — her tuş vuruşunda sorgu çalıştırmamak için (Kural 9). */
 const SEARCH_DEBOUNCE_MS = 300;
 
-export function ParcelsScreen() {
+interface ParcelsScreenProps {
+  /** Kullanıcı bir parselin ağaçlarını görüntülemek istediğinde çağrılır (App.tsx üst navigasyonu yönetir). */
+  onViewTrees: (parcel: Parcel) => void;
+  /** Kullanıcı çiftlik genelindeki referans ağaçları görüntülemek istediğinde çağrılır. */
+  onViewReferenceTrees: () => void;
+}
+
+export function ParcelsScreen({ onViewTrees, onViewReferenceTrees }: ParcelsScreenProps) {
   const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -69,6 +76,7 @@ export function ParcelsScreen() {
         onSubmit={handleSubmit}
         onCancel={() => setView({ mode: "list" })}
         onDelete={view.mode === "edit" ? handleDelete : undefined}
+        onViewTrees={view.mode === "edit" ? () => onViewTrees(view.parcel) : undefined}
       />
     );
   }
@@ -83,6 +91,10 @@ export function ParcelsScreen() {
         onClick={() => setView({ mode: "create" })}
       >
         {t("parcel.addButton")}
+      </button>
+
+      <button type="button" className="lock-screen__button" onClick={onViewReferenceTrees}>
+        {t("parcel.referenceTreesButton")}
       </button>
 
       <div className="search-field form-field">

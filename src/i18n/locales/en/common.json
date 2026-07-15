@@ -35,11 +35,15 @@
     "sortLabel": "Sort by",
     "sortByName": "Name",
     "sortByArea": "Area",
-    "loadMoreButton": "Load More"
+    "loadMoreButton": "Load More",
+    "viewTreesButton": "View Trees",
+    "referenceTreesButton": "Reference Trees"
   },
   "tree": {
     "title": "Trees",
     "emptyState": "No trees yet.",
+    "addButton": "Add Tree",
+    "backButton": "Back to Parcels",
     "formTitleCreate": "New Tree",
     "formTitleEdit": "Edit Tree",
     "treeNumber": "Tree Number",

@@ -23,6 +23,8 @@ import { getDatabase, getRuntimePlatform } from "./data/db/connection";
 import { appMetadataRepository } from "./data/repositories/appMetadata.repository";
 import { CURRENT_SCHEMA_VERSION } from "./data/db/migrations/schema";
 import { ParcelsScreen } from "./modules/parcels/ParcelsScreen";
+import { TreesScreen } from "./modules/trees/TreesScreen";
+import type { Parcel } from "./modules/parcels/domain/parcel.types";
 
 type InfrastructureStatus =
   | { phase: "idle" }
@@ -35,12 +37,23 @@ type InfrastructureStatus =
     }
   | { phase: "failed"; message: string };
 
+/**
+ * Üst düzey navigasyon durumu (Sprint 2.5 ile eklendi).
+ * Bilerek bir router kütüphanesi YOK — Modül 1'den beri süregelen
+ * basit "view state" deseni, iki modül arasına genişletildi.
+ */
+type AppView =
+  | { screen: "parcels" }
+  | { screen: "trees-for-parcel"; parcel: Parcel }
+  | { screen: "reference-trees" };
+
 function App() {
   const { t } = useTranslation();
   const [unlocked, setUnlocked] = useState(false);
   const [infrastructure, setInfrastructure] = useState<InfrastructureStatus>({
     phase: "idle",
   });
+  const [view, setView] = useState<AppView>({ screen: "parcels" });
 
   const initializeInfrastructure = useCallback(async () => {
     setInfrastructure({ phase: "initializing" });
@@ -77,9 +90,27 @@ function App() {
 
   // Modül 1 donduruldu (bkz. docs/module-status.md) — tanılama
   // ekranının görevi bitti. Veritabanı hazır olduğunda artık gerçek
-  // uygulama navigasyonu (bugün: doğrudan ParcelsScreen) gösteriliyor.
+  // uygulama navigasyonu gösteriliyor.
   if (infrastructure.phase === "ready") {
-    return <ParcelsScreen />;
+    if (view.screen === "trees-for-parcel") {
+      return (
+        <TreesScreen
+          mode={{ mode: "parcel", parcelId: view.parcel.id }}
+          onBack={() => setView({ screen: "parcels" })}
+        />
+      );
+    }
+    if (view.screen === "reference-trees") {
+      return (
+        <TreesScreen mode={{ mode: "reference" }} onBack={() => setView({ screen: "parcels" })} />
+      );
+    }
+    return (
+      <ParcelsScreen
+        onViewTrees={(parcel) => setView({ screen: "trees-for-parcel", parcel })}
+        onViewReferenceTrees={() => setView({ screen: "reference-trees" })}
+      />
+    );
   }
 
   return (

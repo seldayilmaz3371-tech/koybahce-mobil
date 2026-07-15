@@ -29,9 +29,11 @@ interface ParcelFormProps {
   onCancel: () => void;
   /** Sadece düzenleme modunda sağlanır — oluşturma modunda silinecek bir kayıt henüz yok. */
   onDelete?: () => Promise<void>;
+  /** Sadece düzenleme modunda sağlanır — henüz kaydedilmemiş bir parselin ağaçları olamaz (Sprint 2.5). */
+  onViewTrees?: () => void;
 }
 
-export function ParcelForm({ initialValue, onSubmit, onCancel, onDelete }: ParcelFormProps) {
+export function ParcelForm({ initialValue, onSubmit, onCancel, onDelete, onViewTrees }: ParcelFormProps) {
   const { t } = useTranslation();
 
   const [name, setName] = useState(initialValue?.name ?? "");
@@ -155,6 +157,18 @@ export function ParcelForm({ initialValue, onSubmit, onCancel, onDelete }: Parce
       >
         {t("common.cancel")}
       </button>
+
+      {onViewTrees ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          style={{ marginTop: 8 }}
+          onClick={onViewTrees}
+          disabled={isSubmitting}
+        >
+          {t("parcel.viewTreesButton")}
+        </button>
+      ) : null}
 
       {onDelete ? (
         <button

@@ -35,11 +35,15 @@
     "sortLabel": "Sırala",
     "sortByName": "Ad",
     "sortByArea": "Alan",
-    "loadMoreButton": "Daha Fazla Yükle"
+    "loadMoreButton": "Daha Fazla Yükle",
+    "viewTreesButton": "Ağaçları Görüntüle",
+    "referenceTreesButton": "Referans Ağaçlar"
   },
   "tree": {
     "title": "Ağaçlar",
     "emptyState": "Henüz ağaç yok.",
+    "addButton": "Ağaç Ekle",
+    "backButton": "Parsellere Dön",
     "formTitleCreate": "Yeni Ağaç",
     "formTitleEdit": "Ağacı Düzenle",
     "treeNumber": "Ağaç Numarası",
