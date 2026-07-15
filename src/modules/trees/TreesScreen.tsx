@@ -25,11 +25,12 @@
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useTrees, type UseTreesOptions } from "./hooks/useTrees";
 import { TreeList } from "./components/TreeList";
 import { TreeForm } from "./TreeForm";
+import { addBackButtonListener } from "../../native/appBackButton";
 import type { NewTreeInput, Tree } from "./domain/tree.types";
 
 type TreesView = { mode: "list" } | { mode: "create" } | { mode: "edit"; tree: Tree };
@@ -44,6 +45,19 @@ export function TreesScreen({ mode, onBack }: TreesScreenProps) {
   const { t } = useTranslation();
   const { trees, status, errorMessage, createTree, updateTree, deactivateTree } = useTrees(mode);
   const [view, setView] = useState<TreesView>({ mode: "list" });
+
+  useEffect(() => {
+    return addBackButtonListener(() => {
+      if (view.mode !== "list") {
+        // Form açıkken geri tuşu = İptal.
+        setView({ mode: "list" });
+      } else {
+        // Ağaç listesindeyiz — Parsellere dön (uygulamadan ÇIKMA,
+        // sadece ParcelsScreen listedeyken çıkış yapılır).
+        onBack();
+      }
+    });
+  }, [view, onBack]);
 
   const handleSelect = (tree: Tree) => {
     setView({ mode: "edit", tree });

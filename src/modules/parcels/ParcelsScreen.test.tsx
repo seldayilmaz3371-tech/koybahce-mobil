@@ -9,7 +9,7 @@
  * "Parcel → Trees navigasyonu" kabul kriterinin gerçek kanıtı.
  */
 
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -22,6 +22,32 @@ import { createTestDatabaseExecutor } from "../../data/db/testDatabaseExecutor";
 import { SCHEMA_MIGRATIONS } from "../../data/db/migrations/schema";
 import { parcelRepository } from "./data/parcel.repository";
 import { ParcelsScreen } from "./ParcelsScreen";
+
+/**
+ * `@capacitor/app` mock'u — gerçek native köprü olmadan geri tuşu
+ * mantığını izole test etmek için. Kaydedilen dinleyiciyi elle
+ * tetikleyerek "kullanıcı geri tuşuna bastı" senaryosunu simüle
+ * ediyoruz (bkz. native/appBackButton.ts).
+ */
+const backButtonListeners: Array<() => void> = [];
+const exitAppMock = vi.fn();
+
+vi.mock("@capacitor/app", () => ({
+  App: {
+    addListener: vi.fn((_event: string, callback: () => void) => {
+      backButtonListeners.push(callback);
+      return Promise.resolve({ remove: vi.fn() });
+    }),
+    exitApp: () => exitAppMock(),
+  },
+}));
+
+function pressBackButton() {
+  act(() => {
+    const latest = backButtonListeners[backButtonListeners.length - 1];
+    latest();
+  });
+}
 
 const ALL_SCHEMA_STATEMENTS = SCHEMA_MIGRATIONS.flatMap((m) => m.statements);
 
@@ -37,6 +63,8 @@ beforeAll(async () => {
 beforeEach(() => {
   const executor = createTestDatabaseExecutor(ALL_SCHEMA_STATEMENTS);
   setDatabaseExecutorProviderForTesting(async () => executor);
+  backButtonListeners.length = 0;
+  exitAppMock.mockClear();
 });
 
 afterEach(() => {
@@ -82,5 +110,29 @@ describe("ParcelsScreen — Navigasyon", () => {
 
     expect(screen.getByText("New Parcel")).toBeTruthy();
     expect(screen.queryByText("View Trees")).toBeNull();
+  });
+});
+
+describe("ParcelsScreen — Android Geri Tuşu", () => {
+  it("form açıkken geri tuşu, kaydetmeden listeye döner (İptal ile aynı)", async () => {
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Add Parcel"));
+    expect(screen.getByText("New Parcel")).toBeTruthy();
+
+    pressBackButton();
+
+    expect(screen.queryByText("New Parcel")).toBeNull();
+    expect(screen.getByText("Add Parcel")).toBeTruthy(); // listeye dönüldü
+  });
+
+  it("ana listedeyken geri tuşu uygulamadan çıkışı tetikler (exitApp)", async () => {
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+
+    pressBackButton();
+
+    expect(exitAppMock).toHaveBeenCalledTimes(1);
   });
 });

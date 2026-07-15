@@ -19,6 +19,7 @@ import { useParcels } from "./hooks/useParcels";
 import { ParcelList } from "./components/ParcelList";
 import { ParcelForm } from "./ParcelForm";
 import { SelectField } from "../../shared/components/form/SelectField";
+import { addBackButtonListener, exitApp } from "../../native/appBackButton";
 import type { NewParcelInput, Parcel } from "./domain/parcel.types";
 import type { ParcelListOptions } from "./data/parcel.repository.interface";
 
@@ -49,6 +50,18 @@ export function ParcelsScreen({ onViewTrees, onViewReferenceTrees }: ParcelsScre
   const { parcels, status, errorMessage, hasMore, loadMore, createParcel, updateParcel, deactivateParcel } =
     useParcels({ search: debouncedSearch || undefined, sortBy });
   const [view, setView] = useState<ScreenView>({ mode: "list" });
+
+  useEffect(() => {
+    return addBackButtonListener(() => {
+      if (view.mode !== "list") {
+        // Form açıkken geri tuşu = İptal (mevcut onCancel ile aynı davranış).
+        setView({ mode: "list" });
+      } else {
+        // Ana ekrandayız — Android'in doğal davranışı: uygulamadan çık.
+        exitApp();
+      }
+    });
+  }, [view]);
 
   const handleSelect = (parcel: Parcel) => {
     setView({ mode: "edit", parcel });

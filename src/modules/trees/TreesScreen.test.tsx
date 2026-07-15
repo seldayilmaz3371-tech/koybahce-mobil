@@ -8,7 +8,7 @@
  * moduna açıyor (ParcelsScreen deseniyle tutarlı, Kural 12).
  */
 
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -22,6 +22,26 @@ import { SCHEMA_MIGRATIONS } from "../../data/db/migrations/schema";
 import { parcelRepository } from "../parcels/data/parcel.repository";
 import { treeRepository } from "./data/tree.repository";
 import { TreesScreen } from "./TreesScreen";
+
+/** bkz. ParcelsScreen.test.tsx'teki aynı mock deseni. */
+const backButtonListeners: Array<() => void> = [];
+
+vi.mock("@capacitor/app", () => ({
+  App: {
+    addListener: vi.fn((_event: string, callback: () => void) => {
+      backButtonListeners.push(callback);
+      return Promise.resolve({ remove: vi.fn() });
+    }),
+    exitApp: vi.fn(),
+  },
+}));
+
+function pressBackButton() {
+  act(() => {
+    const latest = backButtonListeners[backButtonListeners.length - 1];
+    latest();
+  });
+}
 
 const ALL_SCHEMA_STATEMENTS = SCHEMA_MIGRATIONS.flatMap((m) => m.statements);
 
@@ -37,6 +57,7 @@ beforeAll(async () => {
 beforeEach(() => {
   const executor = createTestDatabaseExecutor(ALL_SCHEMA_STATEMENTS);
   setDatabaseExecutorProviderForTesting(async () => executor);
+  backButtonListeners.length = 0;
 });
 
 afterEach(() => {
@@ -179,5 +200,32 @@ describe("TreesScreen", () => {
 
     expect(screen.getByText("A-1")).toBeTruthy();
     expect(screen.queryByText("DEĞİŞTİRİLMEMELİ")).toBeNull();
+  });
+});
+
+describe("TreesScreen — Android Geri Tuşu", () => {
+  it("form açıkken geri tuşu, kaydetmeden listeye döner", async () => {
+    const parcelId = await createTestParcel();
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} />);
+    await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Add Tree"));
+    expect(screen.getByText("New Tree")).toBeTruthy();
+
+    pressBackButton();
+
+    expect(screen.queryByText("New Tree")).toBeNull();
+    expect(screen.getByText("Add Tree")).toBeTruthy(); // listeye dönüldü
+  });
+
+  it("liste görünümündeyken geri tuşu onBack'i çağırır (Parsellere döner, uygulamadan ÇIKMAZ)", async () => {
+    const parcelId = await createTestParcel();
+    const onBack = vi.fn();
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={onBack} />);
+    await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
+
+    pressBackButton();
+
+    expect(onBack).toHaveBeenCalledTimes(1);
   });
 });
