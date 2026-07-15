@@ -22,6 +22,14 @@ Observation ekranının, gelecekte kronolojik bir "Timeline" (zaman çizelgesi) 
 
 `weather_impact` yerine daha geniş bir `environment` kategorisi düşünülmeli (ör. sadece hava değil, toprak/çevresel koşulları da kapsayacak şekilde). **Bugün uygulanmıyor** — Sprint 3.1'in migration'ında `weather_impact` ismiyle ilerliyorum (kullanıcının bu maddeyi de açıkça "bugün uygulanmayacak" listesine koyduğu için). **Önemli not:** Enum-kod değerlerinin isim değişikliği, SQLite'ta "rename-and-recreate" deseni gerektirir (Database Migration Strategy Bölüm 12) — bu, `crop_type` gibi zaten üretimde veri biriktirmiş bir sütun için maliyetli olur. **Öneri (karar değil):** Bu isimlendirme netleşmeden çok fazla gerçek veri birikmeden (ör. Modül 3'ün ilk birkaç haftası içinde) karar verilirse, migration maliyeti düşük kalır.
 
-## 5) Fotoğraf-Merkezli Saha Akışı
+## 5) Observation Type — i18n Genişletilebilirliği
+
+`observation_type` enum-kodunun (ADR 0017 kuralına uygun, İngilizce kod + çeviri) gelecekte yeni kategoriler eklendiğinde i18n ile sorunsuz genişleyebilir kalması gerektiği — Sprint 3.3 onayında kayda geçti. **Bugünkü tasarım zaten buna uygun** (her yeni enum değeri, yeni bir `t('observation.type.<kod>')` anahtarı gerektirir, mevcut yapıyı bozmaz) — bu madde, gelecekte kategori eklenirken bu ilkenin hatırlanması için kayıtlı.
+
+## 6) Accessibility Review (Genişletilmiş Kapsam)
+
+Önceki "Kontrast Denetimi" önerisi, Sprint 3.3 onayında şu şekilde genişletildi: **WCAG AA kontrast oranı, dokunma alanı boyutu, font boyutu, güneş altında okunabilirlik** — tüm uygulamayı kapsayan tek bir Accessibility Review olarak ele alınacak (tek bir ekrana özel değil). **Bu sprint kapsamında uygulanmıyor**, sadece backlog'a kaydedildi.
+
+## 7) Fotoğraf-Merkezli Saha Akışı
 
 UI akışı, "önce fotoğraf çek, sonra isteğe bağlı not ekle" sırasını öncelemeli — saha kullanımında (Kural 15: güneş altında, tek elle, eldivenle) metin girmek fotoğraf çekmekten daha zahmetli. **Sprint 3.7 (Fotoğraf) ve 3.3 (Form) tasarımına girdi:** Gözlem formu, kamera/galeri eylemini metin alanından ÖNCE, daha belirgin şekilde sunmalı. Bugün hiçbir UI kodu yazılmıyor — bu, ilgili sprintler başladığında referans alınacak bir tasarım önceliği.
