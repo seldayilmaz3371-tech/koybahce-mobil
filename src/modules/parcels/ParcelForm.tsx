@@ -95,12 +95,19 @@ export function ParcelForm({ initialValue, onSubmit, onCancel, onDelete }: Parce
   };
 
   return (
-    <form className="status-screen" onSubmit={handleSubmit}>
+    <form className="status-screen" onSubmit={handleSubmit} noValidate>
       <h1 className="status-screen__title">
         {initialValue ? t("parcel.formTitleEdit") : t("parcel.formTitleCreate")}
       </h1>
 
       <FormError message={validationError} />
+      {/* Not: <form noValidate> bilerek eklendi — `required` özniteliği
+          olmadan native tarayıcı doğrulaması, kendi i18n'li JS
+          doğrulamamızı (yukarıdaki FormError) atlayıp çevrilmemiş,
+          stilize edilemeyen bir tarayıcı balonu gösterirdi. Bu, gerçek
+          bir bileşen testinde (TreeForm.test.tsx) bulundu ve aynı hata
+          burada da (daha önce hiç component testi yazılmadığı için
+          fark edilmemiş) düzeltildi. */}
 
       <TextField id="parcel-name" label={t("parcel.name")} value={name} onChange={setName} required />
 
@@ -130,11 +137,11 @@ export function ParcelForm({ initialValue, onSubmit, onCancel, onDelete }: Parce
         onChange={setIrrigationType}
       />
 
-      <NumberField id="parcel-latitude" label={t("parcel.latitude")} value={latitude} onChange={setLatitude} />
+      <NumberField id="parcel-latitude" label={t("common.latitude")} value={latitude} onChange={setLatitude} />
 
-      <NumberField id="parcel-longitude" label={t("parcel.longitude")} value={longitude} onChange={setLongitude} />
+      <NumberField id="parcel-longitude" label={t("common.longitude")} value={longitude} onChange={setLongitude} />
 
-      <TextAreaField id="parcel-notes" label={t("parcel.notes")} value={notes} onChange={setNotes} />
+      <TextAreaField id="parcel-notes" label={t("common.notes")} value={notes} onChange={setNotes} />
 
       <button type="submit" className="lock-screen__button" disabled={isSubmitting}>
         {t("common.save")}

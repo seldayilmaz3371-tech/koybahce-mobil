@@ -4,7 +4,10 @@
     "continue": "Continue",
     "retry": "Try Again",
     "loading": "Loading…",
-    "save": "Save"
+    "save": "Save",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "notes": "Notes"
   },
   "parcel": {
     "title": "Parcels",
@@ -20,9 +23,6 @@
     "areaDekar": "Area (decares)",
     "soilType": "Soil Type",
     "irrigationType": "Irrigation Type",
-    "notes": "Notes",
-    "latitude": "Latitude",
-    "longitude": "Longitude",
     "formTitleCreate": "New Parcel",
     "formTitleEdit": "Edit Parcel",
     "nameRequired": "Name is required.",
@@ -36,6 +36,19 @@
     "sortByName": "Name",
     "sortByArea": "Area",
     "loadMoreButton": "Load More"
+  },
+  "tree": {
+    "formTitleCreate": "New Tree",
+    "formTitleEdit": "Edit Tree",
+    "treeNumber": "Tree Number",
+    "variety": "Variety",
+    "plantingYear": "Planting Year",
+    "isReferenceTree": "Reference Tree",
+    "deleteButton": "Delete Tree",
+    "deleteConfirm": "Delete this tree? It will be removed from your lists.",
+    "treeNumberRequired": "Tree number is required.",
+    "varietyRequired": "Variety is required.",
+    "plantingYearInvalid": "Planting year must be a valid year."
   },
   "auth": {
     "authenticating": "Authenticating…",

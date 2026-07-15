@@ -4,7 +4,10 @@
     "continue": "Devam Et",
     "retry": "Tekrar Dene",
     "loading": "Yükleniyor…",
-    "save": "Kaydet"
+    "save": "Kaydet",
+    "latitude": "Enlem",
+    "longitude": "Boylam",
+    "notes": "Notlar"
   },
   "parcel": {
     "title": "Parseller",
@@ -20,9 +23,6 @@
     "areaDekar": "Alan (dekar)",
     "soilType": "Toprak Tipi",
     "irrigationType": "Sulama Tipi",
-    "notes": "Notlar",
-    "latitude": "Enlem",
-    "longitude": "Boylam",
     "formTitleCreate": "Yeni Parsel",
     "formTitleEdit": "Parseli Düzenle",
     "nameRequired": "Ad alanı zorunludur.",
@@ -36,6 +36,19 @@
     "sortByName": "Ad",
     "sortByArea": "Alan",
     "loadMoreButton": "Daha Fazla Yükle"
+  },
+  "tree": {
+    "formTitleCreate": "Yeni Ağaç",
+    "formTitleEdit": "Ağacı Düzenle",
+    "treeNumber": "Ağaç Numarası",
+    "variety": "Çeşit",
+    "plantingYear": "Dikim Yılı",
+    "isReferenceTree": "Referans Ağaç",
+    "deleteButton": "Ağacı Sil",
+    "deleteConfirm": "Bu ağaç silinsin mi? Listelerinizden kaldırılacak.",
+    "treeNumberRequired": "Ağaç numarası zorunludur.",
+    "varietyRequired": "Çeşit alanı zorunludur.",
+    "plantingYearInvalid": "Dikim yılı geçerli bir yıl olmalıdır."
   },
   "auth": {
     "authenticating": "Kimlik doğrulanıyor…",
