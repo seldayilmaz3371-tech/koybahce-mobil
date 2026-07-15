@@ -1,27 +1,26 @@
 /**
  * ObservationScreen
  * ===================
- * Sprint 3.4 kapsamı: Liste + CRUD (ObservationForm Sprint 3.3'te
- * zaten hazırdı — Ağaç modülünden farklı olarak, burada Screen ve
- * Form aynı sprint sınırında birleşiyor, sahte bir "sadece listeleme"
- * ara adımı eklemiyoruz, çünkü form zaten mevcut).
+ * Sprint 3.4: Liste + CRUD. Sprint 3.5 ile eklenenler:
  *
- * NAVİGASYON/GERİ TUŞU BU SPRİNTİN DIŞINDA (Sprint 3.5 — Tree→
- * Observation Navigation): `scope` prop'u dışarıdan (gelecekte
- * TreesScreen'den) geleceği için `onBack` burada henüz YOK — Sprint
- * 3.5'te App.tsx/TreesScreen entegrasyonu ile birlikte eklenecek.
- *
- * SAYFALAMA: `useObservations`'ın `hasMore`/`loadMore`'u (Domain
- * Review onayı, Sprint 3.2) — Parsel deseni, Ağaç'ınki değil.
+ *   1. `contextLabel` prop — GERÇEK BULGU (Sprint 3.5 UX Doğrulaması
+ *      madde 1/3): ekran başlığı sadece "Observations" idi, kullanıcı
+ *      HANGİ ağaçta olduğunu anlayamıyordu. Çağıran taraf (TreesScreen)
+ *      zaten ağaç bilgisini bildiği için, ekstra bir DB sorgusu
+ *      yapmadan (Kural 9) doğrudan prop olarak geçiriliyor.
+ *   2. `onBack` + Android geri tuşu — talep edilmemişti ama
+ *      Parsel/Ağaç ekranlarındaki tutarlılık standardını korumak için
+ *      eklendi (bkz. sohbet kaydı gerekçesi).
  *
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useObservations, type UseObservationsScope } from "./hooks/useObservations";
 import { ObservationList } from "./components/ObservationList";
 import { ObservationForm } from "./ObservationForm";
+import { addBackButtonListener } from "../../native/appBackButton";
 import type { NewObservationInput, Observation } from "./domain/observation.types";
 
 type ObservationsView = { mode: "list" } | { mode: "create" } | { mode: "edit"; observation: Observation };
@@ -30,9 +29,13 @@ interface ObservationScreenProps {
   scope: UseObservationsScope;
   /** `scope.mode === "tree"` ise zorunlu (formun `parcelId`'ye ihtiyacı var); `scope.mode === "parcel"` ise `scope.parcelId` ile aynı olmalı. */
   parcelId: string;
+  /** Ekran başlığının altında gösterilen bağlam metni (ör. "Ağaç: A-1 — Gemlik"). Çağıran taraftan gelir, burada hesaplanmaz. */
+  contextLabel?: string;
+  /** Kullanıcı geri dönmek istediğinde çağrılır (üst navigasyon App.tsx/TreesScreen'de yönetilir). */
+  onBack: () => void;
 }
 
-export function ObservationScreen({ scope, parcelId }: ObservationScreenProps) {
+export function ObservationScreen({ scope, parcelId, contextLabel, onBack }: ObservationScreenProps) {
   const { t } = useTranslation();
   const {
     observations,
@@ -46,14 +49,22 @@ export function ObservationScreen({ scope, parcelId }: ObservationScreenProps) {
   } = useObservations(scope);
   const [view, setView] = useState<ObservationsView>({ mode: "list" });
 
+  useEffect(() => {
+    return addBackButtonListener(() => {
+      if (view.mode !== "list") {
+        setView({ mode: "list" });
+      } else {
+        onBack();
+      }
+    });
+  }, [view, onBack]);
+
   const handleSelect = (observation: Observation) => {
     setView({ mode: "edit", observation });
   };
 
   const handleSubmit = async (input: NewObservationInput) => {
     if (view.mode === "edit") {
-      // parcelId/treeId sözleşmede yok (ObservationUpdateInput) —
-      // sadece observationType/note/observedAt geçiriliyor.
       await updateObservation(view.observation.id, {
         observationType: input.observationType,
         note: input.note,
@@ -87,7 +98,12 @@ export function ObservationScreen({ scope, parcelId }: ObservationScreenProps) {
 
   return (
     <main className="status-screen">
+      <button type="button" className="lock-screen__button" onClick={onBack}>
+        {t("observation.backButton")}
+      </button>
+
       <h1 className="status-screen__title">{t("observation.screenTitle")}</h1>
+      {contextLabel ? <p className="status-card__label">{contextLabel}</p> : null}
 
       <button type="button" className="lock-screen__button" onClick={() => setView({ mode: "create" })}>
         {t("observation.addButton")}

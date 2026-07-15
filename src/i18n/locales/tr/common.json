@@ -44,6 +44,7 @@
     "emptyState": "Henüz gözlem yok.",
     "addButton": "Gözlem Ekle",
     "loadMoreButton": "Daha Fazla Yükle",
+    "backButton": "Ağaca Dön",
     "formTitleCreate": "Yeni Gözlem",
     "formTitleEdit": "Gözlemi Düzenle",
     "type": {
@@ -70,6 +71,7 @@
     "plantingYear": "Dikim Yılı",
     "isReferenceTree": "Referans Ağaç",
     "deleteButton": "Ağacı Sil",
+    "viewObservationsButton": "Gözlemleri Görüntüle",
     "deleteConfirm": "Bu ağaç silinsin mi? Listelerinizden kaldırılacak.",
     "treeNumberRequired": "Ağaç numarası zorunludur.",
     "varietyRequired": "Çeşit alanı zorunludur.",

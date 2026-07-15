@@ -148,4 +148,61 @@ describe("TreeForm", () => {
       expect(onDelete).not.toHaveBeenCalled();
     });
   });
+
+  describe("Gözlemleri Görüntüle (Sprint 3.5)", () => {
+    it("onViewObservations verilmediğinde buton gösterilmez", () => {
+      render(<TreeForm parcelId={PARCEL_ID} onSubmit={vi.fn()} onCancel={() => {}} />);
+      expect(screen.queryByText("View Observations")).toBeNull();
+    });
+
+    it("oluşturma modunda bile onViewObservations verilirse buton gösterilir (onDelete ile TUTARLI desen — çağıranın sorumluluğu)", () => {
+      // GERÇEK BULGU: İlk yazımda bu test yanlış varsaydı (buton
+      // sadece düzenleme modunda gösterilir diye). Gerçek kod, onDelete
+      // ile AYNI deseni kullanıyor: sadece prop varlığına bakılıyor,
+      // initialValue'ya değil — hangi modda geçirileceği ÇAĞIRANIN
+      // (TreesScreen) sorumluluğu. TreesScreen zaten sadece düzenleme
+      // modunda geçiriyor (kodda doğrulandı) — bu, o gerçek entegrasyonu
+      // test ediyor, TreeForm'un kendi başına yaptığı bir kısıtlama değil.
+      render(
+        <TreeForm
+          parcelId={PARCEL_ID}
+          onSubmit={vi.fn()}
+          onCancel={() => {}}
+          onViewObservations={vi.fn()}
+        />
+      );
+      expect(screen.getByText("View Observations")).toBeTruthy();
+    });
+
+    it("düzenleme modunda buton gösterilir ve tıklanınca onViewObservations çağrılır", async () => {
+      const existingTree: Tree = {
+        id: "tree-1",
+        parcelId: PARCEL_ID,
+        treeNumber: "A-1",
+        variety: "Gemlik",
+        plantingYear: null,
+        latitude: null,
+        longitude: null,
+        isReferenceTree: false,
+        notes: null,
+        isActive: true,
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      };
+      const onViewObservations = vi.fn();
+      render(
+        <TreeForm
+          parcelId={PARCEL_ID}
+          initialValue={existingTree}
+          onSubmit={vi.fn()}
+          onCancel={() => {}}
+          onViewObservations={onViewObservations}
+        />
+      );
+
+      fireEvent.click(screen.getByText("View Observations"));
+
+      expect(onViewObservations).toHaveBeenCalledTimes(1);
+    });
+  });
 });

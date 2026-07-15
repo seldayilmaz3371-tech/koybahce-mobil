@@ -41,3 +41,7 @@ Sprint 3.4 UX Doğrulamasında bulundu: bugünkü tasarımla (sadece sayfalama +
 ## 9) Gözlem Sayısı Gösterimi
 
 Sprint 3.5 UX Doğrulamasında bulundu: `ObservationScreen`'de kullanıcıya "kaç gözlem var" bilgisi gösterilmiyor. **Bugün eklenmiyor** çünkü `observations.length`, sayfalama nedeniyle sadece yüklenen sayıyı yansıtıyor — yanlış/eksik bir toplam göstermek, hiç göstermemekten daha kötü bir kullanıcı deneyimi olurdu. Doğru çözüm, Repository Contract Matrix'te zaten bilinen `count()` eksikliğinin kapatılmasını gerektiriyor — o tamamlanınca bu madde de değerlendirilebilir.
+
+## 10) Test Dosyalarının Kendi Tip Doğruluğu Hiç Kontrol Edilmiyor
+
+Sprint 3.5'te gerçek bir metodolojik boşluk bulundu: `.test.ts(x)` dosyaları `tsconfig.app.json`'da bilerek `exclude` edildiği için (üretim derlemesinin test paketlerine bağımlı olmaması — bkz. `f632df1` commit'i), **hiçbir zaman** `npm run build`/`tsc -b` tarafından tip kontrolünden geçmiyorlar. Bu sprintte, `TreesScreen`/`ObservationScreen`'e yeni zorunlu prop eklendiğinde, ilgili test dosyalarındaki **6+ çağrı noktası eksik prop'la sessizce "geçiyordu"** — sadece geçici, kapsam dışı bir kontrolle (`exclude`'suz bir tsconfig ile tek seferlik `tsc --noEmit`) yakalandı. **Öneri (bugün uygulanmadı):** `package.json`'a `"typecheck:tests"` gibi ayrı bir script eklenip, Release & QA Checklist'e (Belge 5) bir madde olarak eklenmesi — üretim derlemesini test bağımlılıklarına bağlamadan, test dosyalarının kendi tip doğruluğunu periyodik kontrol etmek için.

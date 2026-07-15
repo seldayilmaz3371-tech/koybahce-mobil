@@ -31,9 +31,18 @@ interface TreeFormProps {
   onCancel: () => void;
   /** Sadece düzenleme modunda sağlanır. */
   onDelete?: () => Promise<void>;
+  /** Sadece düzenleme modunda sağlanır — henüz kaydedilmemiş bir ağacın gözlemleri olamaz (Sprint 3.5). NOT: `onDelete` ile aynı desen — bu bileşen sadece prop varlığına bakar, "hangi modda geçirilecek" ÇAĞIRANIN (TreesScreen) sorumluluğudur. */
+  onViewObservations?: () => void;
 }
 
-export function TreeForm({ parcelId, initialValue, onSubmit, onCancel, onDelete }: TreeFormProps) {
+export function TreeForm({
+  parcelId,
+  initialValue,
+  onSubmit,
+  onCancel,
+  onDelete,
+  onViewObservations,
+}: TreeFormProps) {
   const { t } = useTranslation();
 
   const [treeNumber, setTreeNumber] = useState(initialValue?.treeNumber ?? "");
@@ -155,6 +164,18 @@ export function TreeForm({ parcelId, initialValue, onSubmit, onCancel, onDelete 
       >
         {t("common.cancel")}
       </button>
+
+      {onViewObservations ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          style={{ marginTop: 8 }}
+          onClick={onViewObservations}
+          disabled={isSubmitting}
+        >
+          {t("tree.viewObservationsButton")}
+        </button>
+      ) : null}
 
       {onDelete ? (
         <button

@@ -44,6 +44,7 @@
     "emptyState": "No observations yet.",
     "addButton": "Add Observation",
     "loadMoreButton": "Load More",
+    "backButton": "Back to Tree",
     "formTitleCreate": "New Observation",
     "formTitleEdit": "Edit Observation",
     "type": {
@@ -70,6 +71,7 @@
     "plantingYear": "Planting Year",
     "isReferenceTree": "Reference Tree",
     "deleteButton": "Delete Tree",
+    "viewObservationsButton": "View Observations",
     "deleteConfirm": "Delete this tree? It will be removed from your lists.",
     "treeNumberRequired": "Tree number is required.",
     "varietyRequired": "Variety is required.",

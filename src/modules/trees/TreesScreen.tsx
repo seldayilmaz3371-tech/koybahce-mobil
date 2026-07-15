@@ -39,9 +39,11 @@ interface TreesScreenProps {
   mode: UseTreesOptions;
   /** Kullanıcı "Parsellere Dön" dediğinde çağrılır — üst navigasyonu yönetir (App.tsx). */
   onBack: () => void;
+  /** Kullanıcı bir ağacın gözlemlerini görüntülemek istediğinde çağrılır (App.tsx üst navigasyonu yönetir). */
+  onViewObservations: (tree: Tree) => void;
 }
 
-export function TreesScreen({ mode, onBack }: TreesScreenProps) {
+export function TreesScreen({ mode, onBack, onViewObservations }: TreesScreenProps) {
   const { t } = useTranslation();
   const { trees, status, errorMessage, createTree, updateTree, deactivateTree } = useTrees(mode);
   const [view, setView] = useState<TreesView>({ mode: "list" });
@@ -102,6 +104,7 @@ export function TreesScreen({ mode, onBack }: TreesScreenProps) {
         onSubmit={handleSubmit}
         onCancel={() => setView({ mode: "list" })}
         onDelete={view.mode === "edit" ? handleDelete : undefined}
+        onViewObservations={view.mode === "edit" ? () => onViewObservations(view.tree) : undefined}
       />
     );
   }
