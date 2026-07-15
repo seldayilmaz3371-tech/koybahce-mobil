@@ -1,0 +1,50 @@
+flowchart TD
+    %% ==========================================================
+    %% BAHÇEM MOBILE — NAVIGATION FLOW
+    %% ==========================================================
+    %% [GERÇEK] = Bugün kod var
+    %% [GELECEK] = Planlanan, henüz yazılmadı
+
+    Splash["Splash / i18n Bootstrap [GERÇEK]<br/>main.tsx: initI18n()"] --> Lock
+
+    Lock["Kilit Ekranı [GERÇEK]<br/>Biyometrik/PIN"] -->|başarılı| DBInit
+    Lock -->|cihaz güvenli değil| DBInit
+
+    DBInit["Veritabanı Hazırlığı [GERÇEK]<br/>App.tsx infrastructure phase"] -->|ready| Dashboard
+    DBInit -->|failed| DBError["Hata Ekranı + Tekrar Dene [GERÇEK]"]
+    DBError -->|tekrar dene| DBInit
+
+    Dashboard["Ana Ekran / Dashboard [GELECEK]<br/>Bugün: doğrudan ParcelsScreen [GERÇEK, GEÇİCİ]"]
+
+    Dashboard --> ParcelList["Parsel Listesi [GERÇEK]<br/>ParcelsScreen"]
+    ParcelList -->|Parsel Ekle| ParcelForm["Parsel Formu [GERÇEK]<br/>Oluştur/Düzenle/Sil"]
+    ParcelList -->|parsele dokun| ParcelForm
+    ParcelForm -->|kaydet/iptal/sil| ParcelList
+
+    ParcelList -.->|GELECEK: parsel detayına girince| ParcelDetail["Parsel Detay [GELECEK]<br/>Sekmeler: Ağaçlar/Finans/Gözlemler"]
+
+    ParcelDetail -.-> TreeList["Ağaç Listesi [GELECEK - Modül 2 devamı]<br/>parcelId ile filtrelenmiş"]
+    TreeList -.->|Ağaç Ekle/düzenle| TreeForm["Ağaç Formu [GELECEK]"]
+    TreeForm -.-> TreeList
+    TreeList -.->|ağaca dokun| TreeDetail["Ağaç Detay [GELECEK]<br/>Fotoğraflar, Gözlemler, AI Analizi"]
+
+    ParcelDetail -.-> ObservationList["Gözlem Listesi [GELECEK - Modül 3]"]
+    ObservationList -.-> ObservationForm["Gözlem Formu [GELECEK]<br/>+ Fotoğraf + Ses Notu + GPS"]
+
+    TreeDetail -.-> PhotoCapture["Fotoğraf Çek/Seç [GELECEK - Modül 3]"]
+    PhotoCapture -.->|isteğe bağlı| AIPhotoAnalysis["AI ile Analiz Et [GELECEK - Modül 6-7]<br/>Kullanıcı tetiklemeli (Kural 16)"]
+
+    ParcelDetail -.-> FinanceList["Finans Kayıtları [GELECEK - Modül 4]"]
+    Dashboard -.-> InventoryList["Stok [GELECEK - Modül 5]"]
+
+    Dashboard -.-> AIChat["AI Sohbet [GELECEK - Modül 6-7]<br/>FAB veya Bottom Nav ile"]
+
+    Dashboard -.-> Settings["Ayarlar [GELECEK]<br/>Dil değiştirme (ADR 0012 Karar 3 zaten hazır)"]
+
+    Dashboard -.-> Reports["Raporlar [GELECEK - muhtemelen ayrı ekran değil,<br/>mevcut veriler üzerinde görünüm]"]
+
+    %% Etkileşim türleri notu
+    classDef real fill:#2e7d32,color:#fff
+    classDef future fill:#e0e0e0,color:#333,stroke-dasharray: 5 5
+    class Splash,Lock,DBInit,DBError,ParcelList,ParcelForm real
+    class Dashboard,ParcelDetail,TreeList,TreeForm,TreeDetail,ObservationList,ObservationForm,PhotoCapture,AIPhotoAnalysis,FinanceList,InventoryList,AIChat,Settings,Reports future

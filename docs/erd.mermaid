@@ -1,0 +1,156 @@
+erDiagram
+    %% ==========================================================
+    %% BAHÇEM MOBILE — ENTITY RELATIONSHIP DIAGRAM
+    %% ==========================================================
+    %% Bu diyagram projenin TÜM yaşam döngüsünü (10+ yıl) kapsar.
+    %% Durum etiketleri:
+    %%   [GERÇEK]   = Bugün SQLite'ta var, kod yazıldı (ADR 0016)
+    %%   [GELECEK]  = Henüz yok, sadece planlanan ilişki/şekil
+    %%   [SPEKÜLATİF] = Henüz mimari karar bile verilmemiş, sadece
+    %%                  kavramsal yer tutucu (kendi ADR'ini gerektirecek)
+    %%
+    %% YAGNI NOTU: Bu diyagramda "gelecek" olarak işaretli hiçbir
+    %% tablo/kolon bugün oluşturulmuyor. Bu belge planlama/iletişim
+    %% aracıdır, uygulanmış şema değildir — asıl uygulanmış şema için
+    %% docs/database-master-schema.md'ye bakın.
+
+    FARM ||--o{ PARCEL : "sahiptir [SPEKÜLATİF - bkz. AI Architecture Bölüm 16]"
+    PARCEL ||--o{ TREE : "içerir [GERÇEK]"
+    PARCEL ||--o{ OBSERVATION : "üzerinde yapılır [GELECEK]"
+    TREE ||--o{ OBSERVATION : "hakkında olabilir (opsiyonel) [GELECEK]"
+    OBSERVATION ||--o{ PHOTO : "içerebilir [GELECEK - tasarım açık]"
+    TREE ||--o{ PHOTO : "doğrudan da olabilir [GELECEK - tasarım açık]"
+    PHOTO ||--o| PHOTO_AI_ANALYSIS : "analiz edilebilir [GELECEK]"
+    PARCEL ||--o{ FINANCE_RECORD : "maliyet/hasat/satış [GELECEK]"
+    TREE ||--o{ FINANCE_RECORD : "ağaç-bazlı hasat (opsiyonel) [GELECEK]"
+    PARCEL ||--o{ TREATMENT : "sulama/gübre/ilaç [GELECEK]"
+    TREE ||--o{ TREATMENT : "ağaç-bazlı uygulama (opsiyonel) [GELECEK]"
+    INVENTORY_ITEM ||--o{ TREATMENT : "stoktan düşer [GELECEK]"
+    INVENTORY_ITEM ||--o{ INVENTORY_TRANSACTION : "hareket kaydı [GELECEK]"
+    AI_CONVERSATION ||--o{ AI_MESSAGE : "içerir [GELECEK]"
+    AI_CONVERSATION ||--o{ AI_FACT : "üretebilir [GELECEK]"
+    PARCEL ||--o{ AI_FACT : "hakkında olabilir (opsiyonel) [GELECEK]"
+
+    FARM {
+        string id PK "SPEKÜLATİF"
+        string name
+        string created_at
+    }
+
+    PARCEL {
+        string id PK "GERÇEK"
+        string name
+        string crop_type "enum-kod: olive/vegetable/fruit (ADR 0017)"
+        real latitude "nullable"
+        real longitude "nullable"
+        real area_dekar
+        string soil_type "nullable, serbest metin"
+        string irrigation_type "nullable, serbest metin"
+        string notes "nullable"
+        integer is_active "soft delete, default 1"
+        string created_at
+        string updated_at
+    }
+
+    TREE {
+        string id PK "GERÇEK"
+        string parcel_id FK "GERÇEK, ON DELETE RESTRICT"
+        string tree_number
+        string variety "serbest metin"
+        integer planting_year "nullable"
+        real latitude "nullable"
+        real longitude "nullable"
+        integer is_reference_tree "default 0"
+        string notes "nullable"
+        integer is_active "soft delete, default 1"
+        string created_at
+        string updated_at
+    }
+
+    OBSERVATION {
+        string id PK "GELECEK - Modül 3"
+        string parcel_id FK
+        string tree_id FK "nullable"
+        string note
+        string observed_at
+        integer is_active "soft delete"
+    }
+
+    PHOTO {
+        string id PK "GELECEK - Modül 3, ilişki tasarımı AÇIK"
+        string tree_id FK "nullable - iki seçenekten biri"
+        string observation_id FK "nullable - iki seçenekten biri"
+        string file_path
+        string taken_at
+        real exif_latitude "nullable"
+        real exif_longitude "nullable"
+    }
+
+    PHOTO_AI_ANALYSIS {
+        string id PK "GELECEK - Modül 6-7"
+        string photo_id FK
+        string growth_stage "enum-kod"
+        string health_status "enum-kod (ADR 0017 - web projesindeki hatayı TEKRARLAMA)"
+        string raw_ai_response
+        string analyzed_at
+    }
+
+    FINANCE_RECORD {
+        string id PK "GELECEK - Modül 4"
+        string parcel_id FK
+        string tree_id FK "nullable, referans ağaç bazlı hasat takibi için"
+        string record_type "enum-kod: cost/harvest/sale"
+        real amount
+        string currency_code "ör. TRY - localization"
+        string record_date
+        string notes "nullable"
+    }
+
+    INVENTORY_ITEM {
+        string id PK "GELECEK - Modül 5"
+        string name
+        string category "enum-kod: fertilizer/pesticide/equipment/other"
+        real quantity_on_hand
+        string unit "enum-kod: kg/l/piece"
+    }
+
+    TREATMENT {
+        string id PK "GELECEK - Modül 4/5 (sulama+gübre+ilaç BİRLEŞİK öneri, bkz. Bölüm 7)"
+        string parcel_id FK
+        string tree_id FK "nullable"
+        string inventory_item_id FK "nullable"
+        string treatment_type "enum-kod: irrigation/fertilization/spraying"
+        real quantity_used "nullable"
+        string applied_at
+        string notes "nullable"
+    }
+
+    INVENTORY_TRANSACTION {
+        string id PK "GELECEK - Modül 5"
+        string inventory_item_id FK
+        string transaction_type "enum-kod: purchase/consumption/adjustment"
+        real quantity_delta
+        string transaction_date
+    }
+
+    AI_CONVERSATION {
+        string id PK "GELECEK - Modül 6-7 (bkz. AI Master Architecture Bölüm 3)"
+        string started_at
+        string language_code
+    }
+
+    AI_MESSAGE {
+        string id PK "GELECEK"
+        string conversation_id FK
+        string role "enum-kod: user/assistant"
+        string content "orijinal dilinde saklanır, ÇEVİRİ YAPILMAZ"
+        string created_at
+    }
+
+    AI_FACT {
+        string id PK "GELECEK - kullanıcı onaylı, AI kendiliğinden yazamaz"
+        string conversation_id FK "nullable"
+        string parcel_id FK "nullable"
+        string content
+        string approved_at
+    }

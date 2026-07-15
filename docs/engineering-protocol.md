@@ -1,6 +1,6 @@
-# Bahçem Mobile Engineering Protocol v1.9
+# Bahçem Mobile Engineering Protocol v1.10
 
-**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 v1.5'te eklendi; Bölüm 18.5 v1.6'da eklendi; Bölüm 10'a modül durumu takibi v1.7'de eklendi; Bölüm 19 v1.8'de eklendi; Bölüm 9'a `npm run test` adımı — v1.9'da eklendi, ADR 0018'in açık sorunu çözüldü, 2026-07-14)
+**Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 v1.5'te eklendi; Bölüm 18.5 v1.6'da eklendi; Bölüm 10'a modül durumu takibi v1.7'de eklendi; Bölüm 19 v1.8'de eklendi; Bölüm 9'a `npm run test` adımı v1.9'da eklendi; Bölüm 20 — SQLite Transaction/FK Kuralları — v1.10'da eklendi, ADR 0022 araştırması sonucu, 2026-07-15)
 
 Bu belge Bahçem Mobile projesinin resmi geliştirme protokolüdür. Modül 2'den itibaren tüm geliştirme süreci için geçerlidir. Modül 1, bu protokolden önce tamamlandığı için geriye dönük olarak bu sıraya zorlanmamıştır — ancak Modül 1'e uygulanan denetim (Kalite Kapısı, Test Kapısı, ADR belgelemesi) protokolün ruhuyla zaten tutarlıydı.
 
@@ -190,3 +190,8 @@ Bölüm 14'ün (Kullanıcı Deneyimi) doğal bir tamamlayıcısı: saha koşulla
 - Native Android tarafında (ileride WebView dışı native bileşen gerekirse) `contentDescription` eşdeğeri sağlanır.
 - Minimum dokunma hedefi 48x48dp korunur (zaten Modül 1'den beri CSS'te uygulanıyor — Kural 15).
 - Etkileşimli öğeler için her zaman semantik HTML elementleri kullanılır (`<button>`, `<label>`) — `onClick`'li `<div>` gibi ekran okuyucunun tanımadığı yapılar kullanılmaz.
+
+## 20. SQLite Transaction ve Foreign Key Kuralları — *(v1.10'da eklendi, 2026-07-15, bkz. ADR 0022)*
+
+- **`BaseRepository.runInTransaction()` asla iç içe (nested) çağrılmaz.** SQLite'ın kendisi, aktif bir transaction içinde ikinci bir `BEGIN`'i hata olarak değerlendirir (genel platform kısıtı). Çok adımlı bir işlem başka bir transaction'ı tetikleyen bir repository metodu çağırıyorsa, bu metodun transaction-dışı bir varyantı kullanılmalı veya tüm adımlar tek bir `runInTransaction` bloğunda toplanmalı.
+- **Foreign key zorlaması (`PRAGMA foreign_keys = ON`) bağlantı açılışına eklenmeli** — bu bugün eksik (ADR 0022), Ağaç modülü kod aşamasında öncelikli düzeltme maddesidir. Bu eklenene kadar, `REFERENCES` kısıtları şemada belgesel amaçlıdır, veri bütünlüğü **uygulama katmanında** (repository'lerin her zaman geçerli bir `parcelId` ile çağrılması) sağlanmaktadır.
