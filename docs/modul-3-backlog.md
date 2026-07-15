@@ -33,3 +33,7 @@ Observation ekranının, gelecekte kronolojik bir "Timeline" (zaman çizelgesi) 
 ## 7) Fotoğraf-Merkezli Saha Akışı
 
 UI akışı, "önce fotoğraf çek, sonra isteğe bağlı not ekle" sırasını öncelemeli — saha kullanımında (Kural 15: güneş altında, tek elle, eldivenle) metin girmek fotoğraf çekmekten daha zahmetli. **Sprint 3.7 (Fotoğraf) ve 3.3 (Form) tasarımına girdi:** Gözlem formu, kamera/galeri eylemini metin alanından ÖNCE, daha belirgin şekilde sunmalı. Bugün hiçbir UI kodu yazılmıyor — bu, ilgili sprintler başladığında referans alınacak bir tasarım önceliği.
+
+## 8) Gözlem Arama/Filtreleme
+
+Sprint 3.4 UX Doğrulamasında bulundu: bugünkü tasarımla (sadece sayfalama + kronolojik sıralama), kullanıcı **son birkaç gözlemi** hızlıca bulabilir ama **aylar önceki** bir gözlemi aramak için bir mekanizma yok. **Mimari buna kapalı değil** — Sprint 3.2'de zaten kanıtlandığı gibi, `ObservationListOptions`'a tarih aralığı/`observation_type` filtresi eklemek, `ParcelListOptions`'ın `search`/`sortBy` ile genişlediği aynı yöntemle mümkün. **Bugün uygulanmıyor.**
