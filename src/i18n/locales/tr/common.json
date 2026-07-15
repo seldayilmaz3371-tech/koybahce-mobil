@@ -39,6 +39,21 @@
     "viewTreesButton": "Ağaçları Görüntüle",
     "referenceTreesButton": "Referans Ağaçlar"
   },
+  "observation": {
+    "formTitleCreate": "Yeni Gözlem",
+    "formTitleEdit": "Gözlemi Düzenle",
+    "type": {
+      "label": "Tür",
+      "general": "Genel",
+      "health_concern": "Sağlık Sorunu",
+      "growth_stage": "Gelişim Durumu",
+      "weather_impact": "Hava Etkisi",
+      "other": "Diğer"
+    },
+    "note": "Not",
+    "deleteButton": "Gözlemi Sil",
+    "deleteConfirm": "Bu gözlem silinsin mi? Listelerinizden kaldırılacak."
+  },
   "tree": {
     "title": "Ağaçlar",
     "emptyState": "Henüz ağaç yok.",

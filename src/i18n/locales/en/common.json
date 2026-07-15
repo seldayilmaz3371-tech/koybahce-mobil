@@ -39,6 +39,21 @@
     "viewTreesButton": "View Trees",
     "referenceTreesButton": "Reference Trees"
   },
+  "observation": {
+    "formTitleCreate": "New Observation",
+    "formTitleEdit": "Edit Observation",
+    "type": {
+      "label": "Type",
+      "general": "General",
+      "health_concern": "Health Concern",
+      "growth_stage": "Growth Stage",
+      "weather_impact": "Weather Impact",
+      "other": "Other"
+    },
+    "note": "Note",
+    "deleteButton": "Delete Observation",
+    "deleteConfirm": "Delete this observation? It will be removed from your lists."
+  },
   "tree": {
     "title": "Trees",
     "emptyState": "No trees yet.",
