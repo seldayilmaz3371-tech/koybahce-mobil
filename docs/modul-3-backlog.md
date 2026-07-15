@@ -54,16 +54,16 @@ Sprint 3.6 onayında kaydedildi: `file_path`, sadece fiziksel dosyanın **o anki
 
 Sprint 3.6 onayında kaydedildi: `quality_score`, `blur_score`, `ai_processed`, `analysis_version` gibi alanlar **bugün eklenmiyor** ama şema, bunların ADR 0005'in additive migration deseniyle (yeni nullable sütunlar) sancısız eklenmesine açık kalmalı. Bugünkü `photos` tablosu (Sprint 3.6) bu ilkeye uygun tasarlandı — hiçbir alan bu genişlemeyi engellemiyor.
 
-## 13) `taken_at` İçin EXIF Öncelik Sırası (Sprint 3.7'de Uygulanacak)
+## 13) `taken_at` İçin EXIF — KESİNLEŞEN BULGU (Sprint 3.7)
 
-Sprint 3.6 onayında kesinleşen öncelik sırası — kamera entegrasyonu (Sprint 3.7) bu sırayla `taken_at` değerini belirleyecek:
-
-1. **EXIF zamanı** (varsa ve güvenilir ise) — fotoğrafın gerçekte çekildiği an, en kanonik kaynak.
-2. **Uygulamanın oluşturduğu `taken_at`** — EXIF yoksa/güvenilmezse, kayıt anında `new Date().toISOString()` (bugünkü Sprint 3.6 implementasyonunun varsayılan davranışı).
-3. **`created_at`** — sadece "bu satır ne zaman veritabanına yazıldı" bilgisi, asla `taken_at`'ın yerine geçmez, ayrı kalır.
-
-Bugün (Sprint 3.6) sadece madde 2 uygulanıyor — EXIF çıkarımı (madde 1), kamera/galeri entegrasyonu henüz olmadığı için Sprint 3.7'ye bırakıldı.
+**Sprint 3.6'da "EXIF varsa" olarak planlanmıştı — Sprint 3.7'de gerçek plugin araştırmasıyla KESİNLEŞTİ:** `@capacitor/camera` (v8.2.1, güncel) `MediaMetadata` tipi sadece `size`/`duration`/`format`/`resolution` içeriyor — **çekim tarihi/EXIF hiçbir zaman plugin API'sinden gelmiyor** (GitHub issue #1910, 2023, bağımsız olarak doğruluyor). Bu, "veri yoksa" değil, "bu plugin'in genel API'si bunu hiç sunmuyor" — EXIF'e erişmek için dosyanın ham baytlarını ayrı bir kütüphaneyle okumak gerekir (kapsamlı bir ek iş, bugün uygulanmıyor). **Sprint 3.7'nin kesin kararı:** `taken_at`, her zaman uygulamanın kayıt anı (`new Date().toISOString()`) ile dolduruluyor — hem kamera hem galeri için, kaynak farkı yok.
 
 ## 14) Fotoğraf Sayısı / Depolama Sınırı
 
 Sprint 3.6 Veri Modeli Doğrulamasında değerlendirildi: bir gözleme bağlı fotoğraf sayısında veya toplam cihaz depolama kullanımında bugün bir sınır yok. **Bugün eklenmiyor** (YAGNI) — gerçek saha kullanımında depolama sorunu gözlemlenirse ele alınacak.
+
+## 15) `isSubmitting` Deseninin Senkron Çift-Tıklama Karşısındaki Yarış Durumu (Race Condition)
+
+**Sprint 3.7'de gerçek bir testle bulundu:** `PhotoGalleryScreen`'de, sadece React `useState` tabanlı bir `isSaving` bayrağıyla çift-kayıt korumasının **yetersiz kaldığı** kanıtlandı — aynı senkron JS turu içinde art arda gelen iki tıklama, state güncellemesi henüz yeniden render'a yansımadan ikisi de "henüz kaydedilmedi" durumunu görebiliyor. **Düzeltme (sadece `PhotoGalleryScreen`'de uygulandı):** `useRef` tabanlı senkron bir bayrak (`isSavingRef`) eklendi — state, sadece UI'da butonun görsel olarak devre dışı görünmesi için korundu.
+
+**Bugün uygulanmayan, ama gerçek bir olasılık:** `ParcelForm`, `TreeForm`, `ObservationForm` da AYNI `isSubmitting` (state-only) desenini kullanıyor — teorik olarak aynı yarış durumuna açık olabilirler. Gerçek kullanıcı dokunuşlarında (genellikle en az 100-300ms arayla) bu risk düşük (React'in state güncellemesi araya girecek kadar zaman var), ama programatik/çok hızlı tekrarlı tetiklemelerde teorik olarak sorun oluşabilir. **Bugün bu üç form için düzeltme yapılmadı** — gerçek bir sorun (ör. kullanıcı raporu veya yeni bir test) ortaya çıkarsa, aynı `useRef` deseni tutarlı şekilde uygulanmalı.

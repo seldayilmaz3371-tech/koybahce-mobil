@@ -39,6 +39,18 @@
     "viewTreesButton": "View Trees",
     "referenceTreesButton": "Reference Trees"
   },
+  "photo": {
+    "screenTitle": "Photos",
+    "emptyState": "No photos yet.",
+    "cameraButton": "Take Photo",
+    "galleryButton": "Choose from Gallery",
+    "previewTitle": "Preview",
+    "discardButton": "Discard",
+    "deleteButton": "Delete Photo",
+    "deleteConfirm": "Delete this photo? It will be removed from your lists.",
+    "backButton": "Back to Observation",
+    "captureError": "Could not access the camera or gallery. Please check app permissions in your device settings."
+  },
   "observation": {
     "screenTitle": "Observations",
     "emptyState": "No observations yet.",
@@ -57,6 +69,7 @@
     },
     "note": "Note",
     "deleteButton": "Delete Observation",
+    "viewPhotosButton": "View Photos",
     "deleteConfirm": "Delete this observation? It will be removed from your lists."
   },
   "tree": {

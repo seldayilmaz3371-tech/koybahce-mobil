@@ -39,6 +39,18 @@
     "viewTreesButton": "Ağaçları Görüntüle",
     "referenceTreesButton": "Referans Ağaçlar"
   },
+  "photo": {
+    "screenTitle": "Fotoğraflar",
+    "emptyState": "Henüz fotoğraf yok.",
+    "cameraButton": "Fotoğraf Çek",
+    "galleryButton": "Galeriden Seç",
+    "previewTitle": "Önizleme",
+    "discardButton": "Vazgeç",
+    "deleteButton": "Fotoğrafı Sil",
+    "deleteConfirm": "Bu fotoğraf silinsin mi? Listelerinizden kaldırılacak.",
+    "backButton": "Gözleme Dön",
+    "captureError": "Kamera veya galeriye erişilemedi. Lütfen cihaz ayarlarından uygulama izinlerini kontrol edin."
+  },
   "observation": {
     "screenTitle": "Gözlemler",
     "emptyState": "Henüz gözlem yok.",
@@ -57,6 +69,7 @@
     },
     "note": "Not",
     "deleteButton": "Gözlemi Sil",
+    "viewPhotosButton": "Fotoğrafları Görüntüle",
     "deleteConfirm": "Bu gözlem silinsin mi? Listelerinizden kaldırılacak."
   },
   "tree": {

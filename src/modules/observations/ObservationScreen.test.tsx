@@ -72,14 +72,14 @@ async function createTestParcelAndTree(): Promise<{ parcelId: string; treeId: st
 describe("ObservationScreen", () => {
   it("Empty State: hiç gözlem yoksa boş durum mesajı gösterir", async () => {
     const { parcelId, treeId } = await createTestParcelAndTree();
-    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} />);
+    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} onViewPhotos={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("No observations yet.")).toBeTruthy());
   });
 
   it("Create: 'Add Observation' → varsayılan tiple direkt Kaydet → kart listede görünür", async () => {
     const { parcelId, treeId } = await createTestParcelAndTree();
-    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} />);
+    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} onViewPhotos={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No observations yet.")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Add Observation"));
@@ -102,7 +102,7 @@ describe("ObservationScreen", () => {
       note: "İlk not",
       observedAt: "2026-01-01T00:00:00.000Z",
     });
-    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} />);
+    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} onViewPhotos={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("Health Concern")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Health Concern"));
@@ -125,7 +125,7 @@ describe("ObservationScreen", () => {
       observationType: "general",
       observedAt: "2026-01-01T00:00:00.000Z",
     });
-    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} />);
+    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} onViewPhotos={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("General")).toBeTruthy());
 
     fireEvent.click(screen.getByText("General"));
@@ -152,7 +152,7 @@ describe("ObservationScreen", () => {
       observedAt: "2026-01-02T00:00:00.000Z",
     });
 
-    render(<ObservationScreen scope={{ mode: "parcel", parcelId }} parcelId={parcelId} onBack={() => {}} />);
+    render(<ObservationScreen scope={{ mode: "parcel", parcelId }} parcelId={parcelId} onBack={() => {}} onViewPhotos={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("Weather Impact")).toBeTruthy());
     expect(screen.queryByText("Health Concern")).toBeNull();
@@ -169,7 +169,7 @@ describe("ObservationScreen", () => {
       });
     }
 
-    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} />);
+    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} onViewPhotos={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("Load More")).toBeTruthy());
 
     await act(async () => {
@@ -189,6 +189,7 @@ describe("ObservationScreen — contextLabel ve Android Geri Tuşu (Sprint 3.5)"
         parcelId={parcelId}
         contextLabel="A-1 — Gemlik"
         onBack={() => {}}
+        onViewPhotos={vi.fn()}
       />
     );
 
@@ -198,13 +199,13 @@ describe("ObservationScreen — contextLabel ve Android Geri Tuşu (Sprint 3.5)"
   it("contextLabel verilmediğinde hata vermez, sadece gösterilmez", async () => {
     const { parcelId, treeId } = await createTestParcelAndTree();
     expect(() =>
-      render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} />)
+      render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} onViewPhotos={vi.fn()} />)
     ).not.toThrow();
   });
 
   it("form açıkken geri tuşu, kaydetmeden listeye döner", async () => {
     const { parcelId, treeId } = await createTestParcelAndTree();
-    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} />);
+    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={() => {}} onViewPhotos={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No observations yet.")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Add Observation"));
@@ -218,7 +219,7 @@ describe("ObservationScreen — contextLabel ve Android Geri Tuşu (Sprint 3.5)"
   it("liste görünümündeyken geri tuşu onBack'i çağırır (Ağaca döner)", async () => {
     const { parcelId, treeId } = await createTestParcelAndTree();
     const onBack = vi.fn();
-    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={onBack} />);
+    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={onBack} onViewPhotos={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No observations yet.")).toBeTruthy());
 
     pressBackButton();
@@ -229,7 +230,7 @@ describe("ObservationScreen — contextLabel ve Android Geri Tuşu (Sprint 3.5)"
   it("'Back to Tree' butonu onBack'i çağırır", async () => {
     const { parcelId, treeId } = await createTestParcelAndTree();
     const onBack = vi.fn();
-    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={onBack} />);
+    render(<ObservationScreen scope={{ mode: "tree", treeId }} parcelId={parcelId} onBack={onBack} onViewPhotos={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("Back to Tree")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Back to Tree"));

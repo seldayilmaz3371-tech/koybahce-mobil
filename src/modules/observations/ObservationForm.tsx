@@ -43,6 +43,8 @@ interface ObservationFormProps {
   onCancel: () => void;
   /** Sadece düzenleme modunda sağlanır. */
   onDelete?: () => Promise<void>;
+  /** Sadece düzenleme modunda sağlanır — henüz kaydedilmemiş bir gözlemin fotoğrafları olamaz (Sprint 3.7). NOT: onDelete ile tutarlı desen — hangi modda geçirileceği çağıranın sorumluluğu. */
+  onViewPhotos?: () => void;
 }
 
 export function ObservationForm({
@@ -52,6 +54,7 @@ export function ObservationForm({
   onSubmit,
   onCancel,
   onDelete,
+  onViewPhotos,
 }: ObservationFormProps) {
   const { t } = useTranslation();
 
@@ -125,6 +128,18 @@ export function ObservationForm({
       >
         {t("common.cancel")}
       </button>
+
+      {onViewPhotos ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          style={{ marginTop: 8 }}
+          onClick={onViewPhotos}
+          disabled={isSubmitting}
+        >
+          {t("observation.viewPhotosButton")}
+        </button>
+      ) : null}
 
       {onDelete ? (
         <button

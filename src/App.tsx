@@ -25,7 +25,9 @@ import { CURRENT_SCHEMA_VERSION } from "./data/db/migrations/schema";
 import { ParcelsScreen } from "./modules/parcels/ParcelsScreen";
 import { TreesScreen } from "./modules/trees/TreesScreen";
 import { ObservationScreen } from "./modules/observations/ObservationScreen";
+import { PhotoGalleryScreen } from "./modules/photos/PhotoGalleryScreen";
 import type { Tree } from "./modules/trees/domain/tree.types";
+import type { Observation } from "./modules/observations/domain/observation.types";
 
 type InfrastructureStatus =
   | { phase: "idle" }
@@ -54,7 +56,8 @@ type AppView =
   | { screen: "parcels" }
   | { screen: "trees-for-parcel"; parcelId: string }
   | { screen: "reference-trees" }
-  | { screen: "observations-for-tree"; tree: Tree };
+  | { screen: "observations-for-tree"; tree: Tree }
+  | { screen: "photos-for-observation"; tree: Tree; observation: Observation };
 
 function App() {
   const { t } = useTranslation();
@@ -101,6 +104,16 @@ function App() {
   // ekranının görevi bitti. Veritabanı hazır olduğunda artık gerçek
   // uygulama navigasyonu gösteriliyor.
   if (infrastructure.phase === "ready") {
+    if (view.screen === "photos-for-observation") {
+      return (
+        <PhotoGalleryScreen
+          observationId={view.observation.id}
+          onBack={() =>
+            setView({ screen: "observations-for-tree", tree: view.tree })
+          }
+        />
+      );
+    }
     if (view.screen === "observations-for-tree") {
       return (
         <ObservationScreen
@@ -108,6 +121,9 @@ function App() {
           parcelId={view.tree.parcelId}
           contextLabel={`${view.tree.treeNumber} — ${view.tree.variety}`}
           onBack={() => setView({ screen: "trees-for-parcel", parcelId: view.tree.parcelId })}
+          onViewPhotos={(observation) =>
+            setView({ screen: "photos-for-observation", tree: view.tree, observation })
+          }
         />
       );
     }

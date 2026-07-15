@@ -33,9 +33,11 @@ interface ObservationScreenProps {
   contextLabel?: string;
   /** Kullanıcı geri dönmek istediğinde çağrılır (üst navigasyon App.tsx/TreesScreen'de yönetilir). */
   onBack: () => void;
+  /** Kullanıcı bir gözlemin fotoğraflarını görüntülemek istediğinde çağrılır (Sprint 3.7). */
+  onViewPhotos: (observation: Observation) => void;
 }
 
-export function ObservationScreen({ scope, parcelId, contextLabel, onBack }: ObservationScreenProps) {
+export function ObservationScreen({ scope, parcelId, contextLabel, onBack, onViewPhotos }: ObservationScreenProps) {
   const { t } = useTranslation();
   const {
     observations,
@@ -92,6 +94,7 @@ export function ObservationScreen({ scope, parcelId, contextLabel, onBack }: Obs
         onSubmit={handleSubmit}
         onCancel={() => setView({ mode: "list" })}
         onDelete={view.mode === "edit" ? handleDelete : undefined}
+        onViewPhotos={view.mode === "edit" ? () => onViewPhotos(view.observation) : undefined}
       />
     );
   }
