@@ -51,6 +51,11 @@ vi.mock("./data/repositories/appMetadata.repository", () => ({
   },
 }));
 
+let mockIsCapturingPhoto = false;
+vi.mock("./native/camera", () => ({
+  isCapturingPhoto: () => mockIsCapturingPhoto,
+}));
+
 function triggerAppStateChange(isActive: boolean) {
   act(() => {
     appStateChangeListeners[appStateChangeListeners.length - 1](isActive);
@@ -68,6 +73,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   appStateChangeListeners.length = 0;
+  mockIsCapturingPhoto = false;
 });
 
 afterEach(() => {
@@ -156,5 +162,64 @@ describe("App — Arka Plan Yeniden Kilitleme (Sprint 4.3.1, P1 güvenlik düzel
       }
     }).not.toThrow();
     expect(screen.getByText("MOCK_UNLOCK")).toBeTruthy();
+  });
+});
+
+describe("App — P0-001 Kök Neden Düzeltmesi: Camera Intent + LockScreen Regresyonu (Sprint 4.3.2)", () => {
+  it("KRİTİK — fotoğraf çekimi sürerken (isCapturingPhoto:true) appStateChange(false) YENİDEN KİLİTLEMEZ", async () => {
+    const { default: App } = await import("./App");
+    render(<App />);
+    await act(async () => {
+      fireEvent.click(screen.getByText("MOCK_UNLOCK"));
+    });
+    expect(await screen.findByText("MOCK_APP_ROUTER")).toBeTruthy();
+
+    // Kamera Activity'si açılıyor — capturePhoto() sürüyor.
+    mockIsCapturingPhoto = true;
+    triggerAppStateChange(false); // appStateChange, native pop-over yüzünden tetiklendi
+
+    // Uygulama YENİDEN KİLİTLENMEMELİ — AppRouter (ve dolayısıyla
+    // PhotoGalleryScreen'in bekleyen capturePhoto() zinciri) unmount
+    // OLMAMALI.
+    expect(screen.getByText("MOCK_APP_ROUTER")).toBeTruthy();
+    expect(screen.queryByText("MOCK_UNLOCK")).toBeNull();
+  });
+
+  it("fotoğraf çekimi TAMAMLANDIKTAN SONRA, normal arka plana alma YİNE DE yeniden kilitler (P1 düzeltmesi bozulmadı)", async () => {
+    const { default: App } = await import("./App");
+    render(<App />);
+    await act(async () => {
+      fireEvent.click(screen.getByText("MOCK_UNLOCK"));
+    });
+
+    // Kamera Activity'si açılıp KAPANDI (capturePhoto() tamamlandı).
+    mockIsCapturingPhoto = true;
+    triggerAppStateChange(false); // native pop-over sırasında — görmezden gelinmeli
+    expect(screen.getByText("MOCK_APP_ROUTER")).toBeTruthy();
+
+    mockIsCapturingPhoto = false; // Kamera kapandı, capturePhoto() resolve oldu
+    triggerAppStateChange(true); // uygulama tekrar ön planda (kamera kapandı)
+    expect(screen.getByText("MOCK_APP_ROUTER")).toBeTruthy(); // hâlâ açık, beklenen
+
+    // ŞİMDİ gerçek bir arka-plana-alma (Ana Ekran tuşu) oluyor —
+    // isCapturingPhoto artık false, bu yüzden YENİDEN KİLİTLENMELİ.
+    triggerAppStateChange(false);
+
+    expect(screen.getByText("MOCK_UNLOCK")).toBeTruthy();
+    expect(screen.queryByText("MOCK_APP_ROUTER")).toBeNull();
+  });
+
+  it("Galeri seçimi sürerken de AYNI koruma geçerli (kamera VE galeri için tutarlı)", async () => {
+    const { default: App } = await import("./App");
+    render(<App />);
+    await act(async () => {
+      fireEvent.click(screen.getByText("MOCK_UNLOCK"));
+    });
+
+    mockIsCapturingPhoto = true; // galeri picker açık
+    triggerAppStateChange(false);
+
+    expect(screen.getByText("MOCK_APP_ROUTER")).toBeTruthy();
+    expect(screen.queryByText("MOCK_UNLOCK")).toBeNull();
   });
 });

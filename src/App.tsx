@@ -24,6 +24,7 @@ import { appMetadataRepository } from "./data/repositories/appMetadata.repositor
 import { CURRENT_SCHEMA_VERSION } from "./data/db/migrations/schema";
 import { AppRouter } from "./router/AppRouter";
 import { addAppStateChangeListener } from "./native/appLifecycle";
+import { isCapturingPhoto } from "./native/camera";
 
 type InfrastructureStatus =
   | { phase: "idle" }
@@ -50,13 +51,22 @@ function App() {
   // dinliyoruz — zaten kilitliyken (LockScreen açıkken) gereksiz bir
   // "zaten kilitli" durumuna yeniden geçiş yapmaya çalışmıyoruz.
   //
+  // KÖK NEDEN DÜZELTMESİ (Sprint 4.3.2, gerçek Android cihaz regresyonu
+  // P0-001): `isCapturingPhoto()` `true` iken (Kamera/Galeri Activity'si
+  // açıkken) `isActive:false` sinyali GÖRMEZDEN GELİNİYOR — bu, resmi
+  // olarak raporlanmış bir Capacitor davranışı (native pop-over'lar da
+  // appStateChange'i tetikliyor, github.com/ionic-team/capacitor/
+  // issues/5320) — bkz. native/camera.ts başlığındaki tam kök neden
+  // analizi. Genel arka-plana-alma davranışı (Ana Ekran tuşu vb.)
+  // TAMAMEN korunuyor, SADECE bu dar kapsamlı istisna eklendi.
+  //
   // "process kill" senaryosu BİLEREK burada ele ALINMIYOR — süreç
   // öldüğünde tüm React state sıfırdan başlıyor, `useState(false)`
   // varsayılanı zaten güvenli (bkz. native/appLifecycle.ts notu).
   useEffect(() => {
     if (!unlocked) return;
     return addAppStateChangeListener((isActive) => {
-      if (!isActive) {
+      if (!isActive && !isCapturingPhoto()) {
         setUnlocked(false);
       }
     });
