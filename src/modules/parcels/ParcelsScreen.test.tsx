@@ -165,3 +165,17 @@ describe("ParcelsScreen — Android Geri Tuşu", () => {
     expect(exitAppMock).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("ParcelsScreen — Error Code Standard (Sprint 4.3.1)", () => {
+  it("repository hatası ÇEVRİLMİŞ mesajla gösterilir, ham hata ASLA görünmez", async () => {
+    resetDatabaseExecutorProviderForTesting();
+    setDatabaseExecutorProviderForTesting(async () => {
+      throw new Error("SQLITE_CONSTRAINT: test hatası, teknik detay");
+    });
+
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText("Something went wrong. Please try again.")).toBeTruthy());
+    expect(screen.queryByText(/SQLITE_CONSTRAINT/)).toBeNull();
+  });
+});

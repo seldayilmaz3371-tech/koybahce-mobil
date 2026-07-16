@@ -16,13 +16,14 @@
  * src/i18n/locales/*.json dosyalarından gelir.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LockScreen } from "./modules/auth/LockScreen";
 import { getDatabase, getRuntimePlatform } from "./data/db/connection";
 import { appMetadataRepository } from "./data/repositories/appMetadata.repository";
 import { CURRENT_SCHEMA_VERSION } from "./data/db/migrations/schema";
 import { AppRouter } from "./router/AppRouter";
+import { addAppStateChangeListener } from "./native/appLifecycle";
 
 type InfrastructureStatus =
   | { phase: "idle" }
@@ -41,6 +42,25 @@ function App() {
   const [infrastructure, setInfrastructure] = useState<InfrastructureStatus>({
     phase: "idle",
   });
+
+  // GÜVENLİK DÜZELTMESİ (Sprint 4.3.1 — Modül 4 Bağımsız Denetimi'nde
+  // bulunan gerçek P1 bulgusu): uygulama arka plana alınıp öne
+  // geldiğinde (Android Activity onStop/onResume) kullanıcı yeniden
+  // kilit ekranıyla karşılaşmalı. Sadece `unlocked === true` iken
+  // dinliyoruz — zaten kilitliyken (LockScreen açıkken) gereksiz bir
+  // "zaten kilitli" durumuna yeniden geçiş yapmaya çalışmıyoruz.
+  //
+  // "process kill" senaryosu BİLEREK burada ele ALINMIYOR — süreç
+  // öldüğünde tüm React state sıfırdan başlıyor, `useState(false)`
+  // varsayılanı zaten güvenli (bkz. native/appLifecycle.ts notu).
+  useEffect(() => {
+    if (!unlocked) return;
+    return addAppStateChangeListener((isActive) => {
+      if (!isActive) {
+        setUnlocked(false);
+      }
+    });
+  }, [unlocked]);
 
   const initializeInfrastructure = useCallback(async () => {
     setInfrastructure({ phase: "initializing" });

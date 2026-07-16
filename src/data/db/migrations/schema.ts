@@ -71,7 +71,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 6;
+export const CURRENT_SCHEMA_VERSION = 7;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -183,6 +183,47 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
          created_at TEXT NOT NULL,
          updated_at TEXT NOT NULL
        );`,
+      `CREATE INDEX IF NOT EXISTS idx_finance_records_parcel_id ON finance_records(parcel_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_finance_records_tree_id ON finance_records(tree_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_finance_records_record_date ON finance_records(record_date);`,
+    ],
+  },
+  {
+    toVersion: 7,
+    statements: [
+      // Modül 4 Bağımsız Denetimi (2026-07-15) — GERÇEK, ÖNEMLİ BULGU:
+      // `amount REAL` (kayan noktalı sayı), para birimi için bilinen
+      // bir anti-pattern — yuvarlama hataları yıllar boyunca birikir
+      // (kanıt: `19.99 * 100` JS'te `1998.9999999999998` veriyor).
+      // Düzeltme: `amount_minor INTEGER` (kuruş cinsinden, TAM SAYI).
+      //
+      // SQLite `ALTER COLUMN TYPE` desteklemediği için Database
+      // Migration Strategy'nin "rename-and-recreate" deseni kullanılıyor
+      // (Bölüm 12) — yeni tabloya kopyala, `ROUND(amount * 100)` ile
+      // güvenli dönüştür, eskisini sil, yeniden adlandır. Henüz
+      // üretimde gerçek veri yok (Modül 4 ilk sürümü), ama gelecekteki
+      // her kurulum için de AYNI güvenli yol izleniyor — "bugün veri
+      // yok" diye kısayol kullanılmadı.
+      `CREATE TABLE finance_records_v7 (
+         id TEXT PRIMARY KEY NOT NULL,
+         parcel_id TEXT NOT NULL REFERENCES parcels(id) ON DELETE RESTRICT,
+         tree_id TEXT REFERENCES trees(id) ON DELETE RESTRICT,
+         record_type TEXT NOT NULL CHECK (record_type IN ('cost','sale')),
+         amount_minor INTEGER NOT NULL,
+         currency_code TEXT NOT NULL DEFAULT 'TRY',
+         record_date TEXT NOT NULL,
+         notes TEXT,
+         is_active INTEGER NOT NULL DEFAULT 1,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `INSERT INTO finance_records_v7
+         (id, parcel_id, tree_id, record_type, amount_minor, currency_code, record_date, notes, is_active, created_at, updated_at)
+       SELECT
+         id, parcel_id, tree_id, record_type, CAST(ROUND(amount * 100) AS INTEGER), currency_code, record_date, notes, is_active, created_at, updated_at
+       FROM finance_records;`,
+      `DROP TABLE finance_records;`,
+      `ALTER TABLE finance_records_v7 RENAME TO finance_records;`,
       `CREATE INDEX IF NOT EXISTS idx_finance_records_parcel_id ON finance_records(parcel_id);`,
       `CREATE INDEX IF NOT EXISTS idx_finance_records_tree_id ON finance_records(tree_id);`,
       `CREATE INDEX IF NOT EXISTS idx_finance_records_record_date ON finance_records(record_date);`,

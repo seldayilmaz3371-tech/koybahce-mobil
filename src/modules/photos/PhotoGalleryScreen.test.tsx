@@ -266,4 +266,33 @@ describe("PhotoGalleryScreen — Sprint 3.10.1 Hotfix (Hata 2: Fotoğraf Görün
     expect(img.src).not.toBe(rawFilePath); // HAM yol asla doğrudan kullanılmamalı
     expect(img.src).toContain(rawFilePath); // ama dönüştürülmüş yol, orijinal yolu İÇERMELİ
   });
+
+  it("kaydedilmiş fotoğraflar loading='lazy' ile render edilir (Sprint 4.3.1 — düşük maliyetli perf iyileştirmesi)", async () => {
+    const observationId = await createTestChain();
+    await photoRepository.create({ observationId, filePath: "/data/photos/1.jpg" });
+
+    render(<PhotoGalleryScreen observationId={observationId} onBack={() => {}} />);
+    await waitFor(() => expect(screen.getByText("Delete Photo")).toBeTruthy());
+
+    const img = document.querySelector("img") as HTMLImageElement;
+    // NOT: jsdom, `img.loading` IDL özelliğini desteklemiyor (gerçek
+    // bir bulgu — testi yazarken keşfedildi, `undefined` döndürüyordu).
+    // HTML özniteliğinin kendisini (`getAttribute`) doğrudan kontrol
+    // ediyoruz, DOM'da GERÇEKTEN `loading="lazy"` yazdığını kanıtlıyor.
+    expect(img.getAttribute("loading")).toBe("lazy");
+  });
+});
+
+describe("PhotoGalleryScreen — Error Code Standard (Sprint 4.3.1)", () => {
+  it("repository hatası ÇEVRİLMİŞ mesajla gösterilir, ham hata ASLA görünmez", async () => {
+    resetDatabaseExecutorProviderForTesting();
+    setDatabaseExecutorProviderForTesting(async () => {
+      throw new Error("SQLITE_CONSTRAINT: test hatası, teknik detay");
+    });
+
+    render(<PhotoGalleryScreen observationId="herhangi-id" onBack={() => {}} />);
+
+    await waitFor(() => expect(screen.getByText("Something went wrong. Please try again.")).toBeTruthy());
+    expect(screen.queryByText(/SQLITE_CONSTRAINT/)).toBeNull();
+  });
 });

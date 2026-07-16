@@ -49,7 +49,7 @@ export function ParcelsScreen({ onViewTrees, onViewReferenceTrees, onViewFinance
     return () => clearTimeout(timeoutId);
   }, [searchInput]);
 
-  const { parcels, status, errorMessage, hasMore, loadMore, createParcel, updateParcel, deactivateParcel } =
+  const { parcels, status, errorCode, hasMore, loadMore, createParcel, updateParcel, deactivateParcel } =
     useParcels({ search: debouncedSearch || undefined, sortBy });
   const [view, setView] = useState<ScreenView>({ mode: "list" });
 
@@ -143,7 +143,9 @@ export function ParcelsScreen({ onViewTrees, onViewReferenceTrees, onViewFinance
 
       {status === "error" ? (
         <div className="status-card status-card--error">
-          <p className="status-card__value">{errorMessage}</p>
+          <p className="status-card__value">
+            {t(`errors.${errorCode}`, { defaultValue: t("errors.SYS_001") })}
+          </p>
         </div>
       ) : null}
 

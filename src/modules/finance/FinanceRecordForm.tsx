@@ -27,6 +27,7 @@ import { DateField } from "../../shared/components/form/DateField";
 import { TextAreaField } from "../../shared/components/form/TextAreaField";
 import { FormError } from "../../shared/components/form/FormError";
 import type { FinanceRecord, FinanceRecordType, NewFinanceRecordInput } from "./domain/finance.types";
+import { toMinorUnits, toMajorUnits } from "./domain/money";
 
 const RECORD_TYPES: FinanceRecordType[] = ["cost", "sale"];
 
@@ -63,7 +64,7 @@ export function FinanceRecordForm({
 
   const [recordType, setRecordType] = useState<FinanceRecordType>(initialValue?.recordType ?? "cost");
   const [amountInput, setAmountInput] = useState(
-    initialValue ? String(initialValue.amount) : ""
+    initialValue ? String(toMajorUnits(initialValue.amountMinor)) : ""
   );
   const [recordDateInput, setRecordDateInput] = useState(
     initialValue ? isoToDateInputValue(initialValue.recordDate) : todayAsDateInputValue()
@@ -99,7 +100,7 @@ export function FinanceRecordForm({
         parcelId,
         treeId: treeId ?? null,
         recordType,
-        amount: parsedAmount,
+        amountMinor: toMinorUnits(parsedAmount),
         recordDate: dateInputValueToIso(recordDateInput),
         notes: notes.trim() || null,
       });

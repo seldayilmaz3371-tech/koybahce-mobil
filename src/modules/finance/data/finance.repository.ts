@@ -31,7 +31,7 @@ interface FinanceRecordRow {
   parcel_id: string;
   tree_id: string | null;
   record_type: string;
-  amount: number;
+  amount_minor: number;
   currency_code: string;
   record_date: string;
   notes: string | null;
@@ -49,7 +49,7 @@ function mapRowToFinanceRecord(row: FinanceRecordRow): FinanceRecord {
     parcelId: row.parcel_id,
     treeId: row.tree_id,
     recordType: row.record_type as FinanceRecord["recordType"],
-    amount: row.amount,
+    amountMinor: row.amount_minor,
     currencyCode: row.currency_code,
     recordDate: row.record_date,
     notes: row.notes,
@@ -61,7 +61,7 @@ function mapRowToFinanceRecord(row: FinanceRecordRow): FinanceRecord {
 
 const UPDATABLE_COLUMN_MAP: Record<keyof FinanceRecordUpdateInput, string> = {
   recordType: "record_type",
-  amount: "amount",
+  amountMinor: "amount_minor",
   recordDate: "record_date",
   notes: "notes",
 };
@@ -109,7 +109,7 @@ class FinanceRepository extends BaseRepository implements IFinanceRepository {
       parcelId: input.parcelId,
       treeId: input.treeId ?? null,
       recordType: input.recordType,
-      amount: input.amount,
+      amountMinor: input.amountMinor,
       // Formda hiç gösterilmiyor — sessizce sabit atanıyor (Modül 4
       // Mimari Onayı madde 4). Çoklu para birimi ihtiyacı doğarsa
       // backlog'dan ele alınacak.
@@ -123,14 +123,14 @@ class FinanceRepository extends BaseRepository implements IFinanceRepository {
 
     await this.execute(
       `INSERT INTO finance_records
-         (id, parcel_id, tree_id, record_type, amount, currency_code, record_date, notes, is_active, created_at, updated_at)
+         (id, parcel_id, tree_id, record_type, amount_minor, currency_code, record_date, notes, is_active, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
       [
         record.id,
         record.parcelId,
         record.treeId,
         record.recordType,
-        record.amount,
+        record.amountMinor,
         record.currencyCode,
         record.recordDate,
         record.notes,

@@ -51,7 +51,7 @@ interface TreesScreenProps {
 
 export function TreesScreen({ mode, onBack, onViewObservations }: TreesScreenProps) {
   const { t } = useTranslation();
-  const { trees, status, errorMessage, createTree, createManyTrees, updateTree, deactivateTree } =
+  const { trees, status, errorCode, createTree, createManyTrees, updateTree, deactivateTree } =
     useTrees(mode);
   const [view, setView] = useState<TreesView>({ mode: "list" });
 
@@ -182,7 +182,9 @@ export function TreesScreen({ mode, onBack, onViewObservations }: TreesScreenPro
 
       {status === "error" ? (
         <div className="status-card status-card--error">
-          <p className="status-card__value">{errorMessage}</p>
+          <p className="status-card__value">
+            {t(`errors.${errorCode}`, { defaultValue: t("errors.SYS_001") })}
+          </p>
         </div>
       ) : null}
 

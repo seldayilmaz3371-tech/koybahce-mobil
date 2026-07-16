@@ -42,7 +42,7 @@ export function ObservationScreen({ scope, parcelId, contextLabel, onBack, onVie
   const {
     observations,
     status,
-    errorMessage,
+    errorCode,
     hasMore,
     loadMore,
     createObservation,
@@ -118,7 +118,9 @@ export function ObservationScreen({ scope, parcelId, contextLabel, onBack, onVie
 
       {status === "error" ? (
         <div className="status-card status-card--error">
-          <p className="status-card__value">{errorMessage}</p>
+          <p className="status-card__value">
+            {t(`errors.${errorCode}`, { defaultValue: t("errors.SYS_001") })}
+          </p>
         </div>
       ) : null}
 

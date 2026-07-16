@@ -90,7 +90,7 @@ describe("TreesScreen", () => {
     await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
   });
 
-  it("Error State: repository hatası hata kartında gösterilir", async () => {
+  it("Error State: repository hatası ÇEVRİLMİŞ mesajla gösterilir, ham hata ASLA görünmez (Sprint 4.3.1)", async () => {
     resetDatabaseExecutorProviderForTesting();
     setDatabaseExecutorProviderForTesting(async () => {
       throw new Error("Test: veritabanı bağlantısı simülasyonu başarısız");
@@ -98,9 +98,8 @@ describe("TreesScreen", () => {
 
     render(<TreesScreen mode={{ mode: "parcel", parcelId: "herhangi-bir-id" }} onBack={() => {}} onViewObservations={vi.fn()} />);
 
-    await waitFor(() =>
-      expect(screen.getByText("Test: veritabanı bağlantısı simülasyonu başarısız")).toBeTruthy()
-    );
+    await waitFor(() => expect(screen.getByText("Something went wrong. Please try again.")).toBeTruthy());
+    expect(screen.queryByText(/simülasyonu başarısız/)).toBeNull();
   });
 
   it("Listeleme (Parcel Mode): sadece verilen parselin ağaçlarını gösterir", async () => {

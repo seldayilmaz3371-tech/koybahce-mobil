@@ -238,3 +238,19 @@ describe("ObservationScreen — contextLabel ve Android Geri Tuşu (Sprint 3.5)"
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("ObservationScreen — Error Code Standard (Sprint 4.3.1)", () => {
+  it("repository hatası ÇEVRİLMİŞ mesajla gösterilir, ham hata ASLA görünmez", async () => {
+    resetDatabaseExecutorProviderForTesting();
+    setDatabaseExecutorProviderForTesting(async () => {
+      throw new Error("SQLITE_CONSTRAINT: test hatası, teknik detay");
+    });
+
+    render(
+      <ObservationScreen scope={{ mode: "tree", treeId: "herhangi-id" }} parcelId="herhangi-id" onBack={() => {}} onViewPhotos={vi.fn()} />
+    );
+
+    await waitFor(() => expect(screen.getByText("Something went wrong. Please try again.")).toBeTruthy());
+    expect(screen.queryByText(/SQLITE_CONSTRAINT/)).toBeNull();
+  });
+});

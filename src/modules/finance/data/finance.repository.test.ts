@@ -38,14 +38,14 @@ describe("FinanceRepository", () => {
     const created = await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 250.5,
+      amountMinor: 25050,
       recordDate: "2026-01-01T00:00:00.000Z",
       notes: "Gübre alımı",
     });
 
     const found = await financeRepository.getById(created.id);
 
-    expect(found).toMatchObject({ recordType: "cost", amount: 250.5, notes: "Gübre alımı" });
+    expect(found).toMatchObject({ recordType: "cost", amountMinor: 25050, notes: "Gübre alımı" });
   });
 
   it("currencyCode formda verilmese bile sessizce 'TRY' olarak atanır", async () => {
@@ -53,7 +53,7 @@ describe("FinanceRepository", () => {
     const record = await financeRepository.create({
       parcelId,
       recordType: "sale",
-      amount: 1000,
+      amountMinor: 1000,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
 
@@ -66,7 +66,7 @@ describe("FinanceRepository", () => {
       financeRepository.create({
         parcelId,
         recordType: "cost",
-        amount: 100,
+        amountMinor: 100,
         recordDate: "2026-01-01T00:00:00.000Z",
       })
     ).resolves.toMatchObject({ notes: null });
@@ -77,14 +77,14 @@ describe("FinanceRepository", () => {
     await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 50,
+      amountMinor: 50,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
     await financeRepository.create({
       parcelId,
       treeId,
       recordType: "cost",
-      amount: 30,
+      amountMinor: 30,
       recordDate: "2026-01-02T00:00:00.000Z",
     });
 
@@ -98,14 +98,14 @@ describe("FinanceRepository", () => {
     await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 50,
+      amountMinor: 50,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
     await financeRepository.create({
       parcelId,
       treeId,
       recordType: "sale",
-      amount: 500,
+      amountMinor: 500,
       recordDate: "2026-01-02T00:00:00.000Z",
     });
 
@@ -120,25 +120,25 @@ describe("FinanceRepository", () => {
     await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 10,
+      amountMinor: 10,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
     await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 20,
+      amountMinor: 20,
       recordDate: "2026-03-01T00:00:00.000Z",
     });
     await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 30,
+      amountMinor: 30,
       recordDate: "2026-02-01T00:00:00.000Z",
     });
 
     const list = await financeRepository.listByParcel(parcelId);
 
-    expect(list.map((r) => r.amount)).toEqual([20, 30, 10]);
+    expect(list.map((r) => r.amountMinor)).toEqual([20, 30, 10]);
   });
 
   it("update() sadece verilen alanları değiştirir, parcelId/treeId hiç değişemez", async () => {
@@ -146,14 +146,14 @@ describe("FinanceRepository", () => {
     const created = await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 100,
+      amountMinor: 100,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
 
-    await financeRepository.update(created.id, { amount: 150 });
+    await financeRepository.update(created.id, { amountMinor: 150 });
 
     const updated = await financeRepository.getById(created.id);
-    expect(updated?.amount).toBe(150);
+    expect(updated?.amountMinor).toBe(150);
     expect(updated?.recordType).toBe("cost"); // değişmemeli
     expect(updated?.parcelId).toBe(parcelId); // hiç değişemez (tip sisteminde yok)
   });
@@ -163,7 +163,7 @@ describe("FinanceRepository", () => {
     const created = await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 100,
+      amountMinor: 100,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
 
@@ -180,7 +180,7 @@ describe("FinanceRepository", () => {
         parcelId,
         // @ts-expect-error - bilerek geçersiz/kapsam-dışı bir tip deneniyor
         recordType: "harvest",
-        amount: 100,
+        amountMinor: 100,
         recordDate: "2026-01-01T00:00:00.000Z",
       })
     ).rejects.toThrow();
@@ -191,7 +191,20 @@ describe("FinanceRepository", () => {
       financeRepository.create({
         parcelId: "var-olmayan-parsel",
         recordType: "cost",
-        amount: 100,
+        amountMinor: 100,
+        recordDate: "2026-01-01T00:00:00.000Z",
+      })
+    ).rejects.toThrow();
+  });
+
+  it("var olmayan bir treeId ile kayıt oluşturmak FOREIGN KEY kısıtı nedeniyle reddedilir (Sprint 4.3.1 — Modül 4 denetiminde bulunan gerçek kapsam boşluğu)", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    await expect(
+      financeRepository.create({
+        parcelId,
+        treeId: "var-olmayan-agac",
+        recordType: "cost",
+        amountMinor: 100,
         recordDate: "2026-01-01T00:00:00.000Z",
       })
     ).rejects.toThrow();
@@ -208,7 +221,7 @@ describe("FinanceRepository", () => {
       await financeRepository.create({
         parcelId,
         recordType: "cost",
-        amount: i,
+        amountMinor: i,
         recordDate: `2026-01-${String((i % 28) + 1).padStart(2, "0")}T00:00:00.000Z`,
       });
     }

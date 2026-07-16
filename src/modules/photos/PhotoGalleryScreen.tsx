@@ -36,7 +36,7 @@ interface PhotoGalleryScreenProps {
 
 export function PhotoGalleryScreen({ observationId, onBack }: PhotoGalleryScreenProps) {
   const { t } = useTranslation();
-  const { photos, status, errorMessage, refetch, deactivatePhoto } = usePhotos(observationId);
+  const { photos, status, errorCode, refetch, deactivatePhoto } = usePhotos(observationId);
   const [view, setView] = useState<GalleryView>({ mode: "list" });
   const [captureError, setCaptureError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -158,7 +158,9 @@ export function PhotoGalleryScreen({ observationId, onBack }: PhotoGalleryScreen
 
           {status === "error" ? (
             <div className="status-card status-card--error">
-              <p className="status-card__value">{errorMessage}</p>
+              <p className="status-card__value">
+                {t(`errors.${errorCode}`, { defaultValue: t("errors.SYS_001") })}
+              </p>
             </div>
           ) : null}
 
@@ -194,6 +196,7 @@ function PhotoListItem({ photo, onDelete }: { photo: Photo; onDelete: (id: strin
         <img
           src={toDisplaySrc(photo.filePath)}
           alt=""
+          loading="lazy"
           style={{ width: "100%", maxHeight: 200, objectFit: "cover", borderRadius: 8 }}
         />
         <button

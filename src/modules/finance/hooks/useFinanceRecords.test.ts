@@ -41,14 +41,14 @@ describe("useFinanceRecords", () => {
     await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 50,
+      amountMinor: 50,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
     await financeRepository.create({
       parcelId,
       treeId,
       recordType: "sale",
-      amount: 500,
+      amountMinor: 500,
       recordDate: "2026-01-02T00:00:00.000Z",
     });
 
@@ -63,14 +63,14 @@ describe("useFinanceRecords", () => {
     await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 50,
+      amountMinor: 50,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
     await financeRepository.create({
       parcelId,
       treeId,
       recordType: "sale",
-      amount: 500,
+      amountMinor: 500,
       recordDate: "2026-01-02T00:00:00.000Z",
     });
 
@@ -95,7 +95,7 @@ describe("useFinanceRecords", () => {
       await financeRepository.create({
         parcelId,
         recordType: "cost",
-        amount: i,
+        amountMinor: i,
         recordDate: `2026-01-${String((i % 28) + 1).padStart(2, "0")}T00:00:00.000Z`,
       });
     }
@@ -119,7 +119,7 @@ describe("useFinanceRecords", () => {
     await result.current.createRecord({
       parcelId,
       recordType: "cost",
-      amount: 100,
+      amountMinor: 100,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
 

@@ -76,7 +76,7 @@ export function FinanceScreen({ scope, parcelId, onBack }: FinanceScreenProps) {
     if (view.mode === "edit") {
       await updateRecord(view.record.id, {
         recordType: input.recordType,
-        amount: input.amount,
+        amountMinor: input.amountMinor,
         recordDate: input.recordDate,
         notes: input.notes,
       });

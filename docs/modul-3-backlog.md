@@ -79,3 +79,15 @@ Sprint 3.8'de bulundu: `PhotoGalleryScreen`, bugün **tam çözünürlüklü** g
 ## 18) Toplu Oluşturmanın Toplu Geri Alınması
 
 Sprint 3.10'da dürüstçe belirtildi (Madde 8): başarısız bir toplu oluşturma zaten tam olarak geri alınıyor (transaction rollback, gerçek testle kanıtlandı). Ama **başarıyla tamamlanmış** bir toplu oluşturmayı SONRADAN topluca geri almak (ör. "yanlış aralık girdim, hepsini geri al") için özel bir mekanizma bugün yok — kullanıcı isterse ağaçları tek tek pasife alabilir. **Bugün eklenmiyor** (YAGNI) — gerçek bir ihtiyaç doğarsa (`restore()` eksikliğiyle — backlog Modül 2 Kapanış Raporu madde 1 — birlikte) değerlendirilebilir.
+
+## 19) Liste Virtualization
+
+Sprint 4.3.1'de (Modül 4 Bağımsız Denetimi kaynaklı) değerlendirildi: hiçbir listede (`react-window` vb.) virtualization yok — sayfalama (50/sayfa) DOM boyutunu yumuşak bir şekilde sınırlıyor ama sert bir tavan değil (kullanıcı "Daha Fazla Yükle"ye çok kez basarsa yüzlerce öğe DOM'da birikebilir). **Bugün eklenmiyor** — gerçek bir performans şikayeti/ölçümü olmadan bir kütüphane bağımlılığı eklemek erken optimizasyon olurdu (YAGNI). İzlenmesi gereken bir madde: gerçek saha kullanımında bir kullanıcı gerçekten yüzlerce kayıt biriktirirse yeniden değerlendirilmeli.
+
+## 20) `AppRouter.tsx`'teki Inline Fonksiyonlar (`useCallback` Yokluğu)
+
+Sprint 4.3.1'de değerlendirildi: route wrapper'lardaki `onBack={() => navigate(-1)}` gibi satır-içi fonksiyonlar her render'da yeni referans üretiyor, `useCallback` ile sabitlenmiyor. Bu, teorik olarak alt bileşenlerin geri tuşu dinleyicisinin gereksiz yere yeniden kaydolmasına yol açabilir. **Bugün düzeltilmiyor** — gerçek ölçülebilir bir performans etkisi yok (dinleyici yeniden kaydı ucuz bir işlem), `useCallback` eklemek bu ölçekte erken optimizasyon olurdu.
+
+## 21) Tekrarlanan Liste Bileşenleri (`ParcelList`/`TreeList`/`ObservationList`/`FinanceRecordList`)
+
+Sprint 4.3.1'de (Modül 4 Bağımsız Denetimi) değerlendirildi: 4 modülde neredeyse aynı `<ul class="parcel-list">` + `.map()` deseni tekrarlanıyor. **Bugün `EntityList<T>` gibi bir soyutlamaya REFACTOR EDİLMİYOR** — gerekçe: (1) bu 4 modül zaten çalışan, test edilmiş kod — sadece kozmetik/organizasyonel bir sebeple dokunmak gerçek bir regresyon riski taşır (Kural 26 ihlali); (2) bileşenler yapı olarak benzese de İÇERİK olarak (her Card'ın gösterdiği alanlar) farklı — gerçek bir genelleştirme, render-prop/children deseni gerektirir ki bu da kendi karmaşıklığını getirir; (3) henüz sadece 4 tekrar var, 5./6. bir modül (Bakım/Hasat) de aynı deseni gerektirirse yeniden değerlendirilmeli.

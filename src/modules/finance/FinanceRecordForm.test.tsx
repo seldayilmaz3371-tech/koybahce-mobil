@@ -66,7 +66,7 @@ describe("FinanceRecordForm", () => {
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     const submitted = onSubmit.mock.calls[0][0];
-    expect(submitted.amount).toBe(250.75);
+    expect(submitted.amountMinor).toBe(25075);
     expect(submitted.recordDate).toBe("2026-03-15T00:00:00.000Z");
     expect(submitted.recordType).toBe("cost");
     expect(submitted.notes).toBeNull();
@@ -91,7 +91,7 @@ describe("FinanceRecordForm", () => {
       parcelId: PARCEL_ID,
       treeId: null,
       recordType: "sale",
-      amount: 1500,
+      amountMinor: 150000,
       currencyCode: "TRY",
       recordDate: "2025-06-01T00:00:00.000Z",
       notes: "Zeytin satışı",
@@ -119,7 +119,7 @@ describe("FinanceRecordForm", () => {
       parcelId: PARCEL_ID,
       treeId: null,
       recordType: "cost",
-      amount: 100,
+      amountMinor: 10000,
       currencyCode: "TRY",
       recordDate: "2026-01-01T00:00:00.000Z",
       notes: null,

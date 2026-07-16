@@ -80,7 +80,7 @@ describe("FinanceScreen", () => {
     await financeRepository.create({
       parcelId,
       recordType: "cost",
-      amount: 100,
+      amountMinor: 10000,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
     render(<FinanceScreen scope={{ mode: "parcel", parcelId }} parcelId={parcelId} onBack={() => {}} />);
@@ -103,7 +103,7 @@ describe("FinanceScreen", () => {
     await financeRepository.create({
       parcelId,
       recordType: "sale",
-      amount: 100,
+      amountMinor: 10000,
       recordDate: "2026-01-01T00:00:00.000Z",
     });
     render(<FinanceScreen scope={{ mode: "parcel", parcelId }} parcelId={parcelId} onBack={() => {}} />);

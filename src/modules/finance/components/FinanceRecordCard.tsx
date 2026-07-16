@@ -8,6 +8,7 @@
 
 import { useTranslation } from "react-i18next";
 import { formatCurrency, formatDate } from "../../../i18n/formatters";
+import { toMajorUnits } from "../domain/money";
 import type { FinanceRecord } from "../domain/finance.types";
 
 interface FinanceRecordCardProps {
@@ -18,7 +19,7 @@ interface FinanceRecordCardProps {
 export function FinanceRecordCard({ record, onSelect }: FinanceRecordCardProps) {
   const { t, i18n } = useTranslation();
   const typeLabel = t(`finance.type.${record.recordType}`);
-  const formattedAmount = formatCurrency(record.amount, record.currencyCode, i18n.language);
+  const formattedAmount = formatCurrency(toMajorUnits(record.amountMinor), record.currencyCode, i18n.language);
   const formattedDate = formatDate(record.recordDate, i18n.language);
 
   return (

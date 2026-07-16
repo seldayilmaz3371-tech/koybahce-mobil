@@ -106,6 +106,13 @@ function ReferenceTreesScreenRoute() {
  * durumu — orada tam `Tree` nesnesi zaten elde vardı; rotada sadece
  * `treeId` var, bu yüzden burada AYNI veriyi tek bir sorguyla
  * yeniden elde ediyoruz — repository katmanına dokunmadan).
+ *
+ * MİMARİ İSTİSNA (Modül 4 Bağımsız Denetimi'nde bulundu, Sprint
+ * 4.3.1'de değerlendirilip BİLİNÇLİ OLARAK KORUNDU — bkz.
+ * docs/engineering-protocol.md Bölüm 21): Bu, `treeRepository`'ye
+ * Hook katmanını atlayıp DOĞRUDAN erişen tek yer. Gerekçe: mevcut
+ * `useTrees` liste-odaklı, tekil "id'ye göre getir" modu yok; bunun
+ * için yeni bir soyutlama eklemek YAGNI ihlali olurdu.
  */
 function ObservationScreenRoute() {
   const { treeId } = useParams<{ treeId: string }>();
