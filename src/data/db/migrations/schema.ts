@@ -71,7 +71,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 7;
+export const CURRENT_SCHEMA_VERSION = 8;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -227,6 +227,42 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
       `CREATE INDEX IF NOT EXISTS idx_finance_records_parcel_id ON finance_records(parcel_id);`,
       `CREATE INDEX IF NOT EXISTS idx_finance_records_tree_id ON finance_records(tree_id);`,
       `CREATE INDEX IF NOT EXISTS idx_finance_records_record_date ON finance_records(record_date);`,
+    ],
+  },
+  {
+    toVersion: 8,
+    statements: [
+      // Modül 5, Sprint 5.1 — Bakım Yönetimi. Onaylanan Blueprint
+      // (Revizyon 2-4): maintenance_type/status, TypeScript
+      // domain/maintenance.types.ts'teki MaintenanceType/
+      // MaintenanceStatus sabitleriyle BİREBİR eşleşir (tek doğruluk
+      // kaynağı). status_log, HİÇBİR ZAMAN UI'dan değil, repository
+      // transaction'ı içinde otomatik yazılır (Revizyon 4).
+      `CREATE TABLE IF NOT EXISTS maintenance_records (
+         id TEXT PRIMARY KEY NOT NULL,
+         parcel_id TEXT NOT NULL REFERENCES parcels(id) ON DELETE RESTRICT,
+         tree_id TEXT REFERENCES trees(id) ON DELETE RESTRICT,
+         maintenance_type TEXT NOT NULL CHECK (maintenance_type IN
+           ('irrigation','fertilization','pesticide','pruning','soil_preparation','pre_harvest_care','other')),
+         status TEXT NOT NULL CHECK (status IN ('planned','completed','cancelled')) DEFAULT 'completed',
+         scheduled_date TEXT,
+         completed_date TEXT,
+         notes TEXT,
+         is_active INTEGER NOT NULL DEFAULT 1,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `CREATE INDEX IF NOT EXISTS idx_maintenance_records_parcel_id ON maintenance_records(parcel_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_maintenance_records_tree_id ON maintenance_records(tree_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_maintenance_records_scheduled_date ON maintenance_records(scheduled_date);`,
+      `CREATE TABLE IF NOT EXISTS maintenance_status_log (
+         id TEXT PRIMARY KEY NOT NULL,
+         maintenance_record_id TEXT NOT NULL REFERENCES maintenance_records(id) ON DELETE RESTRICT,
+         previous_status TEXT,
+         new_status TEXT NOT NULL,
+         changed_at TEXT NOT NULL
+       );`,
+      `CREATE INDEX IF NOT EXISTS idx_maintenance_status_log_record_id ON maintenance_status_log(maintenance_record_id);`,
     ],
   },
 ];
