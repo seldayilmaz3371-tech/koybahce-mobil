@@ -71,7 +71,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 5;
+export const CURRENT_SCHEMA_VERSION = 6;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -159,6 +159,33 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
        );`,
       `CREATE INDEX IF NOT EXISTS idx_photos_observation_id ON photos(observation_id);`,
       `CREATE INDEX IF NOT EXISTS idx_photos_taken_at ON photos(taken_at);`,
+    ],
+  },
+  {
+    toVersion: 6,
+    statements: [
+      // Modül 4, Sprint 4.1 — Finans. Onaylanan tasarım (Mimari Onay,
+      // 2026-07-15): record_type SADECE 'cost'/'sale' — hasat (fiziksel
+      // miktar/verim) bilerek dışarıda, gelecekteki ayrı bir Hasat
+      // modülüne bırakıldı. created_at/updated_at, Database Master
+      // Schema Genel Kural 2'ye uygun olarak eklendi (ilk taslakta
+      // eksikti — Modül 4 Ön Analizinde bulunan gerçek bir bulguydu).
+      `CREATE TABLE IF NOT EXISTS finance_records (
+         id TEXT PRIMARY KEY NOT NULL,
+         parcel_id TEXT NOT NULL REFERENCES parcels(id) ON DELETE RESTRICT,
+         tree_id TEXT REFERENCES trees(id) ON DELETE RESTRICT,
+         record_type TEXT NOT NULL CHECK (record_type IN ('cost','sale')),
+         amount REAL NOT NULL,
+         currency_code TEXT NOT NULL DEFAULT 'TRY',
+         record_date TEXT NOT NULL,
+         notes TEXT,
+         is_active INTEGER NOT NULL DEFAULT 1,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `CREATE INDEX IF NOT EXISTS idx_finance_records_parcel_id ON finance_records(parcel_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_finance_records_tree_id ON finance_records(tree_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_finance_records_record_date ON finance_records(record_date);`,
     ],
   },
 ];
