@@ -1,4 +1,29 @@
 {
+  "errors": {
+    "DB_003": "Girdiğiniz değer geçerli değil.",
+    "DB_004": "Bu kayıt zaten mevcut.",
+    "DB_005": "İlişkili bir kayıt bulunamadı.",
+    "SYS_001": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
+  },
+  "finance": {
+    "screenTitle": "Finans",
+    "emptyState": "Henüz finans kaydı yok.",
+    "addButton": "Kayıt Ekle",
+    "loadMoreButton": "Daha Fazla Yükle",
+    "formTitleCreate": "Yeni Finans Kaydı",
+    "formTitleEdit": "Finans Kaydını Düzenle",
+    "type": {
+      "label": "Tür",
+      "cost": "Maliyet",
+      "sale": "Satış"
+    },
+    "amount": "Tutar",
+    "recordDate": "Tarih",
+    "deleteButton": "Kaydı Sil",
+    "deleteConfirm": "Bu finans kaydı silinsin mi? Listelerinizden kaldırılacak.",
+    "amountInvalid": "Tutar pozitif bir sayı olmalıdır.",
+    "recordDateInvalid": "Lütfen geçerli bir tarih seçin."
+  },
   "common": {
     "cancel": "İptal",
     "continue": "Devam Et",

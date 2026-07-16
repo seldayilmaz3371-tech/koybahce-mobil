@@ -1,4 +1,29 @@
 {
+  "errors": {
+    "DB_003": "The value you entered isn't valid.",
+    "DB_004": "This record already exists.",
+    "DB_005": "A related record could not be found.",
+    "SYS_001": "Something went wrong. Please try again."
+  },
+  "finance": {
+    "screenTitle": "Finance",
+    "emptyState": "No finance records yet.",
+    "addButton": "Add Record",
+    "loadMoreButton": "Load More",
+    "formTitleCreate": "New Finance Record",
+    "formTitleEdit": "Edit Finance Record",
+    "type": {
+      "label": "Type",
+      "cost": "Cost",
+      "sale": "Sale"
+    },
+    "amount": "Amount",
+    "recordDate": "Date",
+    "deleteButton": "Delete Record",
+    "deleteConfirm": "Delete this finance record? It will be removed from your lists.",
+    "amountInvalid": "Amount must be a positive number.",
+    "recordDateInvalid": "Please select a valid date."
+  },
   "common": {
     "cancel": "Cancel",
     "continue": "Continue",
