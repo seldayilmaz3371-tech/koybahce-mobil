@@ -6,6 +6,16 @@ Bu belge, Engineering Protocol Bölüm 10'daki (Test Kapısı) yaşam döngüsü
 Kod Yazılıyor → Kod Hazır → Gerçek Android Testi Bekleniyor → Test Başarılı → Modül Tamamlandı
 ```
 
+## Genel Özet (Güncel)
+
+| Modül | Kapsam | Durum |
+|---|---|---|
+| 1 | Altyapı | ✅ Resmen kapandı |
+| 2 | Parseller + Ağaçlar | ✅ Resmen tamamlandı (v0.2.0) |
+| 3 | Gözlemler + Fotoğraflar + Toplu Ağaç | ✅ Resmen tamamlandı (v0.3.0) |
+| 4 | Router Migration + Finans | 🟡 Kod tamamlandı, son hotfix'in (P0-001) cihaz doğrulaması bekleniyor |
+| 5+ | Bakım/Hasat/Hava Durumu/Harita/AI/Dashboard/Ayarlar/Raporlar | ⚪ Henüz başlamadı, tasarım kararı yok |
+
 ---
 
 ## Modül 1 — Altyapı
@@ -50,17 +60,103 @@ Parsel ve Ağaç: tam CRUD, arama/sıralama/sayfalama (Parsel), Reference/Parcel
 | 2.3 | TreeForm + CheckboxField + native validation düzeltmesi | ✅ Kullanıcı tarafından kabul edildi |
 | 2.4 | TreesScreen (listeleme) | ✅ Kullanıcı tarafından kabul edildi |
 | 2.5 | TreeForm/TreesScreen entegrasyonu, Parcel→Trees navigasyonu, CRUD | ✅ Kullanıcı tarafından kabul edildi |
-| 2.6 | Android geri tuşu, ADR 0022 düzeltmesi, Error Code Standard | Kod tamamlandı, kullanıcı onayı bekleniyor |
+| 2.6 | Android geri tuşu, ADR 0022 düzeltmesi, Error Code Standard | ✅ Kullanıcı tarafından kabul edildi |
 
 ### Test Kapsamı
 58 otomatik test (Vitest): 9 Parcel repo + 12 Tree repo + 8 useTrees hook + 7 TreeForm + 12 TreesScreen (CRUD+geri tuşu dahil) + 5 ParcelsScreen (navigasyon+geri tuşu) + 5 mapSqliteError.
 
-### Bilinen Teknik Borçlar (Bilinçli, Ertelenen)
-- Fotoğraf↔Gözlem ilişkisi tasarım kararı (Modül 3'e erteledi, Database Master Schema'da belgeli)
-- Error Code Standard'ın UI katmanında (çevrilmiş mesaj gösterimi) henüz tüketilmemesi — altyapı hazır, tüketim gelecek modülde
+### Bilinen Teknik Borçlar (Modül 2 Kapanışında)
+- ~~Fotoğraf↔Gözlem ilişkisi tasarım kararı~~ — ✅ Modül 3'te çözüldü (Seçenek B)
+- ~~Error Code Standard'ın UI katmanında tüketilmemesi~~ — ✅ Modül 4'te (Sprint 4.2/4.3.1) tüm ekranlara genişletildi
 
 ### Sonraki Adım
 Kullanıcının gerçek Android cihaz kabul testi → Git Tag (v0.2.0) → Modül 2 resmi kabulü.
 
 ### Dondurma Kuralı (Kullanıcı Kararı, 2026-07-15)
 Modül 2'ye **yeni özellik eklenmeyecek**. Yalnızca **kritik güvenlik açığı veya kritik hata** bulunursa düzeltme yapılacak (Modül 1'deki aynı kural).
+
+---
+
+## Modül 3 — Gözlemler ve Fotoğraflar
+
+**Durum: ✅ RESMEN TAMAMLANDI** (Kullanıcı Kabul Raporu — gerçek Android cihaz testi, tüm kriterler karşılandı; ardından Sprint 3.10.1'de bir P0/P1 gerçek cihaz hotfix'i uygulanıp yeniden doğrulandı)
+
+### Kapsam
+Gözlem (5 tür: general/health_concern/growth_stage/weather_impact/other) tam CRUD, Fotoğraf (Kamera/Galeri, önizleme, kalıcı depolama, silme), Toplu Ağaç Oluşturma (Sprint 3.10 — `runInTransaction()`'ın ilk gerçek kullanımı), Parsel→Ağaç→Gözlem→Fotoğraf tam navigasyon zinciri.
+
+### Sprint Geçmişi
+| Sprint | İçerik | Durum |
+|---|---|---|
+| 3.1 | Observation Domain Review + ObservationRepository + Şema Sürüm 4 | ✅ Kabul edildi |
+| 3.2 | useObservations hook (dual-scope + sayfalama) | ✅ Kabul edildi |
+| 3.3 | ObservationForm (0 zorunlu alan — Minimum Dokunuş İlkesi) | ✅ Kabul edildi |
+| 3.4 | ObservationScreen (listeleme, ObservationCard) | ✅ Kabul edildi |
+| 3.5 | Ağaç→Gözlem navigasyonu, contextLabel, geri tuşu | ✅ Kabul edildi |
+| 3.6 | PhotoRepository + Şema Sürüm 5 (AI yok) | ✅ Kabul edildi |
+| 3.7 | Photo Screen — Kamera/Galeri/Önizleme/Silme, kalıcı depolama | ✅ Kabul edildi |
+| 3.8 | Observation↔Photo ilişkisi doğrulaması (kod değişikliği gerekmedi) | ✅ Kabul edildi |
+| 3.9 | Modül 3 E2E Kabul Testi (Golden Path) + 5 kapanış belgesi | ✅ Kabul edildi |
+| 3.10 | Toplu Ağaç Oluşturma (Bulk Tree Creation) | ✅ Kabul edildi |
+| 3.10.1 | **P0/P1 Gerçek Cihaz Hotfix** — "Already in transaction" (transaction parametresi) + fotoğraf render (`convertFileSrc`) | ✅ Kabul edildi |
+
+### Test Kapsamı (Modül 3 Kapanışında)
+156 otomatik test — Observation/Photo repository+hook+form+screen, Golden Path E2E, Referans Ağaç+geri tuşu zinciri, statik mimari uyumluluk (offline-first, soft-delete-only).
+
+### Bilinen Teknik Borçlar (Modül 3 Kapanışında)
+- Fotoğraf galerisinde thumbnail yok (tam çözünürlük) — Sprint 4.3.1'de kısmen ele alındı (`loading="lazy"` eklendi, gerçek thumbnail üretimi hâlâ yok)
+- `isSubmitting` yarış durumu sadece Photo'da düzeltilmişti — Sprint 4.2'de Finans'a da baştan uygulandı, Parcel/Tree/Observation formlarında hâlâ teorik risk
+- Router eksikliği (bu noktada kritik önceliğe çıkmıştı) — ✅ Modül 4'te çözüldü
+
+### Dondurma Kuralı
+Modül 3'e **yeni özellik eklenmeyecek**. Yalnızca **kritik güvenlik açığı veya kritik hata** bulunursa düzeltme yapılacak (Sprint 3.10.1 bu kural altında uygulandı).
+
+---
+
+## Modül 4 — Router Migration ve Finans
+
+**Durum: 🟡 KOD TAMAMLANDI — Sprint 4.3.2'nin (P0-001 hotfix) gerçek cihaz doğrulaması bekleniyor**
+
+### Kapsam
+Tüm üst-düzey navigasyonun `react-router` (HashRouter) tabanlı gerçek bir router'a taşınması (view-state prop-threading'den geçiş) + Finans modülü (sadece `cost`/`sale`, kuruş cinsinden `INTEGER` tutar saklama, `record_date` formda görünür/düzenlenebilir).
+
+### Sprint Geçmişi
+| Sprint | İçerik | Durum |
+|---|---|---|
+| 4.0 | Ön analiz + Router Migration mimari onayı | ✅ Onaylandı |
+| 4.0.1 | Router Migration — tüm 5 üst-düzey rota (Seçenek A, tek seferde) | ✅ Onaylandı |
+| 4.1 | Finans — Migration (Şema Sürüm 6) + Domain + Repository | ✅ Onaylandı |
+| 4.2 | Finans — Hook + Form + Screen (Error Code Standard'ın ilk UI tüketimi) | ✅ Onaylandı |
+| 4.3 | Finans Router entegrasyonu (Parsel→Finans navigasyonu) | ✅ Onaylandı |
+| 4.3.1 | **Bağımsız Mimari Denetim** + P1 düzeltmeleri: para birimi (Şema Sürüm 7, `amount_minor INTEGER`), arka plan yeniden kilitleme, Error Code Standard'ın 4 ekrana genişletilmesi | ✅ Onaylandı |
+| 4.3.2 | **P0-001 Hotfix** — Kamera Intent + LockScreen regresyonu (`isCapturingPhoto()` bayrağı) | Kod tamamlandı — **gerçek cihaz doğrulaması bekleniyor** |
+
+### Test Kapsamı (Güncel)
+**222 otomatik test.**
+
+### Bilinen Teknik Borçlar (Modül 4 Bağımsız Denetiminde Bulunan, Bilinçli Ertelenen)
+- Liste virtualization yok (P2 — gerçek performans şikayeti olmadan erken optimizasyon olurdu)
+- `AppRouter.tsx`'teki `treeRepository`'ye doğrudan erişim — değerlendirildi, **gerekçelendirilerek korundu** (`engineering-protocol.md` Bölüm 21)
+- 4 modülde tekrarlanan List bileşen deseni (`EntityList<T>` soyutlaması yok) — YAGNI gerekçesiyle ertelendi
+- `AppRouter.tsx`'teki inline fonksiyonlarda `useCallback` yok — ölçülebilir etkisi yok, erken optimizasyon olurdu
+
+### Sonraki Adım
+Kullanıcının Sprint 4.3.2'yi (özellikle "Kamera ile Çek" senaryosu) gerçek cihazda tekrar doğrulaması → Modül 4 resmi kabulü → Git Tag (v0.4.0 önerilecek).
+
+### Dondurma Kuralı
+Henüz resmen kapanmadı — kullanıcının son onayı bekleniyor.
+
+---
+
+## Henüz Başlamayan Modüller
+
+Router'da isim alanı ayrılmış (`docs/router` altında `FUTURE_ROUTE_NAMES`), ama hiçbir tasarım/kod kararı alınmamış:
+
+- **Bakım (Maintenance)**
+- **Hasat (Harvest)** — Finans'tan Modül 4'te bilinçli olarak ayrıldı
+- **Hava Durumu (Weather)**
+- **Harita (Map)**
+- **AI Analizi**
+- **Bitki Tanıma**
+- **Dashboard**
+- **Ayarlar (Settings)**
+- **Raporlar (Reports)**
