@@ -1,15 +1,15 @@
 /**
  * App — Kök Bileşen
  * ====================
- * Modül 1 kapsamında bu bileşenin tek görevi:
+ * Sprint 4.0 ile KÜÇÜLTÜLDÜ (Router Migration onayı, 2026-07-15):
+ * Eskiden burada yaşayan tüm üst-düzey ekran seçim mantığı (AppView
+ * union'ı + setView çağrıları) `src/router/AppRouter.tsx`'e taşındı.
+ *
+ * Bu bileşenin tek görevi (DEĞİŞMEDİ):
  *   1. Kilit ekranını göstermek (biyometrik/PIN doğrulama).
  *   2. Doğrulama başarılı olduktan sonra veritabanı bağlantısını kurmak
  *      ve şemanın gerçekten uygulandığını doğrulamak.
- *   3. Sonucu, cihazda gözle görülebilir bir "durum ekranı" olarak
- *      göstermek — bu ekran, test planındaki adımların karşılığıdır.
- *
- * İş modülleri (Parseller, Gözlemler, ...) geldiğinde bu durum ekranı
- * kaldırılıp yerine gerçek uygulama gezinmesi (navigation) gelecek.
+ *   3. Altyapı hazır olduğunda `<AppRouter />`'ı render etmek.
  *
  * GLOBALIZATION POLICY: Bu dosyada hiçbir kullanıcıya görünen metin
  * doğrudan yazılmaz — tümü useTranslation() üzerinden
@@ -22,12 +22,7 @@ import { LockScreen } from "./modules/auth/LockScreen";
 import { getDatabase, getRuntimePlatform } from "./data/db/connection";
 import { appMetadataRepository } from "./data/repositories/appMetadata.repository";
 import { CURRENT_SCHEMA_VERSION } from "./data/db/migrations/schema";
-import { ParcelsScreen } from "./modules/parcels/ParcelsScreen";
-import { TreesScreen } from "./modules/trees/TreesScreen";
-import { ObservationScreen } from "./modules/observations/ObservationScreen";
-import { PhotoGalleryScreen } from "./modules/photos/PhotoGalleryScreen";
-import type { Tree } from "./modules/trees/domain/tree.types";
-import type { Observation } from "./modules/observations/domain/observation.types";
+import { AppRouter } from "./router/AppRouter";
 
 type InfrastructureStatus =
   | { phase: "idle" }
@@ -40,32 +35,12 @@ type InfrastructureStatus =
     }
   | { phase: "failed"; message: string };
 
-/**
- * Üst düzey navigasyon durumu (Sprint 2.5'te başladı, Sprint 3.5'te
- * genişledi). Bilerek bir router kütüphanesi YOK — Modül 1'den beri
- * süregelen basit "view state" deseni.
- *
- * `trees-for-parcel` SADECE `parcelId` taşıyor (tam `Parcel` nesnesi
- * DEĞİL) — çünkü TreesScreen zaten sadece bunu kullanıyordu (gereksiz
- * veri taşınmıyordu, Kural 26: sadece gerekli olanı değiştir/taşı).
- * Bu sadeleştirme, `observations-for-tree`'den geri dönerken (Tree
- * nesnesi zaten `parcelId` içeriyor) tutarlı bir şekilde yeniden
- * kullanılabilmesini sağlıyor.
- */
-type AppView =
-  | { screen: "parcels" }
-  | { screen: "trees-for-parcel"; parcelId: string }
-  | { screen: "reference-trees" }
-  | { screen: "observations-for-tree"; tree: Tree }
-  | { screen: "photos-for-observation"; tree: Tree; observation: Observation };
-
 function App() {
   const { t } = useTranslation();
   const [unlocked, setUnlocked] = useState(false);
   const [infrastructure, setInfrastructure] = useState<InfrastructureStatus>({
     phase: "idle",
   });
-  const [view, setView] = useState<AppView>({ screen: "parcels" });
 
   const initializeInfrastructure = useCallback(async () => {
     setInfrastructure({ phase: "initializing" });
@@ -100,57 +75,8 @@ function App() {
     return <LockScreen onUnlocked={handleUnlocked} />;
   }
 
-  // Modül 1 donduruldu (bkz. docs/module-status.md) — tanılama
-  // ekranının görevi bitti. Veritabanı hazır olduğunda artık gerçek
-  // uygulama navigasyonu gösteriliyor.
   if (infrastructure.phase === "ready") {
-    if (view.screen === "photos-for-observation") {
-      return (
-        <PhotoGalleryScreen
-          observationId={view.observation.id}
-          onBack={() =>
-            setView({ screen: "observations-for-tree", tree: view.tree })
-          }
-        />
-      );
-    }
-    if (view.screen === "observations-for-tree") {
-      return (
-        <ObservationScreen
-          scope={{ mode: "tree", treeId: view.tree.id }}
-          parcelId={view.tree.parcelId}
-          contextLabel={`${view.tree.treeNumber} — ${view.tree.variety}`}
-          onBack={() => setView({ screen: "trees-for-parcel", parcelId: view.tree.parcelId })}
-          onViewPhotos={(observation) =>
-            setView({ screen: "photos-for-observation", tree: view.tree, observation })
-          }
-        />
-      );
-    }
-    if (view.screen === "trees-for-parcel") {
-      return (
-        <TreesScreen
-          mode={{ mode: "parcel", parcelId: view.parcelId }}
-          onBack={() => setView({ screen: "parcels" })}
-          onViewObservations={(tree) => setView({ screen: "observations-for-tree", tree })}
-        />
-      );
-    }
-    if (view.screen === "reference-trees") {
-      return (
-        <TreesScreen
-          mode={{ mode: "reference" }}
-          onBack={() => setView({ screen: "parcels" })}
-          onViewObservations={(tree) => setView({ screen: "observations-for-tree", tree })}
-        />
-      );
-    }
-    return (
-      <ParcelsScreen
-        onViewTrees={(parcel) => setView({ screen: "trees-for-parcel", parcelId: parcel.id })}
-        onViewReferenceTrees={() => setView({ screen: "reference-trees" })}
-      />
-    );
+    return <AppRouter />;
   }
 
   return (
