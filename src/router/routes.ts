@@ -14,6 +14,7 @@
 export const ROUTE_PATTERNS = {
   parcels: "/parcels",
   parcelTrees: "/parcels/:parcelId/trees",
+  parcelFinance: "/parcels/:parcelId/finance",
   referenceTrees: "/reference-trees",
   treeObservations: "/trees/:treeId/observations",
   observationPhotos: "/observations/:observationId/photos",
@@ -22,6 +23,7 @@ export const ROUTE_PATTERNS = {
 export const buildPath = {
   parcels: () => "/parcels",
   parcelTrees: (parcelId: string) => `/parcels/${parcelId}/trees`,
+  parcelFinance: (parcelId: string) => `/parcels/${parcelId}/finance`,
   referenceTrees: () => "/reference-trees",
   treeObservations: (treeId: string) => `/trees/${treeId}/observations`,
   observationPhotos: (observationId: string) => `/observations/${observationId}/photos`,
@@ -32,12 +34,15 @@ export const buildPath = {
  * bugün hiçbir <Route>'a bağlı değil, hiçbir ekran yok. Sadece
  * isimlendirme tutarlılığı için burada belgeleniyor; gelecekteki
  * modüller bu isimlerle başlayacak.
+ *
+ * `finance` BURADAN KALDIRILDI (Sprint 4.3) — artık gerçek bir rota
+ * (`ROUTE_PATTERNS.parcelFinance`), düz `/finance` DEĞİL, `/trees`
+ * ile tutarlı `/parcels/:parcelId/finance` deseninde.
  */
 export const FUTURE_ROUTE_NAMES = {
   parcelDetail: "/parcels/:parcelId",
   treeDetail: "/trees/:treeId",
   observationDetail: "/observations/:observationId",
-  finance: "/finance",
   maintenance: "/maintenance",
   harvest: "/harvest",
   dashboard: "/dashboard",

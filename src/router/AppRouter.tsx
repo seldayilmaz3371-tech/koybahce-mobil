@@ -11,12 +11,13 @@
  * ihtiyaç duymadan, statik dosya sunumuyla %100 çalışır — WebView'da
  * adres çubuğu görünmediği için `#` kullanıcıya hiç görünmez.
  *
- * KAPSAM (Sprint 4.0 onayı — Seçenek A): TÜM 5 üst-düzey rota bu
- * sprintte bağlanıyor (Parsel/Ağaç/Referans/Gözlem/Fotoğraf) — hiçbir
- * çalışan akış geçici olarak bozulmasın diye. Screen bileşenlerinin
- * KENDİ iç view-state'i (liste/oluştur/düzenle) HİÇ DEĞİŞMEDİ — bu
- * dosya sadece üst-düzey "hangi ekran" kararını ve bu ekranlara geçen
- * `onBack`/`onViewX` callback'lerini `navigate(...)`'e bağlıyor.
+ * KAPSAM (Sprint 4.0 onayı — Seçenek A, Sprint 4.3'te Finans eklendi):
+ * TÜM üst-düzey rotalar bağlı (Parsel/Ağaç/Finans/Referans/Gözlem/
+ * Fotoğraf) — hiçbir çalışan akış geçici olarak bozulmasın diye.
+ * Screen bileşenlerinin KENDİ iç view-state'i (liste/oluştur/düzenle)
+ * HİÇ DEĞİŞMEDİ — bu dosya sadece üst-düzey "hangi ekran" kararını ve
+ * bu ekranlara geçen `onBack`/`onViewX` callback'lerini `navigate(...)`'e
+ * bağlıyor.
  *
  * `navigate(-1)`, HER `onBack` için tutarlı şekilde kullanılıyor —
  * bu, gerçek dünya Capacitor+react-router kullanımlarında doğrulanmış
@@ -32,6 +33,7 @@ import { ParcelsScreen } from "../modules/parcels/ParcelsScreen";
 import { TreesScreen } from "../modules/trees/TreesScreen";
 import { ObservationScreen } from "../modules/observations/ObservationScreen";
 import { PhotoGalleryScreen } from "../modules/photos/PhotoGalleryScreen";
+import { FinanceScreen } from "../modules/finance/FinanceScreen";
 import { treeRepository } from "../modules/trees/data/tree.repository";
 import type { Tree } from "../modules/trees/domain/tree.types";
 import { useBackButtonFallback } from "./BackButtonHandler";
@@ -43,6 +45,7 @@ function ParcelsScreenRoute() {
     <ParcelsScreen
       onViewTrees={(parcel) => navigate(buildPath.parcelTrees(parcel.id))}
       onViewReferenceTrees={() => navigate(buildPath.referenceTrees())}
+      onViewFinance={(parcel) => navigate(buildPath.parcelFinance(parcel.id))}
     />
   );
 }
@@ -60,6 +63,28 @@ function TreesScreenRoute() {
       mode={{ mode: "parcel", parcelId }}
       onBack={() => navigate(-1)}
       onViewObservations={(tree) => navigate(buildPath.treeObservations(tree.id))}
+    />
+  );
+}
+
+/**
+ * `FinanceScreen` sadece `parcelId`'ye ihtiyaç duyuyor (rotadan
+ * doğrudan geliyor) — `TreesScreenRoute` kadar basit, `Observation
+ * ScreenRoute`'un aksine hiçbir async veri çekme gerekmiyor.
+ */
+function FinanceScreenRoute() {
+  const { parcelId } = useParams<{ parcelId: string }>();
+  const navigate = useNavigate();
+
+  if (!parcelId) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+
+  return (
+    <FinanceScreen
+      scope={{ mode: "parcel", parcelId }}
+      parcelId={parcelId}
+      onBack={() => navigate(-1)}
     />
   );
 }
@@ -145,6 +170,7 @@ export function AppRouter() {
       <Routes>
         <Route path={ROUTE_PATTERNS.parcels} element={<ParcelsScreenRoute />} />
         <Route path={ROUTE_PATTERNS.parcelTrees} element={<TreesScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.parcelFinance} element={<FinanceScreenRoute />} />
         <Route path={ROUTE_PATTERNS.referenceTrees} element={<ReferenceTreesScreenRoute />} />
         <Route path={ROUTE_PATTERNS.treeObservations} element={<ObservationScreenRoute />} />
         <Route path={ROUTE_PATTERNS.observationPhotos} element={<PhotoGalleryScreenRoute />} />

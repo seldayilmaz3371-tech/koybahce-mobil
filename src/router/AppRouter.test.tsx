@@ -209,4 +209,37 @@ describe("AppRouter — Rota Yönlendirme", () => {
     act(() => backButtonListeners[backButtonListeners.length - 1]());
     await waitFor(() => expect(screen.getByText("Zincir P")).toBeTruthy());
   });
+
+  it("Parsel → Finans: 'View Finance' doğru parcelId ile FinanceScreen'e gider, kayıt oluşturma çalışır (Sprint 4.3)", async () => {
+    const parcel = await parcelRepository.create({ name: "Finans P", cropType: "olive", areaDekar: 5 });
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Finans P")).toBeTruthy());
+    fireEvent.click(screen.getByText("Finans P"));
+    await waitFor(() => expect(screen.getByText("View Finance")).toBeTruthy());
+    fireEvent.click(screen.getByText("View Finance"));
+
+    await waitFor(() => expect(screen.getByText("No finance records yet.")).toBeTruthy());
+    expect(window.location.hash).toBe(`#/parcels/${parcel.id}/finance`);
+
+    fireEvent.click(screen.getByText("Add Record"));
+    fireEvent.change(screen.getByLabelText("Amount"), { target: { value: "750" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
+
+    await waitFor(() => expect(screen.getByText(/750/)).toBeTruthy());
+  });
+
+  it("Finans → Parsel: geri tuşu (navigate(-1)) doğru şekilde döner (Sprint 4.3)", async () => {
+    const parcel = await parcelRepository.create({ name: "Finans P", cropType: "olive", areaDekar: 5 });
+    window.location.hash = `#/parcels/${parcel.id}/finance`;
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("No finance records yet.")).toBeTruthy());
+
+    act(() => backButtonListeners[backButtonListeners.length - 1]());
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
 });

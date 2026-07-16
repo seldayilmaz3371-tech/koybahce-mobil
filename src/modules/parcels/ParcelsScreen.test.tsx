@@ -75,7 +75,7 @@ afterEach(() => {
 describe("ParcelsScreen — Navigasyon", () => {
   it("'Reference Trees' butonu onViewReferenceTrees'i çağırır", () => {
     const onViewReferenceTrees = vi.fn();
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={onViewReferenceTrees} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={onViewReferenceTrees} onViewFinance={vi.fn()} />);
 
     fireEvent.click(screen.getByText("Reference Trees"));
 
@@ -90,7 +90,7 @@ describe("ParcelsScreen — Navigasyon", () => {
     });
     const onViewTrees = vi.fn();
 
-    render(<ParcelsScreen onViewTrees={onViewTrees} onViewReferenceTrees={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={onViewTrees} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("Kuzey Zeytinliği")).toBeTruthy());
     fireEvent.click(screen.getByText("Kuzey Zeytinliği"));
@@ -103,7 +103,7 @@ describe("ParcelsScreen — Navigasyon", () => {
   });
 
   it("oluşturma modunda (henüz kaydedilmemiş parsel) 'View Trees' butonu gösterilmez", async () => {
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No parcels yet. Tap \"Add Parcel\" to create your first one.")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Add Parcel"));
@@ -111,11 +111,40 @@ describe("ParcelsScreen — Navigasyon", () => {
     expect(screen.getByText("New Parcel")).toBeTruthy();
     expect(screen.queryByText("View Trees")).toBeNull();
   });
+
+  it("bir parseli düzenlerken 'View Finance' onViewFinance'i DOĞRU parselle çağırır (Sprint 4.3)", async () => {
+    const parcel = await parcelRepository.create({
+      name: "Güney Bahçesi",
+      cropType: "fruit",
+      areaDekar: 4,
+    });
+    const onViewFinance = vi.fn();
+
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={onViewFinance} />);
+
+    await waitFor(() => expect(screen.getByText("Güney Bahçesi")).toBeTruthy());
+    fireEvent.click(screen.getByText("Güney Bahçesi"));
+
+    await waitFor(() => expect(screen.getByText("View Finance")).toBeTruthy());
+    fireEvent.click(screen.getByText("View Finance"));
+
+    expect(onViewFinance).toHaveBeenCalledTimes(1);
+    expect(onViewFinance.mock.calls[0][0]).toMatchObject({ id: parcel.id, name: "Güney Bahçesi" });
+  });
+
+  it("oluşturma modunda (henüz kaydedilmemiş parsel) 'View Finance' butonu gösterilmez (Sprint 4.3)", async () => {
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("No parcels yet. Tap \"Add Parcel\" to create your first one.")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Add Parcel"));
+
+    expect(screen.queryByText("View Finance")).toBeNull();
+  });
 });
 
 describe("ParcelsScreen — Android Geri Tuşu", () => {
   it("form açıkken geri tuşu, kaydetmeden listeye döner (İptal ile aynı)", async () => {
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Add Parcel"));
@@ -128,7 +157,7 @@ describe("ParcelsScreen — Android Geri Tuşu", () => {
   });
 
   it("ana listedeyken geri tuşu uygulamadan çıkışı tetikler (exitApp)", async () => {
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
 
     pressBackButton();
