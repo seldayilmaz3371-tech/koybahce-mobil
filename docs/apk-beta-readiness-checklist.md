@@ -1,6 +1,6 @@
 # APK/Beta Hazır Olma Kontrol Listesi
 
-**Tarih:** 2026-07-17 · **Kapsam:** Modül 6 (AI Altyapısı) sonrası, APK üretimi öncesi
+**Tarih:** 2026-07-17 (Sprint 7.3'te güncellendi) · **Kapsam:** Modül 6 (AI Altyapısı) sonrası, APK üretimi öncesi
 **Amaç:** APK üretiminden ÖNCE kontrol edilmesi gereken maddeler (gerçek cihaz testi SONRASI değil, ÖNCESİ) — `docs/sprint-6-apk-device-test-plan.md` ile karıştırılmamalı (o belge, APK ÜRETİLDİKTEN SONRA cihazda yapılacak testleri kapsıyor).
 
 ## Durum Özeti
@@ -11,9 +11,13 @@
 | Navigasyon Entegrasyonu | ✅ Tamamlandı (Sprint 7.1) |
 | UX/Erişilebilirlik Son Kontrolleri | ✅ Tamamlandı (Sprint 7.2) |
 | Bundle Optimizasyonu | ✅ Tamamlandı, ölçüldü |
-| **İmzalama Yapılandırması** | 🔴 **Eksik — aşağıya bkz.** |
-| **Versiyon Numarası** | 🟡 Karar bekliyor |
-| APK Üretimi | 🔴 Henüz yapılmadı |
+| **Gerçek Cihaz İlk Doğrulama** | ✅ **Tamamlandı (Sprint 7.2 onayında doğrulandı — APK üretildi, kuruldu, çöküş yok, temel akışlar çalışıyor)** |
+| AI Asistan Mobil UX | ✅ Tamamlandı (Sprint 7.3 — sohbet balonları, textarea, klavye davranışı) |
+| AI Davranış Doğrulaması (kod seviyesi) | ✅ Tamamlandı (Sprint 7.3 — bkz. `sprint-7.3-ai-behavior-verification-report.md`) |
+| **İmzalama Yapılandırması** | 🔴 **Eksik — Karar için `adr/0025-beta-release-strategy.md`'ye bkz.** |
+| **Versiyon Numarası** | 🟡 Öneriler hazır (`sprint-7.3-version-proposal.md`), karar bekliyor |
+| Beta APK Üretimi | 🔴 Henüz yapılmadı (imzalama/versiyon kararları sonrası) |
+
 
 ## 1. Build Yapılandırması
 
@@ -47,10 +51,11 @@
 - [x] TODO/FIXME/HACK yorumu yok
 - [x] Ölü kod taraması denendi (ts-prune, geçici) — araç başarısız oldu, manuel bulgu da yok
 
-## 6. Güvenlik (Sprint 6'da Test Edildi, APK Üzerinde Doğrulanmadı)
+## 6. Güvenlik (Sprint 6'da Kod Seviyesinde, Sprint 7.2'de Gerçek Cihazda Kısmen Doğrulandı)
 
 - [x] API anahtarının Secure Storage'da saklandığı **kod seviyesinde** test edildi (mock ile)
-- [ ] API anahtarının **gerçek cihazda düz metin olarak bulunamadığı** henüz doğrulanmadı (bkz. SEC-001, `sprint-6-apk-device-test-plan.md`)
+- [x] **Gerçek cihazda doğrulandı (Sprint 7.2 onayı):** "Gemini API anahtarı Secure Storage'a kaydediliyor" — kullanıcı tarafından teyit edildi
+- [ ] API anahtarının **gerçek cihazda düz metin olarak bulunamadığı** (dosya sistemi seviyesinde, `adb shell` ile) henüz ayrıca doğrulanmadı (bkz. SEC-001, `sprint-6-apk-device-test-plan.md`) — bu, "kaydediliyor" ile "güvenli şekilde şifrelenmiş" farklı iddialar, ikincisi hâlâ açık
 - [x] `debugMode` kapalıyken tool sonuçlarının DB'ye ayrı kaydedilmediği kod seviyesinde test edildi
 
 ## 7. Bilinen Açık Noktalar (Bu Kontrol Listesinin Kendisi Tarafından Bulundu)
@@ -61,4 +66,4 @@
 
 ## Sonuç
 
-APK **kod/mimari/test/UX açısından üretime hazır**. Ancak **imzalama yapılandırması ve versiyon numarası kararları olmadan** anlamlı bir Beta APK'sı üretilemez — bunlar, sonraki adımda (APK üretim sprinti) **kullanıcı onayı gerektiren** açık kararlardır.
+APK **kod/mimari/test/UX/gerçek cihaz ilk doğrulama açısından üretime hazır** (Sprint 7.2'de kullanıcı tarafından gerçek cihazda onaylandı). Ancak **imzalama yapılandırması ve versiyon numarası kararları olmadan** anlamlı bir **Beta** APK'sı üretilemez — bunlar artık **somut önerilerle** (`sprint-7.3-version-proposal.md`) ve **belgelenmiş bir stratejiyle** (`adr/0025-beta-release-strategy.md`) birlikte kullanıcı onayı bekliyor.
