@@ -5,6 +5,34 @@
     "DB_005": "İlişkili bir kayıt bulunamadı.",
     "SYS_001": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
   },
+  "maintenance": {
+    "screenTitle": "Bakım",
+    "emptyState": "Henüz bakım kaydı yok.",
+    "addButton": "Kayıt Ekle",
+    "loadMoreButton": "Daha Fazla Yükle",
+    "formTitleCreate": "Yeni Bakım Kaydı",
+    "formTitleEdit": "Bakım Kaydını Düzenle",
+    "type": {
+      "label": "Tür",
+      "irrigation": "Sulama",
+      "fertilization": "Gübreleme",
+      "pesticide": "İlaçlama",
+      "pruning": "Budama",
+      "soil_preparation": "Toprak İşleme",
+      "pre_harvest_care": "Hasat Öncesi Bakım",
+      "other": "Diğer"
+    },
+    "status": {
+      "label": "Durum",
+      "planned": "Planlandı",
+      "completed": "Tamamlandı",
+      "cancelled": "İptal Edildi"
+    },
+    "scheduledDate": "Planlanan Tarih",
+    "completedDate": "Tamamlanma Tarihi",
+    "deleteButton": "Kaydı Sil",
+    "deleteConfirm": "Bu bakım kaydı silinsin mi? Listelerinizden kaldırılacak."
+  },
   "finance": {
     "screenTitle": "Finans",
     "emptyState": "Henüz finans kaydı yok.",

@@ -5,6 +5,34 @@
     "DB_005": "A related record could not be found.",
     "SYS_001": "Something went wrong. Please try again."
   },
+  "maintenance": {
+    "screenTitle": "Maintenance",
+    "emptyState": "No maintenance records yet.",
+    "addButton": "Add Record",
+    "loadMoreButton": "Load More",
+    "formTitleCreate": "New Maintenance Record",
+    "formTitleEdit": "Edit Maintenance Record",
+    "type": {
+      "label": "Type",
+      "irrigation": "Irrigation",
+      "fertilization": "Fertilization",
+      "pesticide": "Pesticide",
+      "pruning": "Pruning",
+      "soil_preparation": "Soil Preparation",
+      "pre_harvest_care": "Pre-Harvest Care",
+      "other": "Other"
+    },
+    "status": {
+      "label": "Status",
+      "planned": "Planned",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "scheduledDate": "Scheduled Date",
+    "completedDate": "Completed Date",
+    "deleteButton": "Delete Record",
+    "deleteConfirm": "Delete this maintenance record? It will be removed from your lists."
+  },
   "finance": {
     "screenTitle": "Finance",
     "emptyState": "No finance records yet.",
