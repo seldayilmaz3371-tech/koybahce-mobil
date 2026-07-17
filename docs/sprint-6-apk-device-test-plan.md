@@ -1,8 +1,10 @@
 # Sprint 6 — APK ve Gerçek Android Cihaz Test Planı
 
-**Durum:** Onay bekliyor · **Kapsam:** Modül 6 (AI Altyapısı) — Production Ready kararından önceki son aşama
+**Durum:** ✅ Onaylandı (2026-07-17) · **Kapsam:** Modül 6 (AI Altyapısı) — Production Ready kararından önceki son aşama
 **Hazırlayan bakış açısı:** Kıdemli Android QA Mühendisi + Mobil Yazılım Mimarı
 **Kaynak:** Gerçek proje yapılandırması incelenerek hazırlandı (`AndroidManifest.xml`, `build.gradle`, `capacitor.config.ts`) — varsayılmadı.
+
+**🔴 Uygulama Sırası (kullanıcı kararı):** Bu plandaki testler **Sprint 7'nin AI navigasyon entegrasyonu tamamlandıktan SONRA**, APK **gerçek navigasyonla yeniden oluşturulduktan SONRA** çalıştırılacak. Bkz. belge sonundaki "Süreç" bölümü.
 
 ---
 
@@ -98,7 +100,11 @@ adb shell pm list packages | grep com.bahcem.mobile
 
 ## 4. AI Modülü Testleri (Gerçek Cihaz — En Kritik Bölüm)
 
-**Not:** Bu ekranlar henüz route'a bağlanmadığı için (Sprint 6'nın bilinen kapsamı), bu testlerin bir kısmı **geçici bir test-erişim yöntemi gerektirir** (ör. geliştirici menüsü veya doğrudan `AppRouter`'a geçici bir rota eklenerek). Bu, gerçek cihaz testi öncesi netleştirilmesi gereken bir ön koşuldur.
+**Ön Koşul (Sprint 7'nin ilk görevi):** Bu bölümdeki testlerin TAMAMI, `AiSettingsScreen`/`AiChatScreen`'in **gerçek navigasyon yapısına** (mevcut Router'daki diğer ekranlarla — Parsel/Ağaç/Finans/Bakım — AYNI desende) entegre edilmesinden SONRA çalıştırılacak. **Geçici route veya sadece-test-amaçlı bir erişim yöntemi KULLANILMAYACAK** — kullanıcı kararı gereği, test edilen yapının production'da kullanılacak yapıyla **birebir aynı** olması esas alınıyor. Bu nedenle:
+
+1. Sprint 7 önce AI ekranlarını gerçek kullanıcı akışına bağlayacak (nereden erişileceği — ör. genel bir "AI Asistan" menü girişi mi, parsel-bazlı bir giriş mi — Sprint 7'nin kendi analiz/onay sürecinde netleşecek).
+2. APK bu gerçek navigasyonla YENİDEN oluşturulacak.
+3. Aşağıdaki testler, gerçek navigasyon üzerinden (ör. "Ana ekrandan AI Asistan'a dokun") yürütülecek.
 
 | Test ID | Amaç | Ön Koşullar | Adımlar | Beklenen Sonuç | Başarı Kriteri |
 |---|---|---|---|---|---|
@@ -114,7 +120,7 @@ adb shell pm list packages | grep com.bahcem.mobile
 | **AI-010** | Sohbet ekranı — temel akış | AI etkin, API anahtarı geçerli, internet var | "Kaç parselim var?" gibi gerçek bir soru sor | Gerçek Gemini yanıtı, ekranda görünür | Yanıt makul sürede (< 10sn) gelir |
 | **AI-011** | Konuşma geçmişi — ekran içi kalıcılık | AI-010 tamamlandı | Ekrandan çık, geri dön (SAME oturum) | **Sprint 6'nın bilinen davranışı:** her ekran açılışında YENİ bir konuşma başlar (kayıtlı davranış) — önceki konuşma GÖRÜNMEZ | Bu, bir hata DEĞİL, belgelenmiş bir tasarım kararı — test bunu DOĞRULAMALI, "hata" olarak işaretlenmemeli |
 | **AI-012** | Tool Calling — gerçek cihazda uçtan uca | AI etkin, en az 1 parsel/gözlem verisi mevcut | "Son gözlemlerim neler?" gibi bir soru sor | Model `queryObservations` aracını çağırır, GERÇEK veriden yanıt üretir (uydurma veri DEĞİL) | Yanıttaki bilgiler SQLite'taki gerçek verilerle eşleşir |
-| **AI-013** | Context Engine — ekran bağlamı | Bir parsel ID'siyle sohbet ekranı açılmış (test-erişimiyle) | Parsel-spesifik bir soru sor | Yanıt doğru parsele ait bilgi içerir | Context Engine'in `parcelId`'yi doğru ilettiği doğrulanır |
+| **AI-013** | Context Engine — ekran bağlamı | Bir parselin gerçek navigasyon akışı üzerinden AI ekranına ulaşılmış (ör. parsel detayından "AI Asistan" girişi) | Parsel-spesifik bir soru sor | Yanıt doğru parsele ait bilgi içerir | Context Engine'in `parcelId`'yi doğru ilettiği doğrulanır |
 | **AI-014** | Yazma engelinin gerçek cihazda doğrulanması | AI etkin | "Bana bir sulama kaydı ekle" gibi bir YAZMA isteği gönder | Model, sistem promptu gereği bunu REDDEDER, formları kullanmasını önerir | Hiçbir yeni `maintenance_records` satırı OLUŞMAZ (DB kontrolüyle doğrulanmalı) |
 
 ---
@@ -216,4 +222,13 @@ Production kararını ENGELLEMEZ, ama kaliteyi artırır:
 
 ---
 
-**Not:** AI ekranları henüz route'a bağlı olmadığı için (Sprint 6'nın bilinen kapsamı), Bölüm 4'teki testlerin **çoğu**, test öncesi geçici bir erişim yöntemi gerektiriyor. Bunu nasıl sağlamak istediğine (geçici route mu, geliştirici menüsü mü) karar vermen gerekiyor — ben bunu **kod yazmadan önce senden netleştirmeni** öneririm.
+## Süreç (Kullanıcı Kararı, 2026-07-17)
+
+Bu plan, **gerçek navigasyon üzerinden** çalıştırılacak şekilde tasarlandı — geçici/test-amaçlı hiçbir erişim yöntemi kullanılmayacak:
+
+1. **Sprint 7, Adım 1:** AI ekranlarını gerçek navigasyon yapısına entegre et (Parsel/Ağaç/Finans/Bakım ile aynı desende).
+2. **Sprint 7, Adım 2:** APK'yı bu gerçek navigasyonla yeniden oluştur.
+3. **Sprint 7, Adım 3:** Bu belgedeki testleri, gerçek kullanıcı akışı üzerinden yürüt.
+
+Bu sıralama, test edilen yapının production'da kullanılacak yapıyla birebir aynı olmasını garanti eder.
+
