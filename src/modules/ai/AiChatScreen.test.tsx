@@ -151,3 +151,104 @@ describe("AiChatScreen", () => {
     expect(onViewSettings).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("AiChatScreen — Mobil UX (Sprint 7.3)", () => {
+  it("giriş alanı TEK SATIRLIK input DEĞİL, çok satırlı textarea", async () => {
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
+    await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
+
+    const field = screen.getByLabelText("Ask a question about your farm data");
+    expect(field.tagName).toBe("TEXTAREA");
+    expect(field.getAttribute("rows")).toBe("4");
+  });
+
+  it("placeholder metni doğru gösterilir", async () => {
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
+    await waitFor(() => expect(screen.getByPlaceholderText("Type your question...")).toBeTruthy());
+  });
+
+  it("kullanıcı mesajı 'ai-chat__bubble--user' sınıfıyla, AI mesajı 'ai-chat__bubble--model' sınıfıyla render edilir", async () => {
+    await aiSettingsRepository.getOrCreate();
+    await aiSettingsRepository.update({ isEnabled: true, internetPermission: true });
+    providerRegistry.register({
+      providerName: "gemini",
+      sendMessage: vi.fn().mockResolvedValue({ text: "cevap metni", toolCalls: [] }),
+    });
+
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
+    await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Ask a question about your farm data"), {
+      target: { value: "soru metni" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Send"));
+    });
+
+    await waitFor(() => expect(screen.getByText("cevap metni")).toBeTruthy());
+    const userBubble = screen.getByText("soru metni").closest(".ai-chat__bubble");
+    const modelBubble = screen.getByText("cevap metni").closest(".ai-chat__bubble");
+    expect(userBubble?.className).toContain("ai-chat__bubble--user");
+    expect(modelBubble?.className).toContain("ai-chat__bubble--model");
+  });
+
+  it("AI cevap üretirken 'Thinking...' göstergesi GEÇİCİ olarak görünür", async () => {
+    await aiSettingsRepository.getOrCreate();
+    await aiSettingsRepository.update({ isEnabled: true, internetPermission: true });
+    let resolveResponse!: (value: { text: string; toolCalls: never[] }) => void;
+    providerRegistry.register({
+      providerName: "gemini",
+      sendMessage: vi.fn(
+        () =>
+          new Promise<{ text: string; toolCalls: never[] }>((resolve) => {
+            resolveResponse = resolve;
+          })
+      ),
+    });
+
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
+    await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Ask a question about your farm data"), {
+      target: { value: "soru" },
+    });
+    act(() => {
+      fireEvent.click(screen.getByText("Send"));
+    });
+
+    await waitFor(() => expect(screen.getByText("Thinking...")).toBeTruthy());
+
+    await act(async () => {
+      resolveResponse({ text: "sonunda gelen cevap", toolCalls: [] });
+    });
+
+    await waitFor(() => expect(screen.getByText("sonunda gelen cevap")).toBeTruthy());
+    expect(screen.queryByText("Thinking...")).toBeNull(); // gösterge KAYBOLDU
+  });
+
+  it("gönderim sırasında (sending) textarea VE gönder butonu devre dışı kalır", async () => {
+    await aiSettingsRepository.getOrCreate();
+    await aiSettingsRepository.update({ isEnabled: true, internetPermission: true });
+    providerRegistry.register({
+      providerName: "gemini",
+      sendMessage: vi.fn(() => new Promise<never>(() => {})), // asla resolve olmaz — "sending" durumunu SABİTLE
+    });
+
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
+    await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Ask a question about your farm data"), {
+      target: { value: "soru" },
+    });
+    act(() => {
+      fireEvent.click(screen.getByText("Send"));
+    });
+
+    await waitFor(() =>
+      expect((screen.getByLabelText("Ask a question about your farm data") as HTMLTextAreaElement).disabled).toBe(
+        true
+      )
+    );
+    expect((screen.getByText("Send") as HTMLButtonElement).disabled).toBe(true);
+  });
+});

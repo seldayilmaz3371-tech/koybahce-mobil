@@ -29,8 +29,10 @@
     "userLabel": "You",
     "assistantLabel": "Assistant",
     "inputLabel": "Ask a question about your farm data",
+    "inputPlaceholder": "Type your question...",
     "sendButton": "Send",
-    "settingsLinkLabel": "AI Settings"
+    "settingsLinkLabel": "AI Settings",
+    "thinkingLabel": "Thinking..."
   },
   "maintenancePlan": {
     "screenTitle": "Maintenance Plans",
