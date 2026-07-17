@@ -71,7 +71,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 9;
+export const CURRENT_SCHEMA_VERSION = 10;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -288,6 +288,49 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
       `CREATE INDEX IF NOT EXISTS idx_maintenance_plans_parcel_id ON maintenance_plans(parcel_id);`,
       `CREATE INDEX IF NOT EXISTS idx_maintenance_plans_tree_id ON maintenance_plans(tree_id);`,
       `CREATE INDEX IF NOT EXISTS idx_maintenance_plans_next_due_date ON maintenance_plans(next_due_date);`,
+    ],
+  },
+  {
+    toVersion: 10,
+    statements: [
+      // Sprint 6 — AI Altyapısı (ADR 0024). Web projesinde (Deliverable
+      // 1) "konuşma geçmişi" kavramı YOK (stateless) — bu şema sıfırdan
+      // tasarlandı. `ai_settings` TEK SATIR (id='default') — Modül 1'in
+      // generic `app_metadata` key-value deseninden BİLİNÇLİ bir sapma:
+      // 8 tiplendirilmiş alan (boolean/integer/text), generic string-value
+      // deseninde tip dönüşüm karmaşıklığı yaratırdı. `provider_name`
+      // TEXT (ADR 0024 Karar 4 — provider-bağımsız, hiçbir yerde
+      // "gemini" sabit kodlanmıyor).
+      `CREATE TABLE IF NOT EXISTS ai_settings (
+         id TEXT PRIMARY KEY NOT NULL,
+         provider_name TEXT NOT NULL DEFAULT 'gemini',
+         is_enabled INTEGER NOT NULL DEFAULT 0,
+         api_key_configured INTEGER NOT NULL DEFAULT 0,
+         internet_permission INTEGER NOT NULL DEFAULT 0,
+         response_language TEXT NOT NULL DEFAULT 'tr',
+         max_context_items INTEGER NOT NULL DEFAULT 10,
+         max_messages INTEGER NOT NULL DEFAULT 10,
+         debug_mode INTEGER NOT NULL DEFAULT 0,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `CREATE TABLE IF NOT EXISTS ai_conversations (
+         id TEXT PRIMARY KEY NOT NULL,
+         title TEXT,
+         is_active INTEGER NOT NULL DEFAULT 1,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `CREATE TABLE IF NOT EXISTS ai_messages (
+         id TEXT PRIMARY KEY NOT NULL,
+         conversation_id TEXT NOT NULL REFERENCES ai_conversations(id) ON DELETE RESTRICT,
+         role TEXT NOT NULL CHECK (role IN ('user','model','tool')),
+         content TEXT NOT NULL,
+         tool_calls_json TEXT,
+         created_at TEXT NOT NULL
+       );`,
+      `CREATE INDEX IF NOT EXISTS idx_ai_messages_conversation_id ON ai_messages(conversation_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_ai_conversations_updated_at ON ai_conversations(updated_at);`,
     ],
   },
 ];

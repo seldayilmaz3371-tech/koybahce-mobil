@@ -25,6 +25,7 @@ import { CURRENT_SCHEMA_VERSION } from "./data/db/migrations/schema";
 import { AppRouter } from "./router/AppRouter";
 import { addAppStateChangeListener } from "./native/appLifecycle";
 import { isCapturingPhoto } from "./native/camera";
+import { bootstrapAi } from "./modules/ai/bootstrapAi";
 
 type InfrastructureStatus =
   | { phase: "idle" }
@@ -83,6 +84,11 @@ function App() {
       // sadece "bağlantı açıldı" değil, "şema doğru kuruldu ve
       // kalıcı" bilgisini de verir.
       const firstLaunchAt = await appMetadataRepository.recordFirstLaunchIfNeeded();
+
+      // Sprint 6 (ADR 0024) — Gemini provider + salt-okunur AI
+      // araçlarını kaydeder. Senkron, hızlı (gerçek ağ çağrısı YOK) —
+      // mevcut başlatma akışına EK, hiçbir satırı DEĞİŞTİRMİYOR.
+      bootstrapAi();
 
       setInfrastructure({
         phase: "ready",

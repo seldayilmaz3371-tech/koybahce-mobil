@@ -3,7 +3,29 @@
     "DB_003": "The value you entered isn't valid.",
     "DB_004": "This record already exists.",
     "DB_005": "A related record could not be found.",
+    "AI_001": "AI is turned off. You can enable it in AI Settings.",
+    "AI_002": "AI needs internet permission. You can enable it in AI Settings.",
+    "AI_003": "AI provider is not available right now.",
+    "AI_004": "Please add your Gemini API key in AI Settings.",
     "SYS_001": "Something went wrong. Please try again."
+  },
+  "aiSettings": {
+    "screenTitle": "AI Settings",
+    "isEnabledLabel": "Enable AI features",
+    "internetPermissionLabel": "Allow AI to use the internet",
+    "apiKeyLabel": "Gemini API Key",
+    "apiKeyConfigured": "API key is configured.",
+    "saveApiKeyButton": "Save",
+    "removeApiKeyButton": "Remove Key",
+    "removeApiKeyConfirm": "Remove your Gemini API key? AI features will stop working until you add a new one."
+  },
+  "aiChat": {
+    "screenTitle": "AI Assistant",
+    "offlineNotice": "You're offline. Connect to the internet to talk to the AI assistant.",
+    "userLabel": "You",
+    "assistantLabel": "Assistant",
+    "inputLabel": "Ask a question about your farm data",
+    "sendButton": "Send"
   },
   "maintenancePlan": {
     "screenTitle": "Maintenance Plans",

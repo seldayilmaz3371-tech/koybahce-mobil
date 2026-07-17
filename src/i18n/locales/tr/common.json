@@ -3,7 +3,29 @@
     "DB_003": "Girdiğiniz değer geçerli değil.",
     "DB_004": "Bu kayıt zaten mevcut.",
     "DB_005": "İlişkili bir kayıt bulunamadı.",
+    "AI_001": "AI kapalı. AI Ayarları'ndan açabilirsiniz.",
+    "AI_002": "AI'nin internet iznine ihtiyacı var. AI Ayarları'ndan verebilirsiniz.",
+    "AI_003": "AI sağlayıcısı şu an kullanılamıyor.",
+    "AI_004": "Lütfen AI Ayarları'ndan Gemini API anahtarınızı girin.",
     "SYS_001": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
+  },
+  "aiSettings": {
+    "screenTitle": "AI Ayarları",
+    "isEnabledLabel": "AI özelliklerini etkinleştir",
+    "internetPermissionLabel": "AI'nin interneti kullanmasına izin ver",
+    "apiKeyLabel": "Gemini API Anahtarı",
+    "apiKeyConfigured": "API anahtarı yapılandırıldı.",
+    "saveApiKeyButton": "Kaydet",
+    "removeApiKeyButton": "Anahtarı Kaldır",
+    "removeApiKeyConfirm": "Gemini API anahtarınız kaldırılsın mı? Yeni bir anahtar ekleyene kadar AI özellikleri çalışmaz."
+  },
+  "aiChat": {
+    "screenTitle": "AI Asistan",
+    "offlineNotice": "Çevrimdışısınız. AI asistanla konuşmak için internete bağlanın.",
+    "userLabel": "Siz",
+    "assistantLabel": "Asistan",
+    "inputLabel": "Çiftlik verileriniz hakkında bir soru sorun",
+    "sendButton": "Gönder"
   },
   "maintenancePlan": {
     "screenTitle": "Bakım Planları",

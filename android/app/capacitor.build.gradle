@@ -16,6 +16,7 @@ dependencies {
     implementation project(':capacitor-camera')
     implementation project(':capacitor-device')
     implementation project(':capacitor-filesystem')
+    implementation project(':capacitor-network')
     implementation project(':capacitor-preferences')
 
 }

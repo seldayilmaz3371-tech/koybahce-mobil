@@ -27,6 +27,11 @@ export const ErrorCode = {
 
   NATIVE_001: "NATIVE_001", // Biyometrik doğrulama başarısız
 
+  AI_001: "AI_001", // AI devre dışı (Ayarlar'dan açılmamış)
+  AI_002: "AI_002", // İnternet izni verilmemiş
+  AI_003: "AI_003", // Sağlayıcı kayıtlı değil (iç tutarsızlık)
+  AI_004: "AI_004", // API anahtarı yapılandırılmamış
+
   SYS_001: "SYS_001", // Beklenmeyen/sınıflandırılamayan hata
 } as const;
 

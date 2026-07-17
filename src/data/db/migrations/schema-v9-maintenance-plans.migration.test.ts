@@ -110,8 +110,4 @@ describe("Şema Migration — Sürüm 9 (maintenance_plans)", () => {
     db.close();
   });
 
-  it("CURRENT_SCHEMA_VERSION 9'a güncellenmiş", async () => {
-    const { CURRENT_SCHEMA_VERSION } = await import("./schema");
-    expect(CURRENT_SCHEMA_VERSION).toBe(9);
-  });
 });
