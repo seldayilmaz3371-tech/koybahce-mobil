@@ -4,15 +4,19 @@
 |---|---|
 | **Project** | Bahçem Mobile |
 | **Module** | Modül 6 — AI Altyapısı |
-| **Sprint** | 7.2 |
-| **Feature** | UX/Erişilebilirlik/Dokümantasyon Son Kontrolleri (APK Öncesi Kalite) |
-| **Test Sonucu** | ✅ 479/479 başarılı (+3 yeni — i18n simetri denetimi) |
-| **Build** | ✅ Başarılı — ana bundle 395.68kB, AI chunk 346.40kB (Sprint 7.1 ölçümüyle tutarlı) |
+| **Sprint** | 7.3 |
+| **Feature** | AI Asistan Mobil UX + AI Davranış Doğrulaması + Beta/Release Hazırlığı |
+| **Test Sonucu** | ✅ 484/484 başarılı (+5 yeni — mobil UX testleri) |
+| **Build** | ✅ Başarılı — ana bundle 395.82kB, AI chunk 346.40kB (değişmedi) |
 | **Lint** | ✅ 0 uyarı / 0 hata (183 dosya, 103 kural) |
 | **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) |
 | **Tarih** | 2026-07-17 |
-| **Git Commit** | `aaeeb57` |
-| **ADR** | [0024 — AI Architecture Decisions](docs/adr/0024-ai-architecture-decisions.md) |
+| **Git Commit** | `98edca6` |
+| **ADR** | [0024 — AI Architecture Decisions](docs/adr/0024-ai-architecture-decisions.md), [0025 — Beta Release Strategy (taslak)](docs/adr/0025-beta-release-strategy.md) |
+
+## Gerçek Cihaz Doğrulaması (Sprint 7.2'de Kullanıcı Tarafından Onaylandı)
+
+APK üretildi, Android cihaza kuruldu, çöküş gözlenmedi. Parsel listesi/SQLite/AI Ayarları/Secure Storage/AI ekranı/Galeri fotoğraf seçimi doğrulandı.
 
 ## Frozen Modules
 
@@ -25,10 +29,13 @@
 | Modül 5 — Bakım Yönetimi | ✅ FROZEN |
 | Sprint 6 — AI Altyapısı (kod) | ✅ Onaylandı |
 | Sprint 7.1 — Navigasyon + Bundle Optimizasyonu | ✅ Onaylandı |
-| Sprint 7.2 — UX/Kalite Son Kontrolleri | 🟡 Bu teslimat |
+| Sprint 7.2 — UX/Kalite Son Kontrolleri | ✅ Onaylandı, **gerçek cihazda doğrulandı** |
+| Sprint 7.3 — Mobil UX + AI Doğrulaması + Beta Hazırlığı | 🟡 Bu teslimat |
 
 ## Kısa Değişiklik Özeti
 
-Gerçek bulgularla yönlendirilen 6 kalite iyileştirmesi: (1) i18n EN/TR simetri denetimi eklendi (30+ sprintlik manuel disiplinin otomatik güvenceye kavuşması), (2) `engineering-protocol.md` Bölüm 21 güncellendi (v1.12, `useTreeForRoute`'un gerçekleştiğini yansıtıyor), (3) `AiChatScreen`'e otomatik kaydırma eklendi (gerçek UX sorunu), (4) mesaj listesine `aria-live` eklendi (gerçek erişilebilirlik boşluğu), (5) `.status-screen`'e responsive `max-width` eklendi (geniş ekranlı Android tabletler için), (6) `module-status.md`/APK test planı Sprint 7.1'in tamamlandığını yansıtacak şekilde güncellendi. Kod davranışı DEĞİŞMEDİ (CSS-only + erişilebilirlik ekleri), bundle boyutu ETKİLENMEDİ.
+**AI Asistan mobil UX'i tamamen yenilendi:** çok satırlı otomatik büyüyen textarea (4-10 satır), sohbet balonları (kullanıcı sağda/AI solda), gönderim sırasında spinner+"Düşünüyor..." göstergesi, `android:windowSoftInputMode="adjustResize"` (gerçek bulgu — hiç yapılandırılmamıştı). **AI mimarisi hiç değişmedi.**
 
-**Yeni belge:** `docs/apk-beta-readiness-checklist.md` — imzalama yapılandırması eksikliği ve versiyon numarası kararlarının APK üretimi öncesi kullanıcı onayı gerektirdiğini kayıt altına alıyor.
+**AI davranışı kod seviyesinde doğrulandı:** Gemini API'ye gerçekten istek gittiği, `gemini-2.5-flash` modelinin kullanıldığı, hiçbir fallback/sahte cevap mekanizması olmadığı kanıtlandı. Dürüstçe belirtilen sınır: gerçek Logcat/cihaz erişimi bu ortamda mümkün değil, analiz kod seviyesinde yapıldı.
+
+**Beta/Release hazırlığı:** Versiyon önerileri (`sprint-7.3-version-proposal.md`) ve ADR 0025 (Beta Release Strategy) hazırlandı — **hiçbir dosya değiştirilmedi**, hepsi kullanıcı onayı bekliyor.
