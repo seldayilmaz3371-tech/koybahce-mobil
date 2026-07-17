@@ -4,23 +4,35 @@
  * bkz. Sprint 5.4. `IMaintenanceRepository` ile AYNI dual-scope desen
  * (Kural 12).
  *
- * BİLİNÇLİ FARK (Sprint 5.1'in Revizyon 3'ünden): `MaintenanceListOptions`
- * (kayıtlar için) `maintenanceType`/`fromDate`/`toDate` filtreleri
- * TAŞIYORDU çünkü o revizyon BUNU AÇIKÇA istemişti. Bu sprint (5.4)
- * için böyle bir talep YOK — Blueprint'in tekrarlanan YAGNI vurgusu
- * gereği, planlar için SADECE `activeOnly`/`limit`/`offset` sağlanıyor.
- * Gerçek bir ihtiyaç doğarsa (ör. "sadece sulama planlarını göster"),
- * `MaintenanceListOptions`'taki AYNI desen buraya da eklenebilir —
- * bugün spekülatif olarak eklenmiyor.
+ * GÜNCELLEME (Sprint 5.5): Sprint 5.4'te "bugün için böyle bir talep
+ * yok, YAGNI" diyerek ERTELEDİĞİMİZ filtre ihtiyacı, TAM OLARAK bu
+ * sprintte gerçek hale geldi — `dueStatus` eklendi (Yaklaşan/Geciken
+ * görünümü). Bu, YAGNI ilkesinin nasıl çalışması gerektiğinin gerçek
+ * bir örneği: spekülatif olarak ÖNCEDEN eklenmedi, gerçek ihtiyaç
+ * doğunca eklendi.
  */
 
 import type { MaintenancePlan, MaintenancePlanUpdateInput, NewMaintenancePlanInput } from "../domain/maintenance.types";
+
+export type MaintenancePlanDueStatus = "overdue" | "today" | "upcoming";
 
 export interface MaintenancePlanListOptions {
   /** Varsayılan true — pasife alınmış planlar listelenmez. */
   activeOnly?: boolean;
   limit?: number;
   offset?: number;
+  /**
+   * Sprint 5.5 — `next_due_date`'e göre filtreler. `referenceDate`
+   * ile BİRLİKTE kullanılır (biri verilirse diğeri de ZORUNLU).
+   */
+  dueStatus?: MaintenancePlanDueStatus;
+  /**
+   * "Bugün" hangi tarih kabul edilsin (`YYYY-MM-DD`). Repository
+   * KENDİ `new Date()`'ini ÜRETMEZ — çağırandan (Hook) alır. Bu,
+   * repository'yi deterministik ve test edilebilir tutar (Kural 30 —
+   * varsayımla değil, verilen veriyle çalışır).
+   */
+  referenceDate?: string;
 }
 
 export interface IMaintenancePlanRepository {

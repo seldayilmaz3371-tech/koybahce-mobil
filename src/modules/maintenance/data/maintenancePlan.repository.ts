@@ -54,33 +54,78 @@ const UPDATABLE_COLUMN_MAP: Record<keyof MaintenancePlanUpdateInput, string> = {
   nextDueDate: "next_due_date",
 };
 
+/**
+ * `listByParcel`/`listByTree`'nin ortak WHERE/parametre inşası (Kural
+ * 8 — kod tekrarından kaçınma; `MaintenanceRepository`'nin
+ * `buildListClause`'uyla AYNI desen).
+ *
+ * `dueStatus` — "bugün" (`referenceDate`) referans alınarak SQL'de
+ * karşılaştırma: `overdue` → bugünden ÖNCE, `today` → bugün İÇİNDE
+ * (gün başı-sonu aralığı), `upcoming` → yarından SONRA (dahil).
+ * "Yarın" hesaplaması, `referenceDate`'in KENDİSİNDEN türetiliyor —
+ * repository `new Date()` (şu anki gerçek zaman) hiç ÇAĞIRMIYOR,
+ * tamamen VERİLEN referans tarihe göre deterministik (Kural 30).
+ */
+function buildListClause(
+  scopeColumn: "parcel_id" | "tree_id",
+  scopeValue: string,
+  options: MaintenancePlanListOptions
+): { whereClause: string; values: unknown[] } {
+  const activeOnly = options.activeOnly ?? true;
+  const conditions = [`${scopeColumn} = ?`];
+  const values: unknown[] = [scopeValue];
+
+  if (activeOnly) {
+    conditions.push("is_active = 1");
+  }
+
+  if (options.dueStatus && options.referenceDate) {
+    const todayStart = `${options.referenceDate}T00:00:00.000Z`;
+    const tomorrow = new Date(`${options.referenceDate}T00:00:00.000Z`);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    const tomorrowStart = tomorrow.toISOString();
+
+    if (options.dueStatus === "overdue") {
+      conditions.push("next_due_date < ?");
+      values.push(todayStart);
+    } else if (options.dueStatus === "today") {
+      conditions.push("next_due_date >= ? AND next_due_date < ?");
+      values.push(todayStart, tomorrowStart);
+    } else {
+      // "upcoming" — yarından itibaren (dahil).
+      conditions.push("next_due_date >= ?");
+      values.push(tomorrowStart);
+    }
+  }
+
+  return { whereClause: conditions.join(" AND "), values };
+}
+
 class MaintenancePlanRepository extends BaseRepository implements IMaintenancePlanRepository {
   protected readonly tableName = "maintenance_plans";
 
   async listByParcel(parcelId: string, options: MaintenancePlanListOptions = {}): Promise<MaintenancePlan[]> {
-    const activeOnly = options.activeOnly ?? true;
     const limit = options.limit ?? DEFAULT_LIST_LIMIT;
     const offset = options.offset ?? 0;
-    const whereActive = activeOnly ? "AND is_active = 1" : "";
+    const { whereClause, values } = buildListClause("parcel_id", parcelId, options);
 
     const rows = await this.query<MaintenancePlanRow>(
-      `SELECT * FROM maintenance_plans WHERE parcel_id = ? ${whereActive}
+      `SELECT * FROM maintenance_plans WHERE ${whereClause}
        ORDER BY next_due_date ASC LIMIT ? OFFSET ?`,
-      [parcelId, limit, offset]
+      [...values, limit, offset]
     );
     return rows.map(mapRowToMaintenancePlan);
   }
 
   async listByTree(treeId: string, options: MaintenancePlanListOptions = {}): Promise<MaintenancePlan[]> {
-    const activeOnly = options.activeOnly ?? true;
     const limit = options.limit ?? DEFAULT_LIST_LIMIT;
     const offset = options.offset ?? 0;
-    const whereActive = activeOnly ? "AND is_active = 1" : "";
+    const { whereClause, values } = buildListClause("tree_id", treeId, options);
 
     const rows = await this.query<MaintenancePlanRow>(
-      `SELECT * FROM maintenance_plans WHERE tree_id = ? ${whereActive}
+      `SELECT * FROM maintenance_plans WHERE ${whereClause}
        ORDER BY next_due_date ASC LIMIT ? OFFSET ?`,
-      [treeId, limit, offset]
+      [...values, limit, offset]
     );
     return rows.map(mapRowToMaintenancePlan);
   }

@@ -165,3 +165,98 @@ describe("MaintenancePlanScreen — Error Code Standard", () => {
     expect(screen.queryByText(/line 42/)).toBeNull();
   });
 });
+
+describe("MaintenancePlanScreen — Yaklaşan/Geciken/Bugün Görünümü (Sprint 5.5)", () => {
+  function daysFromNowIso(daysOffset: number): string {
+    const date = new Date();
+    date.setUTCDate(date.getUTCDate() + daysOffset);
+    return date.toISOString();
+  }
+
+  it("3 kategori DOĞRU başlıklarla, DOĞRU planlarla gösterilir", async () => {
+    const parcelId = await createTestParcel();
+    await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: "irrigation",
+      intervalDays: 7,
+      nextDueDate: daysFromNowIso(-3),
+    });
+    await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: "fertilization",
+      intervalDays: 30,
+      nextDueDate: daysFromNowIso(0),
+    });
+    await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: "pruning",
+      intervalDays: 180,
+      nextDueDate: daysFromNowIso(15),
+    });
+
+    render(<MaintenancePlanScreen scope={{ mode: "parcel", parcelId }} parcelId={parcelId} onBack={() => {}} />);
+
+    await waitFor(() => expect(screen.getByText("Overdue")).toBeTruthy());
+    expect(screen.getByText("Due Today")).toBeTruthy();
+    expect(screen.getByText("Upcoming")).toBeTruthy();
+
+    // Her plan SADECE kendi kategorisinde görünüyor (çakışma yok —
+    // "Tüm Planlar" bölümü BİLİNÇLİ olarak kaldırıldı).
+    expect(screen.getByText(/Irrigation/)).toBeTruthy();
+    expect(screen.getByText(/Fertilization/)).toBeTruthy();
+    expect(screen.getByText(/Pruning/)).toBeTruthy();
+  });
+
+  it("boş bir kategori (ör. hiç geciken yok) bölüm başlığı GÖSTERİLMEZ", async () => {
+    const parcelId = await createTestParcel();
+    await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: "irrigation",
+      intervalDays: 7,
+      nextDueDate: daysFromNowIso(15), // sadece "upcoming"
+    });
+
+    render(<MaintenancePlanScreen scope={{ mode: "parcel", parcelId }} parcelId={parcelId} onBack={() => {}} />);
+
+    await waitFor(() => expect(screen.getByText("Upcoming")).toBeTruthy());
+    expect(screen.queryByText("Overdue")).toBeNull();
+    expect(screen.queryByText("Due Today")).toBeNull();
+  });
+
+  it("hiç plan yoksa boş durum mesajı gösterilir, hiçbir kategori başlığı görünmez", async () => {
+    const parcelId = await createTestParcel();
+
+    render(<MaintenancePlanScreen scope={{ mode: "parcel", parcelId }} parcelId={parcelId} onBack={() => {}} />);
+
+    await waitFor(() => expect(screen.getByText("No maintenance plans yet.")).toBeTruthy());
+    expect(screen.queryByText("Overdue")).toBeNull();
+    expect(screen.queryByText("Due Today")).toBeNull();
+    expect(screen.queryByText("Upcoming")).toBeNull();
+  });
+
+  it("Geciken bir plandan düzenleme formu açılıp status DEĞİL ama nextDueDate güncellenirse, plan DOĞRU kategoriye taşınır", async () => {
+    const parcelId = await createTestParcel();
+    const created = await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: "irrigation",
+      intervalDays: 7,
+      nextDueDate: daysFromNowIso(-3), // geciken
+    });
+
+    render(<MaintenancePlanScreen scope={{ mode: "parcel", parcelId }} parcelId={parcelId} onBack={() => {}} />);
+    await waitFor(() => expect(screen.getByText("Overdue")).toBeTruthy());
+
+    fireEvent.click(screen.getByText(/Irrigation/));
+    const newDate = daysFromNowIso(20).slice(0, 10);
+    fireEvent.change(screen.getByLabelText("Next Due Date"), { target: { value: newDate } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
+
+    await waitFor(() => expect(screen.getByText("Upcoming")).toBeTruthy());
+    expect(screen.queryByText("Overdue")).toBeNull();
+
+    const updated = await maintenancePlanRepository.getById(created.id);
+    expect(updated?.nextDueDate.slice(0, 10)).toBe(newDate);
+  });
+});

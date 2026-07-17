@@ -16,6 +16,10 @@
     "nextDueDate": "Next Due Date",
     "intervalDaysInvalid": "Interval must be a positive whole number of days.",
     "nextDueDateInvalid": "Please select a valid date.",
+    "overdueSectionTitle": "Overdue",
+    "todaySectionTitle": "Due Today",
+    "upcomingSectionTitle": "Upcoming",
+    "allPlansSectionTitle": "All Plans",
     "deleteButton": "Delete Plan",
     "deleteConfirm": "Delete this maintenance plan? It will be removed from your lists."
   },

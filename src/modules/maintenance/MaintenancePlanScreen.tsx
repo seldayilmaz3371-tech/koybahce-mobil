@@ -38,10 +38,11 @@ export function MaintenancePlanScreen({ scope, parcelId, onBack }: MaintenancePl
   const { t } = useTranslation();
   const {
     plans,
+    overduePlans,
+    todayPlans,
+    upcomingPlans,
     status,
     errorCode,
-    hasMore,
-    loadMore,
     createPlan,
     updatePlan,
     deactivatePlan,
@@ -115,20 +116,33 @@ export function MaintenancePlanScreen({ scope, parcelId, onBack }: MaintenancePl
         </div>
       ) : null}
 
-      {status === "ready" && plans.length === 0 ? (
+      {status === "ready" && overduePlans.length === 0 && todayPlans.length === 0 && upcomingPlans.length === 0 ? (
         <p className="status-card__value">{t("maintenancePlan.emptyState")}</p>
       ) : null}
 
-      {plans.length > 0 ? (
-        <>
-          <MaintenancePlanList plans={plans} onSelect={handleSelect} />
-          {status === "loading" ? <p className="status-card__value">{t("common.loading")}</p> : null}
-          {hasMore && status !== "loading" ? (
-            <button type="button" className="lock-screen__button" onClick={loadMore}>
-              {t("maintenancePlan.loadMoreButton")}
-            </button>
+      {overduePlans.length > 0 || todayPlans.length > 0 || upcomingPlans.length > 0 ? (
+        <div className="status-card">
+          {overduePlans.length > 0 ? (
+            <section>
+              <h2 className="status-card__label">{t("maintenancePlan.overdueSectionTitle")}</h2>
+              <MaintenancePlanList plans={overduePlans} onSelect={handleSelect} />
+            </section>
           ) : null}
-        </>
+
+          {todayPlans.length > 0 ? (
+            <section>
+              <h2 className="status-card__label">{t("maintenancePlan.todaySectionTitle")}</h2>
+              <MaintenancePlanList plans={todayPlans} onSelect={handleSelect} />
+            </section>
+          ) : null}
+
+          {upcomingPlans.length > 0 ? (
+            <section>
+              <h2 className="status-card__label">{t("maintenancePlan.upcomingSectionTitle")}</h2>
+              <MaintenancePlanList plans={upcomingPlans} onSelect={handleSelect} />
+            </section>
+          ) : null}
+        </div>
       ) : null}
     </main>
   );

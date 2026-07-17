@@ -172,3 +172,83 @@ describe("useMaintenancePlans", () => {
     expect(result.current.errorCode).not.toBeNull();
   });
 });
+
+describe("useMaintenancePlans — Yaklaşan/Geciken Kategorileri (Sprint 5.5)", () => {
+  /**
+   * Testler GERÇEK "bugün"e göre DİNAMİK tarih hesaplıyor (sabit bir
+   * tarih YAZILMADI) — aksi halde bu testler SADECE yazıldığı gün
+   * geçer, gelecekte gerçek CI/test ortamında başarısız olurdu.
+   */
+  function daysFromNowIso(daysOffset: number): string {
+    const date = new Date();
+    date.setUTCDate(date.getUTCDate() + daysOffset);
+    return date.toISOString();
+  }
+
+  it("overduePlans/todayPlans/upcomingPlans doğru şekilde kategorize edilir", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: MaintenanceType.Irrigation,
+      intervalDays: 7,
+      nextDueDate: daysFromNowIso(-5), // geçmiş
+    });
+    await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: MaintenanceType.Fertilization,
+      intervalDays: 30,
+      nextDueDate: daysFromNowIso(0), // bugün
+    });
+    await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: MaintenanceType.Pruning,
+      intervalDays: 180,
+      nextDueDate: daysFromNowIso(10), // gelecek
+    });
+
+    const { result } = renderHook(() => useMaintenancePlans({ mode: "parcel", parcelId }));
+
+    await waitFor(() => expect(result.current.status).toBe("ready"));
+    expect(result.current.overduePlans).toHaveLength(1);
+    expect(result.current.overduePlans[0].maintenanceType).toBe("irrigation");
+    expect(result.current.todayPlans).toHaveLength(1);
+    expect(result.current.todayPlans[0].maintenanceType).toBe("fertilization");
+    expect(result.current.upcomingPlans).toHaveLength(1);
+    expect(result.current.upcomingPlans[0].maintenanceType).toBe("pruning");
+
+    // Ana `plans` listesi HİÇ ETKİLENMEDİ — Sprint 5.4'ün davranışı korundu.
+    expect(result.current.plans).toHaveLength(3);
+  });
+
+  it("createPlan() sonrası kategoriler de OTOMATİK güncellenir (refetch tüm 4 sorguyu tazeler)", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    const { result } = renderHook(() => useMaintenancePlans({ mode: "parcel", parcelId }));
+    await waitFor(() => expect(result.current.status).toBe("ready"));
+    expect(result.current.overduePlans).toHaveLength(0);
+
+    await result.current.createPlan({
+      parcelId,
+      maintenanceType: MaintenanceType.Irrigation,
+      intervalDays: 7,
+      nextDueDate: daysFromNowIso(-3),
+    });
+
+    await waitFor(() => expect(result.current.overduePlans).toHaveLength(1));
+  });
+
+  it("Tree Mode'da da kategoriler doğru çalışır", async () => {
+    const { parcelId, treeId } = await createTestParcelAndTree();
+    await maintenancePlanRepository.create({
+      parcelId,
+      treeId,
+      maintenanceType: MaintenanceType.Pesticide,
+      intervalDays: 14,
+      nextDueDate: daysFromNowIso(-1),
+    });
+
+    const { result } = renderHook(() => useMaintenancePlans({ mode: "tree", treeId }));
+
+    await waitFor(() => expect(result.current.status).toBe("ready"));
+    expect(result.current.overduePlans).toHaveLength(1);
+  });
+});

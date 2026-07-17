@@ -230,6 +230,166 @@ describe("MaintenancePlanRepository — Veri Bütünlüğü (CHECK/FOREIGN KEY)"
   });
 });
 
+describe("MaintenancePlanRepository — dueStatus Filtresi (Sprint 5.5)", () => {
+  const REFERENCE_DATE = "2026-07-17"; // "bugün" olarak kabul edilen sabit tarih
+
+  async function seedThreeStatuses(parcelId: string) {
+    const overdue = await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: MaintenanceType.Irrigation,
+      intervalDays: 7,
+      nextDueDate: "2026-07-10T00:00:00.000Z", // geçmiş
+    });
+    const today = await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: MaintenanceType.Fertilization,
+      intervalDays: 30,
+      nextDueDate: "2026-07-17T14:30:00.000Z", // bugün, öğleden sonra
+    });
+    const upcoming = await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: MaintenanceType.Pruning,
+      intervalDays: 180,
+      nextDueDate: "2026-08-01T00:00:00.000Z", // gelecek
+    });
+    return { overdue, today, upcoming };
+  }
+
+  it("dueStatus:'overdue' SADECE bugünden ÖNCEki planları döndürür", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    const { overdue } = await seedThreeStatuses(parcelId);
+
+    const list = await maintenancePlanRepository.listByParcel(parcelId, {
+      dueStatus: "overdue",
+      referenceDate: REFERENCE_DATE,
+    });
+
+    expect(list).toHaveLength(1);
+    expect(list[0].id).toBe(overdue.id);
+  });
+
+  it("dueStatus:'today' SADECE bugünün TAMAMINI (saat fark etmeksizin) döndürür", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    const { today } = await seedThreeStatuses(parcelId);
+
+    const list = await maintenancePlanRepository.listByParcel(parcelId, {
+      dueStatus: "today",
+      referenceDate: REFERENCE_DATE,
+    });
+
+    expect(list).toHaveLength(1);
+    expect(list[0].id).toBe(today.id);
+  });
+
+  it("dueStatus:'upcoming' SADECE yarından itibarenki planları döndürür", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    const { upcoming } = await seedThreeStatuses(parcelId);
+
+    const list = await maintenancePlanRepository.listByParcel(parcelId, {
+      dueStatus: "upcoming",
+      referenceDate: REFERENCE_DATE,
+    });
+
+    expect(list).toHaveLength(1);
+    expect(list[0].id).toBe(upcoming.id);
+  });
+
+  it("SINIR DURUMU — 'bugün' gece yarısına (00:00:00.000Z) DA doğru şekilde dahil edilir", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: MaintenanceType.Irrigation,
+      intervalDays: 7,
+      nextDueDate: "2026-07-17T00:00:00.000Z", // TAM gece yarısı
+    });
+
+    const list = await maintenancePlanRepository.listByParcel(parcelId, {
+      dueStatus: "today",
+      referenceDate: REFERENCE_DATE,
+    });
+
+    expect(list).toHaveLength(1);
+  });
+
+  it("SINIR DURUMU — 'bugün' gece 23:59:59.999Z'ye DE doğru şekilde dahil edilir, YARIN gece yarısı DAHİL DEĞİL", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: MaintenanceType.Irrigation,
+      intervalDays: 7,
+      nextDueDate: "2026-07-17T23:59:59.999Z",
+    });
+    await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: MaintenanceType.Pesticide,
+      intervalDays: 7,
+      nextDueDate: "2026-07-18T00:00:00.000Z", // YARIN gece yarısı — "today" DEĞİL
+    });
+
+    const todayList = await maintenancePlanRepository.listByParcel(parcelId, {
+      dueStatus: "today",
+      referenceDate: REFERENCE_DATE,
+    });
+    expect(todayList).toHaveLength(1);
+    expect(todayList[0].maintenanceType).toBe("irrigation");
+
+    const upcomingList = await maintenancePlanRepository.listByParcel(parcelId, {
+      dueStatus: "upcoming",
+      referenceDate: REFERENCE_DATE,
+    });
+    expect(upcomingList).toHaveLength(1);
+    expect(upcomingList[0].maintenanceType).toBe("pesticide");
+  });
+
+  it("dueStatus verilmezse (varsayılan davranış) TÜM planlar döner — Sprint 5.4'ün davranışı KORUNDU (regresyon yok)", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    await seedThreeStatuses(parcelId);
+
+    const list = await maintenancePlanRepository.listByParcel(parcelId);
+
+    expect(list).toHaveLength(3);
+  });
+
+  it("dueStatus filtresi listByTree() için de AYNI şekilde çalışır", async () => {
+    const { parcelId, treeId } = await createTestParcelAndTree();
+    await maintenancePlanRepository.create({
+      parcelId,
+      treeId,
+      maintenanceType: MaintenanceType.Irrigation,
+      intervalDays: 7,
+      nextDueDate: "2026-07-10T00:00:00.000Z", // geçmiş
+    });
+    await maintenancePlanRepository.create({
+      parcelId,
+      treeId,
+      maintenanceType: MaintenanceType.Pruning,
+      intervalDays: 180,
+      nextDueDate: "2026-08-01T00:00:00.000Z", // gelecek
+    });
+
+    const overdueList = await maintenancePlanRepository.listByTree(treeId, {
+      dueStatus: "overdue",
+      referenceDate: REFERENCE_DATE,
+    });
+
+    expect(overdueList).toHaveLength(1);
+    expect(overdueList[0].maintenanceType).toBe("irrigation");
+  });
+
+  it("pasife alınmış bir plan, dueStatus filtresiyle de listelenmez (activeOnly ile tutarlı)", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    const { overdue } = await seedThreeStatuses(parcelId);
+    await maintenancePlanRepository.deactivate(overdue.id);
+
+    const list = await maintenancePlanRepository.listByParcel(parcelId, {
+      dueStatus: "overdue",
+      referenceDate: REFERENCE_DATE,
+    });
+
+    expect(list).toHaveLength(0);
+  });
+});
+
 describe("MaintenancePlanRepository — Integration Test (Parsel→Ağaç→Plan Tam Zincir)", () => {
   it("gerçekçi bir saha akışı: parsel geneli + ağaç-özel plan birlikte, pasife alma sonrası kalıcılık", async () => {
     const parcel = await parcelRepository.create({ name: "Plan Parseli", cropType: "olive", areaDekar: 8 });

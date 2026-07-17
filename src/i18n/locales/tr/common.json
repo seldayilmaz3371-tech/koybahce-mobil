@@ -16,6 +16,10 @@
     "nextDueDate": "Sonraki Tarih",
     "intervalDaysInvalid": "Aralık, pozitif bir tam gün sayısı olmalıdır.",
     "nextDueDateInvalid": "Lütfen geçerli bir tarih seçin.",
+    "overdueSectionTitle": "Geciken",
+    "todaySectionTitle": "Bugün",
+    "upcomingSectionTitle": "Yaklaşan",
+    "allPlansSectionTitle": "Tüm Planlar",
     "deleteButton": "Planı Sil",
     "deleteConfirm": "Bu bakım planı silinsin mi? Listelerinizden kaldırılacak."
   },
