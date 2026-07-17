@@ -29,8 +29,10 @@
     "userLabel": "Siz",
     "assistantLabel": "Asistan",
     "inputLabel": "Çiftlik verileriniz hakkında bir soru sorun",
+    "inputPlaceholder": "Sorunuzu yazın...",
     "sendButton": "Gönder",
-    "settingsLinkLabel": "AI Ayarları"
+    "settingsLinkLabel": "AI Ayarları",
+    "thinkingLabel": "Düşünüyor..."
   },
   "maintenancePlan": {
     "screenTitle": "Bakım Planları",

@@ -255,3 +255,119 @@ button {
   height: 24px;
   flex-shrink: 0;
 }
+
+/* --- AI Sohbet — Sprint 7.3 (mobil UX iyileştirmesi) ---
+ * `.status-screen`'in genel padding'i KORUNUYOR (diğer ekranları
+ * etkilememesi için `.ai-chat-screen` AYRI bir sınıf, `.status-screen`
+ * ile BİRLİKTE kullanılıyor, onun yerine GEÇMİYOR).
+ */
+
+.ai-chat-screen {
+  display: flex;
+  flex-direction: column;
+  /* `#root`'un flex sütun düzeninde, bu ekranın KENDİSİ kalan tüm
+     dikey alanı kaplasın — mesaj alanı İÇERİDE kaydırılsın, sayfanın
+     TAMAMI değil (klavye açıldığında composer'ın görünür kalması
+     için, `android:windowSoftInputMode="adjustResize"` ile birlikte). */
+  height: 100%;
+  min-height: 0;
+}
+
+.ai-chat__messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+  padding: 4px;
+}
+
+.ai-chat__bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  /* Uzun cevaplar rahat okunsun: satır sonu doğal, kelimeler
+     birbirine YAPIŞMASIN. */
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+
+.ai-chat__bubble--user {
+  align-self: flex-end;
+  background: var(--color-primary);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.ai-chat__bubble--model {
+  align-self: flex-start;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-bottom-left-radius: 4px;
+}
+
+.ai-chat__bubble-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.75;
+  margin-bottom: 2px;
+}
+
+.ai-chat__bubble--loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.ai-chat__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: ai-chat-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes ai-chat-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ai-chat__composer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Composer HER ZAMAN görünür kalsın — flex düzeninde son eleman,
+     büyümez (`flex-shrink: 0`), mesaj alanı SIKIŞTIĞINDA composer
+     ASLA ekran dışına ÇIKMAZ. */
+  flex-shrink: 0;
+}
+
+.ai-chat__textarea {
+  width: 100%;
+  min-height: 96px; /* ~4 satır */
+  max-height: 240px; /* ~10 satır — JS ile bu sınıra kadar büyür */
+  padding: 12px 14px;
+  font-size: 16px; /* 16px altı Android'de otomatik yakınlaştırmayı tetikler, KAÇINILIYOR */
+  font-family: inherit;
+  line-height: 1.4;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  resize: none;
+  overflow-y: auto;
+}
+
+.ai-chat__textarea:disabled {
+  opacity: 0.6;
+}

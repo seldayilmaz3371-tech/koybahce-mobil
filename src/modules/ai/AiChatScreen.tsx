@@ -5,10 +5,16 @@
  * gönderme devre dışı bırakılır, geçmiş konuşma (bu oturumda) yine de
  * görüntülenebilir.
  *
+ * Sprint 7.3 — Mobil UX iyileştirmesi (kullanıcı talebi, 2026-07-17):
+ * çok satırlı otomatik büyüyen textarea, sohbet balonları (kullanıcı
+ * sağda/AI solda), gönderim sırasında "yazıyor..." göstergesi. AI
+ * MİMARİSİ (useAiChat/AiSessionService/Provider) HİÇ DEĞİŞMEDİ —
+ * sadece bu dosyanın render/etkileşim katmanı yeniden tasarlandı.
+ *
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useAiChat } from "./hooks/useAiChat";
 import { addNetworkStatusListener, isOnline } from "../../native/network";
@@ -20,35 +26,59 @@ interface AiChatScreenProps {
   onViewSettings: () => void;
 }
 
+/** CSS'teki `.ai-chat__textarea`'nın `max-height`'iyle BİREBİR eşleşmeli (~10 satır). */
+const TEXTAREA_MAX_HEIGHT_PX = 240;
+
 export function AiChatScreen({ screenContext, onBack, onViewSettings }: AiChatScreenProps) {
   const { t } = useTranslation();
   const { messages, status, errorCode, sendMessage } = useAiChat(screenContext);
   const [inputValue, setInputValue] = useState("");
   const [online, setOnline] = useState(true);
-  // Sprint 7.2 — GERÇEK UX bulgusu: uzun bir konuşmada, yeni gelen
-  // cevap listenin altında kalıp GÖRÜNMEYEBİLİR. Her yeni mesajda
-  // (kullanıcı VEYA model) en alta otomatik kaydırıyoruz.
-  const latestMessageRef = useRef<HTMLLIElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  // bkz. Sprint 7.2 — uzun bir konuşmada yeni gelen cevap listenin
+  // altında kalıp GÖRÜNMEYEBİLİR. Her yeni mesajda (kullanıcı VEYA
+  // model) en alta otomatik kaydırıyoruz.
+  const latestMessageRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     latestMessageRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages]);
+  }, [messages, status]);
 
   useEffect(() => {
     isOnline().then(setOnline);
     return addNetworkStatusListener(setOnline);
   }, []);
 
+  const handleTextareaChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setInputValue(event.target.value);
+    // Sprint 7.3 — otomatik büyüme: önce "auto"ya sıfırlanır (küçülme
+    // ihtimali için — kullanıcı metni SİLERSE textarea da küçülmeli),
+    // sonra GERÇEK içerik yüksekliğine (`scrollHeight`) göre, ~10
+    // satır sınırına kadar büyütülür.
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = `${Math.min(el.scrollHeight, TEXTAREA_MAX_HEIGHT_PX)}px`;
+    }
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!inputValue.trim() || status === "sending") return;
     const query = inputValue;
     setInputValue("");
+    // Textarea'yı görsel olarak da varsayılan (4 satır) yüksekliğe döndür.
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
     await sendMessage(query);
   };
 
+  const visibleMessages = messages.filter((m) => m.role !== "tool");
+  const isSending = status === "sending";
+
   return (
-    <main className="status-screen">
+    <main className="status-screen ai-chat-screen">
       <h1 className="status-screen__title">{t("aiChat.screenTitle")}</h1>
 
       {!online ? <p className="status-card__value">{t("aiChat.offlineNotice")}</p> : null}
@@ -61,32 +91,46 @@ export function AiChatScreen({ screenContext, onBack, onViewSettings }: AiChatSc
         </div>
       ) : null}
 
-      <ul className="parcel-list" aria-live="polite" aria-relevant="additions">
-        {(() => {
-          const visibleMessages = messages.filter((m) => m.role !== "tool");
-          return visibleMessages.map((m, index) => (
-            <li key={m.id} ref={index === visibleMessages.length - 1 ? latestMessageRef : undefined}>
-              <span className="parcel-list__name">
+      <div className="ai-chat__messages" aria-live="polite" aria-relevant="additions">
+        {visibleMessages.map((m, index) => {
+          const isLast = index === visibleMessages.length - 1 && !isSending;
+          return (
+            <div
+              key={m.id}
+              ref={isLast ? latestMessageRef : undefined}
+              className={`ai-chat__bubble ai-chat__bubble--${m.role === "user" ? "user" : "model"}`}
+            >
+              <span className="ai-chat__bubble-label">
                 {m.role === "user" ? t("aiChat.userLabel") : t("aiChat.assistantLabel")}
               </span>
-              <span className="parcel-list__meta">{m.content}</span>
-            </li>
-          ));
-        })()}
-      </ul>
+              {m.content}
+            </div>
+          );
+        })}
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
+        {isSending ? (
+          <div ref={latestMessageRef} className="ai-chat__bubble ai-chat__bubble--model ai-chat__bubble--loading">
+            <span className="ai-chat__spinner" aria-hidden="true" />
+            {t("aiChat.thinkingLabel")}
+          </div>
+        ) : null}
+      </div>
+
+      <form className="ai-chat__composer" onSubmit={handleSubmit}>
+        <textarea
+          ref={textareaRef}
+          className="ai-chat__textarea"
+          rows={4}
           aria-label={t("aiChat.inputLabel")}
+          placeholder={t("aiChat.inputPlaceholder")}
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          disabled={!online || status === "sending"}
+          onChange={handleTextareaChange}
+          disabled={!online || isSending}
         />
         <button
           type="submit"
           className="lock-screen__button"
-          disabled={!online || status === "sending" || !inputValue.trim()}
+          disabled={!online || isSending || !inputValue.trim()}
         >
           {t("aiChat.sendButton")}
         </button>
