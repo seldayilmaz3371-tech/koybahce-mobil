@@ -33,6 +33,7 @@ yapmıştık?" sorusuna kod kazmadan cevap verebilmektir.
 | [0022](0022-foreign-key-zorlamasi-bulgusu.md) | Foreign Key Zorlaması Muhtemelen Etkin Değil (Kritik Bulgu) | ✅ Düzeltme uygulandı (Sprint 2.6) |
 | [0023](0023-native-run-transaction-parametresi.md) | Native `run()` Transaction Parametresi Kök Neden Bulgusu | ✅ Gerçek cihaz hatasından bulundu, düzeltildi, iki yönlü test kanıtı (Sprint 3.10.1) |
 | [0024](0024-ai-architecture-decisions.md) | AI Architecture Decisions — Provider Registry, Tool Registry, AiSessionService, IContextEngine | ✅ Kabul edildi (Sprint 6) |
+| [0025](0025-beta-release-strategy.md) | Beta Release Strategy — Versioning, Keystore, APK/Dağıtım Süreci, Git Tag Politikası | 🟡 Taslak, kullanıcı onayı bekliyor (Sprint 7.3) |
 
 ## Yeni bir ADR ne zaman eklenir?
 
