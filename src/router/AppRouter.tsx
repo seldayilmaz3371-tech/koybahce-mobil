@@ -34,6 +34,7 @@ import { TreesScreen } from "../modules/trees/TreesScreen";
 import { ObservationScreen } from "../modules/observations/ObservationScreen";
 import { PhotoGalleryScreen } from "../modules/photos/PhotoGalleryScreen";
 import { FinanceScreen } from "../modules/finance/FinanceScreen";
+import { MaintenanceScreen } from "../modules/maintenance/MaintenanceScreen";
 import { treeRepository } from "../modules/trees/data/tree.repository";
 import type { Tree } from "../modules/trees/domain/tree.types";
 import { useBackButtonFallback } from "./BackButtonHandler";
@@ -46,6 +47,7 @@ function ParcelsScreenRoute() {
       onViewTrees={(parcel) => navigate(buildPath.parcelTrees(parcel.id))}
       onViewReferenceTrees={() => navigate(buildPath.referenceTrees())}
       onViewFinance={(parcel) => navigate(buildPath.parcelFinance(parcel.id))}
+      onViewMaintenance={(parcel) => navigate(buildPath.parcelMaintenance(parcel.id))}
     />
   );
 }
@@ -63,6 +65,7 @@ function TreesScreenRoute() {
       mode={{ mode: "parcel", parcelId }}
       onBack={() => navigate(-1)}
       onViewObservations={(tree) => navigate(buildPath.treeObservations(tree.id))}
+      onViewMaintenance={(tree) => navigate(buildPath.treeMaintenance(tree.id))}
     />
   );
 }
@@ -89,6 +92,27 @@ function FinanceScreenRoute() {
   );
 }
 
+/**
+ * `MaintenanceScreen` sadece `parcelId`'ye ihtiyaç duyuyor (rotadan
+ * doğrudan geliyor) — `FinanceScreenRoute` ile birebir aynı basitlik.
+ */
+function MaintenanceScreenRoute() {
+  const { parcelId } = useParams<{ parcelId: string }>();
+  const navigate = useNavigate();
+
+  if (!parcelId) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+
+  return (
+    <MaintenanceScreen
+      scope={{ mode: "parcel", parcelId }}
+      parcelId={parcelId}
+      onBack={() => navigate(-1)}
+    />
+  );
+}
+
 function ReferenceTreesScreenRoute() {
   const navigate = useNavigate();
   return (
@@ -96,6 +120,7 @@ function ReferenceTreesScreenRoute() {
       mode={{ mode: "reference" }}
       onBack={() => navigate(-1)}
       onViewObservations={(tree) => navigate(buildPath.treeObservations(tree.id))}
+      onViewMaintenance={(tree) => navigate(buildPath.treeMaintenance(tree.id))}
     />
   );
 }
@@ -160,6 +185,67 @@ function ObservationScreenRoute() {
   );
 }
 
+/**
+ * `MaintenanceScreen`'in `parcelId` prop'u için `Tree` nesnesi
+ * ZORUNLU — rotada sadece `treeId` var. `ObservationScreenRoute` ile
+ * BİREBİR AYNI desen (Sprint 5.3).
+ *
+ * 🔴 MİMARİ NOT (Sprint 4.3.1'in kendi öngörüsü doğrulandı):
+ * `engineering-protocol.md` Bölüm 21, bu deseni "TEK istisna" olarak
+ * belgelemişti ve şunu önceden not etmişti: "Eğer gelecekte 2. veya
+ * 3. bir route wrapper da benzer bir doğrudan repository erişimine
+ * ihtiyaç duyarsa, bu artık bir desen haline gelir ve o zaman gerçek
+ * bir soyutlama değerlendirilmelidir." İşte bu, TAM OLARAK o 2.
+ * tekrar. Sprint 5.3'ün "❌ Refactor" yasağı gereği bu sprintte
+ * `ObservationScreenRoute`'a DOKUNULMADI (ortak bir hook'a çıkarmak
+ * mevcut, çalışan kodu değiştirmek anlamına gelirdi) — kod BİLEREK
+ * tekrarlandı. **Sprint 5.4+ için açık öneri:** küçük bir
+ * `useTreeForRoute(treeId)` hook'u ile bu iki route wrapper'ın ortak
+ * mantığı birleştirilmeli.
+ */
+function TreeMaintenanceScreenRoute() {
+  const { treeId } = useParams<{ treeId: string }>();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [tree, setTree] = useState<Tree | null | "loading">("loading");
+
+  useEffect(() => {
+    if (!treeId) return;
+    let cancelled = false;
+    setTree("loading");
+    treeRepository.getById(treeId).then((result) => {
+      if (!cancelled) setTree(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [treeId]);
+
+  useBackButtonFallback(tree === "loading", () => navigate(-1));
+
+  if (!treeId) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+  if (tree === "loading") {
+    return (
+      <main className="status-screen">
+        <p className="status-card__value">{t("common.loading")}</p>
+      </main>
+    );
+  }
+  if (tree === null) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+
+  return (
+    <MaintenanceScreen
+      scope={{ mode: "tree", treeId: tree.id }}
+      parcelId={tree.parcelId}
+      onBack={() => navigate(-1)}
+    />
+  );
+}
+
 function PhotoGalleryScreenRoute() {
   const { observationId } = useParams<{ observationId: string }>();
   const navigate = useNavigate();
@@ -178,8 +264,10 @@ export function AppRouter() {
         <Route path={ROUTE_PATTERNS.parcels} element={<ParcelsScreenRoute />} />
         <Route path={ROUTE_PATTERNS.parcelTrees} element={<TreesScreenRoute />} />
         <Route path={ROUTE_PATTERNS.parcelFinance} element={<FinanceScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.parcelMaintenance} element={<MaintenanceScreenRoute />} />
         <Route path={ROUTE_PATTERNS.referenceTrees} element={<ReferenceTreesScreenRoute />} />
         <Route path={ROUTE_PATTERNS.treeObservations} element={<ObservationScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.treeMaintenance} element={<TreeMaintenanceScreenRoute />} />
         <Route path={ROUTE_PATTERNS.observationPhotos} element={<PhotoGalleryScreenRoute />} />
         <Route path="*" element={<Navigate to={buildPath.parcels()} replace />} />
       </Routes>

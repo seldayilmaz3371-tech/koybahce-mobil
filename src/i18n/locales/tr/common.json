@@ -92,6 +92,7 @@
     "loadMoreButton": "Daha Fazla Yükle",
     "viewTreesButton": "Ağaçları Görüntüle",
     "viewFinanceButton": "Finansı Görüntüle",
+    "viewMaintenanceButton": "Bakımı Görüntüle",
     "referenceTreesButton": "Referans Ağaçlar"
   },
   "photo": {
@@ -150,6 +151,7 @@
     "isReferenceTree": "Referans Ağaç",
     "deleteButton": "Ağacı Sil",
     "viewObservationsButton": "Gözlemleri Görüntüle",
+    "viewMaintenanceButton": "Bakımı Görüntüle",
     "deleteConfirm": "Bu ağaç silinsin mi? Listelerinizden kaldırılacak.",
     "treeNumberRequired": "Ağaç numarası zorunludur.",
     "varietyRequired": "Çeşit alanı zorunludur.",

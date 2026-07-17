@@ -36,9 +36,16 @@ interface ParcelsScreenProps {
   onViewReferenceTrees: () => void;
   /** Kullanıcı bir parselin finans geçmişini görüntülemek istediğinde çağrılır (Sprint 4.3). */
   onViewFinance: (parcel: Parcel) => void;
+  /** Kullanıcı bir parselin bakım geçmişini görüntülemek istediğinde çağrılır (Sprint 5.3). */
+  onViewMaintenance: (parcel: Parcel) => void;
 }
 
-export function ParcelsScreen({ onViewTrees, onViewReferenceTrees, onViewFinance }: ParcelsScreenProps) {
+export function ParcelsScreen({
+  onViewTrees,
+  onViewReferenceTrees,
+  onViewFinance,
+  onViewMaintenance,
+}: ParcelsScreenProps) {
   const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -93,6 +100,7 @@ export function ParcelsScreen({ onViewTrees, onViewReferenceTrees, onViewFinance
         onDelete={view.mode === "edit" ? handleDelete : undefined}
         onViewTrees={view.mode === "edit" ? () => onViewTrees(view.parcel) : undefined}
         onViewFinance={view.mode === "edit" ? () => onViewFinance(view.parcel) : undefined}
+        onViewMaintenance={view.mode === "edit" ? () => onViewMaintenance(view.parcel) : undefined}
       />
     );
   }

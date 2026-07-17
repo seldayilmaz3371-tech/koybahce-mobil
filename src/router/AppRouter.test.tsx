@@ -23,6 +23,7 @@ import { SCHEMA_MIGRATIONS } from "../data/db/migrations/schema";
 import { parcelRepository } from "../modules/parcels/data/parcel.repository";
 import { treeRepository } from "../modules/trees/data/tree.repository";
 import { observationRepository } from "../modules/observations/data/observation.repository";
+import { maintenanceRepository } from "../modules/maintenance/data/maintenance.repository";
 import { AppRouter } from "./AppRouter";
 
 const backButtonListeners: Array<() => void> = [];
@@ -237,6 +238,108 @@ describe("AppRouter — Rota Yönlendirme", () => {
 
     render(<AppRouter />);
     await waitFor(() => expect(screen.getByText("No finance records yet.")).toBeTruthy());
+
+    act(() => backButtonListeners[backButtonListeners.length - 1]());
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+
+  it("Parsel → Bakım: 'View Maintenance' doğru parcelId ile MaintenanceScreen'e gider, kayıt oluşturma çalışır (Sprint 5.3)", async () => {
+    const parcel = await parcelRepository.create({ name: "Bakım P", cropType: "olive", areaDekar: 5 });
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Bakım P")).toBeTruthy());
+    fireEvent.click(screen.getByText("Bakım P"));
+    await waitFor(() => expect(screen.getByText("View Maintenance")).toBeTruthy());
+    fireEvent.click(screen.getByText("View Maintenance"));
+
+    await waitFor(() => expect(screen.getByText("No maintenance records yet.")).toBeTruthy());
+    // Parametre aktarımı — doğru parcelId ile rotaya gidildi.
+    expect(window.location.hash).toBe(`#/parcels/${parcel.id}/maintenance`);
+
+    fireEvent.click(screen.getByText("Add Record"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
+
+    await waitFor(() => expect(screen.getByText(/Irrigation/)).toBeTruthy());
+  });
+
+  it("Bakım → Parsel: geri tuşu doğru şekilde döner (Sprint 5.3)", async () => {
+    const parcel = await parcelRepository.create({ name: "Bakım P", cropType: "olive", areaDekar: 5 });
+    window.location.hash = `#/parcels/${parcel.id}/maintenance`;
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("No maintenance records yet.")).toBeTruthy());
+
+    act(() => backButtonListeners[backButtonListeners.length - 1]());
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+
+  it("Ağaç → Bakım: 'View Maintenance' doğru treeId ile TreeMaintenanceScreenRoute'a gider, Tree'den DOĞRU parcelId çekilir (Sprint 5.3, Context Preservation)", async () => {
+    const parcel = await parcelRepository.create({ name: "Ağaç Bakım P", cropType: "olive", areaDekar: 5 });
+    const tree = await treeRepository.create({ parcelId: parcel.id, treeNumber: "M-1", variety: "Gemlik" });
+    window.location.hash = `#/parcels/${parcel.id}/trees`;
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("M-1")).toBeTruthy());
+    fireEvent.click(screen.getByText("M-1"));
+    await waitFor(() => expect(screen.getByText("View Maintenance")).toBeTruthy());
+    fireEvent.click(screen.getByText("View Maintenance"));
+
+    await waitFor(() => expect(screen.getByText("No maintenance records yet.")).toBeTruthy());
+    expect(window.location.hash).toBe(`#/trees/${tree.id}/maintenance`);
+
+    // Kayıt oluştur — DOĞRU parcelId ile ilişkilendirildiğini
+    // (Tree'den doğru çekildiğini) dolaylı olarak kanıtlıyoruz: kayıt
+    // parselin GENEL bakım listesinde de görünmeli.
+    fireEvent.click(screen.getByText("Add Record"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
+    await waitFor(() => expect(screen.getByText(/Irrigation/)).toBeTruthy());
+
+    const parcelWideRecords = await maintenanceRepository.listByParcel(parcel.id);
+    expect(parcelWideRecords).toHaveLength(1);
+    expect(parcelWideRecords[0].treeId).toBe(tree.id);
+  });
+
+  it("Geçersiz/var olmayan treeId ile Bakım rotası Parsellere yönlendirir (Sprint 5.3)", async () => {
+    window.location.hash = "#/trees/var-olmayan-id/maintenance";
+
+    render(<AppRouter />);
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+
+  it("Referans Ağaç → Bakım: Referans Modu'ndan da AYNI şekilde çalışır (Sprint 5.3, Madde 4 — özel bir ayrım yok)", async () => {
+    const parcel = await parcelRepository.create({ name: "Ref P", cropType: "olive", areaDekar: 5 });
+    const referenceTree = await treeRepository.create({
+      parcelId: parcel.id,
+      treeNumber: "REF-M-1",
+      variety: "Gemlik",
+      isReferenceTree: true,
+    });
+    window.location.hash = "#/reference-trees";
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("REF-M-1")).toBeTruthy());
+    fireEvent.click(screen.getByText("REF-M-1"));
+    await waitFor(() => expect(screen.getByText("View Maintenance")).toBeTruthy());
+    fireEvent.click(screen.getByText("View Maintenance"));
+
+    await waitFor(() => expect(screen.getByText("No maintenance records yet.")).toBeTruthy());
+    expect(window.location.hash).toBe(`#/trees/${referenceTree.id}/maintenance`);
+  });
+
+  it("Bakım (Ağaç Modu) → geri tuşu doğru şekilde döner (Sprint 5.3)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const tree = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-1", variety: "Gemlik" });
+    window.location.hash = `#/trees/${tree.id}/maintenance`;
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("No maintenance records yet.")).toBeTruthy());
 
     act(() => backButtonListeners[backButtonListeners.length - 1]());
 

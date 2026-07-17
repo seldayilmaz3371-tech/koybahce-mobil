@@ -33,6 +33,8 @@ interface TreeFormProps {
   onDelete?: () => Promise<void>;
   /** Sadece düzenleme modunda sağlanır — henüz kaydedilmemiş bir ağacın gözlemleri olamaz (Sprint 3.5). NOT: `onDelete` ile aynı desen — bu bileşen sadece prop varlığına bakar, "hangi modda geçirilecek" ÇAĞIRANIN (TreesScreen) sorumluluğudur. */
   onViewObservations?: () => void;
+  /** Sadece düzenleme modunda sağlanır (Sprint 5.3). AYNI desen — Parsel Modu VEYA Referans Modu fark etmeksizin çalışır, özel bir ayrım YOK (Sprint 5.1'in "referans ağaçlar için özel ayrım yok" kararıyla tutarlı — bu tek prop, hem "Ağaç→Bakım" hem "Referans Ağaç Bakım Geçmişi" ihtiyacını aynı anda karşılıyor). */
+  onViewMaintenance?: () => void;
 }
 
 export function TreeForm({
@@ -42,6 +44,7 @@ export function TreeForm({
   onCancel,
   onDelete,
   onViewObservations,
+  onViewMaintenance,
 }: TreeFormProps) {
   const { t } = useTranslation();
 
@@ -174,6 +177,18 @@ export function TreeForm({
           disabled={isSubmitting}
         >
           {t("tree.viewObservationsButton")}
+        </button>
+      ) : null}
+
+      {onViewMaintenance ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          style={{ marginTop: 8 }}
+          onClick={onViewMaintenance}
+          disabled={isSubmitting}
+        >
+          {t("tree.viewMaintenanceButton")}
         </button>
       ) : null}
 

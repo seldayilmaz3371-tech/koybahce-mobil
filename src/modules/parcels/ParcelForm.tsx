@@ -33,6 +33,8 @@ interface ParcelFormProps {
   onViewTrees?: () => void;
   /** Sadece düzenleme modunda sağlanır — henüz kaydedilmemiş bir parselin finans geçmişi olamaz (Sprint 4.3). NOT: onDelete/onViewTrees ile tutarlı desen — hangi modda geçirileceği çağıranın sorumluluğu. */
   onViewFinance?: () => void;
+  /** Sadece düzenleme modunda sağlanır (Sprint 5.3). Aynı desen. */
+  onViewMaintenance?: () => void;
 }
 
 export function ParcelForm({
@@ -42,6 +44,7 @@ export function ParcelForm({
   onDelete,
   onViewTrees,
   onViewFinance,
+  onViewMaintenance,
 }: ParcelFormProps) {
   const { t } = useTranslation();
 
@@ -188,6 +191,18 @@ export function ParcelForm({
           disabled={isSubmitting}
         >
           {t("parcel.viewFinanceButton")}
+        </button>
+      ) : null}
+
+      {onViewMaintenance ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          style={{ marginTop: 8 }}
+          onClick={onViewMaintenance}
+          disabled={isSubmitting}
+        >
+          {t("parcel.viewMaintenanceButton")}
         </button>
       ) : null}
 

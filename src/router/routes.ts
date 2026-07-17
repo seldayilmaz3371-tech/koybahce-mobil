@@ -15,8 +15,10 @@ export const ROUTE_PATTERNS = {
   parcels: "/parcels",
   parcelTrees: "/parcels/:parcelId/trees",
   parcelFinance: "/parcels/:parcelId/finance",
+  parcelMaintenance: "/parcels/:parcelId/maintenance",
   referenceTrees: "/reference-trees",
   treeObservations: "/trees/:treeId/observations",
+  treeMaintenance: "/trees/:treeId/maintenance",
   observationPhotos: "/observations/:observationId/photos",
 } as const;
 
@@ -24,8 +26,10 @@ export const buildPath = {
   parcels: () => "/parcels",
   parcelTrees: (parcelId: string) => `/parcels/${parcelId}/trees`,
   parcelFinance: (parcelId: string) => `/parcels/${parcelId}/finance`,
+  parcelMaintenance: (parcelId: string) => `/parcels/${parcelId}/maintenance`,
   referenceTrees: () => "/reference-trees",
   treeObservations: (treeId: string) => `/trees/${treeId}/observations`,
+  treeMaintenance: (treeId: string) => `/trees/${treeId}/maintenance`,
   observationPhotos: (observationId: string) => `/observations/${observationId}/photos`,
 } as const;
 
@@ -43,7 +47,6 @@ export const FUTURE_ROUTE_NAMES = {
   parcelDetail: "/parcels/:parcelId",
   treeDetail: "/trees/:treeId",
   observationDetail: "/observations/:observationId",
-  maintenance: "/maintenance",
   harvest: "/harvest",
   dashboard: "/dashboard",
   settings: "/settings",

@@ -47,9 +47,11 @@ interface TreesScreenProps {
   onBack: () => void;
   /** Kullanıcı bir ağacın gözlemlerini görüntülemek istediğinde çağrılır (App.tsx üst navigasyonu yönetir). */
   onViewObservations: (tree: Tree) => void;
+  /** Kullanıcı bir ağacın bakım geçmişini görüntülemek istediğinde çağrılır (Sprint 5.3). Parsel VEYA Referans Modu'nda AYNI şekilde çalışır. */
+  onViewMaintenance: (tree: Tree) => void;
 }
 
-export function TreesScreen({ mode, onBack, onViewObservations }: TreesScreenProps) {
+export function TreesScreen({ mode, onBack, onViewObservations, onViewMaintenance }: TreesScreenProps) {
   const { t } = useTranslation();
   const { trees, status, errorCode, createTree, createManyTrees, updateTree, deactivateTree } =
     useTrees(mode);
@@ -143,6 +145,7 @@ export function TreesScreen({ mode, onBack, onViewObservations }: TreesScreenPro
         onCancel={() => setView({ mode: "list" })}
         onDelete={view.mode === "edit" ? handleDelete : undefined}
         onViewObservations={view.mode === "edit" ? () => onViewObservations(view.tree) : undefined}
+        onViewMaintenance={view.mode === "edit" ? () => onViewMaintenance(view.tree) : undefined}
       />
     );
   }
