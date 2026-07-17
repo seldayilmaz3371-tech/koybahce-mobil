@@ -35,6 +35,12 @@ beforeAll(async () => {
     fallbackLng: "en",
     interpolation: { escapeValue: false },
   });
+  // GERÇEK bulgu: jsdom `Element.scrollIntoView`'i İMPLEMENT ETMİYOR
+  // (tarayıcının gerçek bir özelliği, ama jsdom bunu desteklemiyor —
+  // bilinen bir sınırlama). AiChatScreen'in Sprint 7.2'de eklenen
+  // otomatik kaydırma davranışı bunu çağırıyor — testte no-op olarak
+  // sağlanıyor.
+  Element.prototype.scrollIntoView = vi.fn();
 });
 
 beforeEach(() => {

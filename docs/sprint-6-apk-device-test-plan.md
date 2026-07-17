@@ -4,7 +4,7 @@
 **Hazırlayan bakış açısı:** Kıdemli Android QA Mühendisi + Mobil Yazılım Mimarı
 **Kaynak:** Gerçek proje yapılandırması incelenerek hazırlandı (`AndroidManifest.xml`, `build.gradle`, `capacitor.config.ts`) — varsayılmadı.
 
-**🔴 Uygulama Sırası (kullanıcı kararı):** Bu plandaki testler **Sprint 7'nin AI navigasyon entegrasyonu tamamlandıktan SONRA**, APK **gerçek navigasyonla yeniden oluşturulduktan SONRA** çalıştırılacak. Bkz. belge sonundaki "Süreç" bölümü.
+**🟡 Uygulama Sırası (kullanıcı kararı, Sprint 7.2'de güncellendi):** AI navigasyon entegrasyonu **Sprint 7.1'de tamamlandı**. Bu plandaki testler, Sprint 7.2 (APK/Beta hazırlığı) sonrası, APK **gerçek navigasyonla oluşturulduktan SONRA** çalıştırılacak. Bkz. belge sonundaki "Süreç" bölümü.
 
 ---
 
@@ -224,11 +224,11 @@ Production kararını ENGELLEMEZ, ama kaliteyi artırır:
 
 ## Süreç (Kullanıcı Kararı, 2026-07-17)
 
-Bu plan, **gerçek navigasyon üzerinden** çalıştırılacak şekilde tasarlandı — geçici/test-amaçlı hiçbir erişim yöntemi kullanılmayacak:
+Bu plan, **gerçek navigasyon üzerinden** çalıştırılacak şekilde tasarlandı — geçici/test-amaçlı hiçbir erişim yöntemi kullanılmadı:
 
-1. **Sprint 7, Adım 1:** AI ekranlarını gerçek navigasyon yapısına entegre et (Parsel/Ağaç/Finans/Bakım ile aynı desende).
-2. **Sprint 7, Adım 2:** APK'yı bu gerçek navigasyonla yeniden oluştur.
-3. **Sprint 7, Adım 3:** Bu belgedeki testleri, gerçek kullanıcı akışı üzerinden yürüt.
+1. ✅ **Sprint 7.1 (Tamamlandı):** AI ekranları gerçek navigasyon yapısına entegre edildi (`/ai/chat`, `/parcels/:parcelId/ai`, `/trees/:treeId/ai`, `/settings`, `/settings/ai`).
+2. 🟡 **Sprint 7.2 (Bu teslimat):** APK/Beta hazırlığı — UX/erişilebilirlik/dokümantasyon son kontrolleri.
+3. 🔴 **Sprint 7.3+ (Bekliyor):** APK gerçek navigasyonla oluşturulacak, bu belgedeki testler gerçek kullanıcı akışı üzerinden yürütülecek.
 
 Bu sıralama, test edilen yapının production'da kullanılacak yapıyla birebir aynı olmasını garanti eder.
 

@@ -103,6 +103,9 @@ button {
 
 .status-screen {
   flex: 1;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
   padding: 24px;
   background: var(--color-bg);
 }

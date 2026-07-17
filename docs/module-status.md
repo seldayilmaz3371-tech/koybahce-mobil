@@ -184,14 +184,16 @@ Modül 5 **kalıcı olarak donduruldu**. Sadece kritik güvenlik açığı/üret
 
 ## Modül 6 — AI Altyapısı
 
-**Durum: 🟡 KODLAMA TAMAMLANDI — Production Ready DEĞİL** (kullanıcı kararı, 2026-07-17)
+**Durum: 🟡 KOD+NAVİGASYON TAMAMLANDI — Production Ready DEĞİL** (kullanıcı kararı, 2026-07-17)
 
 | Alan | Durum |
 |---|---|
 | Kodlama | ✅ Tamamlandı |
 | Mimari | ✅ Tamamlandı (ADR 0024) |
-| Testler | ✅ Tamamlandı (459/459, +112 yeni) |
+| Testler | ✅ Tamamlandı (479/479) |
 | Dokümantasyon | ✅ Tamamlandı (ADR 0024, BUILD_INFO.md, APK Test Planı) |
+| Navigasyon Entegrasyonu | ✅ Tamamlandı (Sprint 7.1) |
+| Bundle Optimizasyonu | ✅ Tamamlandı (Sprint 7.1 — ana bundle 744kB→396kB, ölçüldü) |
 | APK Testi | 🔴 Bekleniyor |
 | Gerçek Android Cihaz Doğrulaması | 🔴 Bekleniyor |
 | Production Ready | 🔴 **Henüz değil** |
@@ -199,11 +201,15 @@ Modül 5 **kalıcı olarak donduruldu**. Sadece kritik güvenlik açığı/üret
 ### Kapsam
 AI Ayarları (güvenli varsayılanlar) + Provider Registry (Gemini) + Tool Registry (5 salt-okunur araç) + Context Engine (anahtar kelime tabanlı) + Konuşma Depolama + Salt-Okunur Sohbet. Fotoğraf Analizi/Sesli Asistan/RAG/Embedding/AI Agent/Workflow/Yazma Araçları/Çoklu Sağlayıcı **bilinçli olarak kapsam dışı**.
 
-### Bilinen Açık Konu
-`AiSettingsScreen`/`AiChatScreen` henüz gerçek navigasyona bağlı değil — **Sprint 7'nin ilk görevi bu entegrasyon**, ardından APK gerçek navigasyonla yeniden oluşturulup `docs/sprint-6-apk-device-test-plan.md`'deki testler yürütülecek.
+### Sprint Geçmişi
+| Sprint | İçerik | Durum |
+|---|---|---|
+| 6 | AI Altyapısı — Provider/Tool Registry, Context Engine, Sohbet (ADR 0024) | ✅ Kod tamamlandı |
+| 7.1 | Gerçek navigasyon entegrasyonu (`/settings`, `/settings/ai`, `/ai/chat`, parsel/ağaç-bağlamlı) + `React.lazy` bundle optimizasyonu + `useTreeForRoute` soyutlaması | ✅ Onaylandı |
+| 7.2 | APK/Beta hazırlığı — UX/erişilebilirlik/dokümantasyon son kontrolleri | 🟡 Bu teslimat |
 
 ### Sonraki Adım
-Sprint 7: (1) AI ekranlarının gerçek navigasyon entegrasyonu, (2) APK üretimi, (3) Gerçek cihaz doğrulaması (bkz. `docs/sprint-6-apk-device-test-plan.md`), (4) Production Ready kararı.
+Sprint 7.2 sonrası: APK üretimi → Gerçek cihaz doğrulaması (bkz. `docs/sprint-6-apk-device-test-plan.md`, gerçek navigasyona göre güncellendi) → Production Ready kararı.
 
 ### Dondurma Kuralı
 Henüz uygulanmıyor — modül aktif geliştirme/doğrulama aşamasında.

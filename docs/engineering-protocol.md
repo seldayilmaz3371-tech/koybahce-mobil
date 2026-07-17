@@ -1,4 +1,4 @@
-# Bahçem Mobile Engineering Protocol v1.11
+# Bahçem Mobile Engineering Protocol v1.12
 
 **Durum:** Onaylandı (v1.0 kullanıcı tarafından sunuldu; Bölüm 5 ve 16 v1.1'de revize edildi; Bölüm 18 v1.2'de eklendi; Bölüm 18.1-18.3 v1.3'te eklendi; Bölüm 18.2 v1.4'te güncellendi; Bölüm 18.4 v1.5'te eklendi; Bölüm 18.5 v1.6'da eklendi; Bölüm 10'a modül durumu takibi v1.7'de eklendi; Bölüm 19 v1.8'de eklendi; Bölüm 9'a `npm run test` adımı v1.9'da eklendi; Bölüm 20 — SQLite Transaction/FK Kuralları — v1.10'da eklendi, ADR 0022 araştırması sonucu, 2026-07-15)
 
@@ -196,13 +196,14 @@ Bölüm 14'ün (Kullanıcı Deneyimi) doğal bir tamamlayıcısı: saha koşulla
 - **`BaseRepository.runInTransaction()` asla iç içe (nested) çağrılmaz.** SQLite'ın kendisi, aktif bir transaction içinde ikinci bir `BEGIN`'i hata olarak değerlendirir (genel platform kısıtı). Çok adımlı bir işlem başka bir transaction'ı tetikleyen bir repository metodu çağırıyorsa, bu metodun transaction-dışı bir varyantı kullanılmalı veya tüm adımlar tek bir `runInTransaction` bloğunda toplanmalı.
 - **Foreign key zorlaması (`PRAGMA foreign_keys = ON`) her bağlantı açılışında açıkça çalıştırılır** — ✅ Sprint 2.6'da uygulandı (`connection.ts`), gerçek testle (`tree.repository.test.ts`) kanıtlandı. Gerçek cihazda da aynı davranışın doğrulanması, kullanıcının cihaz testine kalıyor (ADR 0022).
 
-## 21. Router Katmanının Repository Erişimi — Dar Kapsamlı, Belgelenmiş İstisna *(v1.11'de eklendi, 2026-07-15, Sprint 4.3.1)*
+## 21. Router Katmanının Repository Erişimi — Dar Kapsamlı, Belgelenmiş İstisna *(v1.11'de eklendi, 2026-07-15, Sprint 4.3.1; v1.12'de güncellendi, 2026-07-17, Sprint 7.1)*
 
 **Genel kural (değişmedi):** Screen bileşenleri SADECE Hook'ları çağırır, Repository'lere doğrudan erişmez.
 
-**Bilinçli, dar kapsamlı istisna:** `src/router/AppRouter.tsx` içindeki `ObservationScreenRoute`, `treeRepository.getById()`'i DOĞRUDAN çağırır (Hook katmanını atlar). Modül 4 Bağımsız Denetimi'nde (2026-07-15) bu bir mimari sızıntı olarak işaretlendi; değerlendirme sonucu **kasıtlı olarak korunmasına** karar verildi:
+**Güncel durum (Sprint 7.1):** Bu istisna artık `src/router/useTreeForRoute.ts` adlı **gerçek, paylaşılan bir hook'a** çıkarılmıştır — aşağıdaki tarihsel gerekçe, NEDEN bu deseni gerektirdiğimizi açıklamak için korunuyor, ama artık kod TEKRARI yok.
 
-- **Neden gerekli:** URL parametreleri sadece `treeId` (bir string) taşıyor. `ObservationScreen`'in `parcelId`/`contextLabel` prop'ları için TAM bir `Tree` nesnesi gerekiyor.
-- **Neden mevcut Hook'lar yetersiz:** `useTrees`, LİSTE senaryoları için tasarlandı (parsel-bazlı veya referans) — tekil bir "id'ye göre getir" modu yok. Bunu eklemek, sadece BU rotanın ihtiyacı için hook'un arayüzünü genişletmek anlamına gelirdi.
-- **Neden yeni bir soyutlama eklenmedi:** Bu, TEK bir route wrapper'daki TEK bir salt-okunur sorgu — yeni bir "route-level data hook" katmanı icat etmek, YAGNI'yi ihlal ederdi (Sprint 4.3.1 kararı).
-- **Sınır:** Bu istisna SADECE `router/` klasöründeki route wrapper'ları kapsar, Screen bileşenlerinin kendisini DEĞİL. Eğer gelecekte 2. veya 3. bir route wrapper da benzer bir doğrudan repository erişimine ihtiyaç duyarsa, bu artık bir desen haline gelir ve o zaman gerçek bir soyutlama (ör. küçük bir `useEntityById` hook'u) değerlendirilmelidir — bugün için erken.
+- **Neden gerekli:** URL parametreleri sadece `treeId` (bir string) taşıyor. `ObservationScreen`/`MaintenanceScreen`/`AiChatScreen`'in `parcelId`/`contextLabel` prop'ları için TAM bir `Tree` nesnesi gerekiyor.
+- **Neden mevcut Hook'lar yetersiz:** `useTrees`, LİSTE senaryoları için tasarlandı (parsel-bazlı veya referans) — tekil bir "id'ye göre getir" modu yok. Bunu eklemek, sadece BU rotaların ihtiyacı için hook'un arayüzünü genişletmek anlamına gelirdi.
+- **Tarihsel karar (Sprint 4.3.1→5.3):** İlk 2 tekrar (`ObservationScreenRoute`, `TreeMaintenanceScreenRoute`) BİLİNÇLİ olarak soyutlanmadı — her ilgili sprintin "❌ Refactor" yasağı gereği, VE "2 tekrar henüz bir desen değil, erken soyutlama olur" değerlendirmesiyle.
+- **Eşik aşıldı (Sprint 7.1):** `TreeAiChatScreenRoute` ile **3. tekrar** gerçekleşti — önceden yazılı kural ("2 veya 3. tekrar olursa soyutlama değerlendirilmeli") tetiklendi. `useTreeForRoute(treeId)` hook'u oluşturuldu, mevcut 2 route wrapper BİREBİR AYNI davranışla bu hook'u kullanacak şekilde güncellendi (davranış değişikliği YOK — saf çıkarma, 4 gerçek testle kanıtlandı), yeni `TreeAiChatScreenRoute` da bunu kullanıyor.
+- **Sınır:** Bu istisna (artık `useTreeForRoute` üzerinden) SADECE `router/` klasöründeki route wrapper'ları kapsar, Screen bileşenlerinin kendisini DEĞİL. Bu, artık kalıcı, meşru bir router-katmanı yardımcı hook'u — gelecekte 4. bir kullanım ihtiyacı doğarsa, doğrudan bu hook'u tekrar kullanacak, yeni bir soyutlamaya gerek YOK.

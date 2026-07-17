@@ -8,7 +8,7 @@
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useAiChat } from "./hooks/useAiChat";
 import { addNetworkStatusListener, isOnline } from "../../native/network";
@@ -25,6 +25,14 @@ export function AiChatScreen({ screenContext, onBack, onViewSettings }: AiChatSc
   const { messages, status, errorCode, sendMessage } = useAiChat(screenContext);
   const [inputValue, setInputValue] = useState("");
   const [online, setOnline] = useState(true);
+  // Sprint 7.2 — GERÇEK UX bulgusu: uzun bir konuşmada, yeni gelen
+  // cevap listenin altında kalıp GÖRÜNMEYEBİLİR. Her yeni mesajda
+  // (kullanıcı VEYA model) en alta otomatik kaydırıyoruz.
+  const latestMessageRef = useRef<HTMLLIElement | null>(null);
+
+  useEffect(() => {
+    latestMessageRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages]);
 
   useEffect(() => {
     isOnline().then(setOnline);
@@ -53,17 +61,18 @@ export function AiChatScreen({ screenContext, onBack, onViewSettings }: AiChatSc
         </div>
       ) : null}
 
-      <ul className="parcel-list">
-        {messages
-          .filter((m) => m.role !== "tool")
-          .map((m) => (
-            <li key={m.id}>
+      <ul className="parcel-list" aria-live="polite" aria-relevant="additions">
+        {(() => {
+          const visibleMessages = messages.filter((m) => m.role !== "tool");
+          return visibleMessages.map((m, index) => (
+            <li key={m.id} ref={index === visibleMessages.length - 1 ? latestMessageRef : undefined}>
               <span className="parcel-list__name">
                 {m.role === "user" ? t("aiChat.userLabel") : t("aiChat.assistantLabel")}
               </span>
               <span className="parcel-list__meta">{m.content}</span>
             </li>
-          ))}
+          ));
+        })()}
       </ul>
 
       <form onSubmit={handleSubmit}>
