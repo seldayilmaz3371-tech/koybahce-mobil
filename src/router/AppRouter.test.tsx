@@ -346,3 +346,101 @@ describe("AppRouter — Rota Yönlendirme", () => {
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
   });
 });
+
+describe("AppRouter — AI ve Ayarlar Navigasyonu (Sprint 7.1, GERÇEK navigasyon)", () => {
+  it("Parsel Listesi → 'AI Assistant' (GENEL) doğru rotaya gider, Suspense fallback GEÇİCİ olarak görünür", async () => {
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("AI Assistant")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("AI Assistant"));
+
+    // Lazy-loaded ekran async yüklenirken Suspense fallback (common.loading)
+    // GEÇİCİ olarak görünür, sonra GERÇEK ekran yerini alır.
+    await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
+    expect(window.location.hash).toBe("#/ai/chat");
+  });
+
+  it("AI Chat → geri tuşu (Back butonu) doğru şekilde Parsellere döner", async () => {
+    window.location.hash = "#/ai/chat";
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Back"));
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+
+  it("Parsel Formu (düzenleme) → 'AI Assistant' PARSEL-bağlamlı rotaya gider (parametre aktarımı kanıtı)", async () => {
+    const parcel = await parcelRepository.create({ name: "AI Parseli", cropType: "olive", areaDekar: 5 });
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("AI Parseli")).toBeTruthy());
+    fireEvent.click(screen.getByText("AI Parseli"));
+
+    await waitFor(() => expect(screen.getByText("AI Assistant")).toBeTruthy());
+    fireEvent.click(screen.getByText("AI Assistant"));
+
+    await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
+    expect(window.location.hash).toBe(`#/parcels/${parcel.id}/ai`);
+  });
+
+  it("Ağaç Formu (düzenleme) → 'AI Assistant' AĞAÇ-bağlamlı rotaya gider (Tree'den parcelId DOĞRU çekilir)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const tree = await treeRepository.create({ parcelId: parcel.id, treeNumber: "AI-1", variety: "Gemlik" });
+    window.location.hash = `#/parcels/${parcel.id}/trees`;
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("AI-1")).toBeTruthy());
+    fireEvent.click(screen.getByText("AI-1"));
+    await waitFor(() => expect(screen.getByText("AI Assistant")).toBeTruthy());
+    fireEvent.click(screen.getByText("AI Assistant"));
+
+    await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
+    expect(window.location.hash).toBe(`#/trees/${tree.id}/ai`);
+  });
+
+  it("Geçersiz/var olmayan treeId ile Ağaç AI rotası Parsellere yönlendirir", async () => {
+    window.location.hash = "#/trees/var-olmayan-id/ai";
+
+    render(<AppRouter />);
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+
+  it("Parsel Listesi → 'Settings' → 'AI' → AI Ayarları ekranı GERÇEK navigasyon zinciriyle açılır", async () => {
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Settings")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Settings"));
+    await waitFor(() => expect(screen.getByText("AI")).toBeTruthy());
+    fireEvent.click(screen.getByText("AI"));
+
+    await waitFor(() => expect(screen.getByLabelText("Enable AI features")).toBeTruthy());
+    expect(window.location.hash).toBe("#/settings/ai");
+  });
+
+  it("AI Ayarları → 'Back' HER ZAMAN /settings'e döner (route hiyerarşisi, navigate(-1) DEĞİL)", async () => {
+    window.location.hash = "#/settings/ai";
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByLabelText("Enable AI features")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Back"));
+
+    await waitFor(() => expect(screen.getByText("AI")).toBeTruthy());
+    expect(window.location.hash).toBe("#/settings");
+  });
+
+  it("AI Chat → 'AI Settings' bağlantısı DOĞRU rotaya gider (Chat'ten gelse bile /settings'e döner, tutarlı UX kanıtı)", async () => {
+    window.location.hash = "#/ai/chat";
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("AI Settings")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("AI Settings"));
+    await waitFor(() => expect(screen.getByLabelText("Enable AI features")).toBeTruthy());
+
+    // Chat'ten gelinmiş olsa bile, "Back" /settings'e gider (Chat'e DEĞİL) —
+    // route hiyerarşisine sadık, tutarlı "up navigation" davranışı.
+    fireEvent.click(screen.getByText("Back"));
+    await waitFor(() => expect(screen.getByText("AI")).toBeTruthy());
+    expect(window.location.hash).toBe("#/settings");
+  });
+});

@@ -9,6 +9,10 @@
     "AI_004": "Lütfen AI Ayarları'ndan Gemini API anahtarınızı girin.",
     "SYS_001": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
   },
+  "settings": {
+    "screenTitle": "Ayarlar",
+    "aiSectionLabel": "AI"
+  },
   "aiSettings": {
     "screenTitle": "AI Ayarları",
     "isEnabledLabel": "AI özelliklerini etkinleştir",
@@ -25,7 +29,8 @@
     "userLabel": "Siz",
     "assistantLabel": "Asistan",
     "inputLabel": "Çiftlik verileriniz hakkında bir soru sorun",
-    "sendButton": "Gönder"
+    "sendButton": "Gönder",
+    "settingsLinkLabel": "AI Ayarları"
   },
   "maintenancePlan": {
     "screenTitle": "Bakım Planları",
@@ -94,6 +99,7 @@
   },
   "common": {
     "cancel": "İptal",
+    "back": "Geri",
     "continue": "Devam Et",
     "retry": "Tekrar Dene",
     "loading": "Yükleniyor…",
@@ -133,7 +139,10 @@
     "viewTreesButton": "Ağaçları Görüntüle",
     "viewFinanceButton": "Finansı Görüntüle",
     "viewMaintenanceButton": "Bakımı Görüntüle",
-    "referenceTreesButton": "Referans Ağaçlar"
+    "viewAiChatButton": "AI Asistan",
+    "referenceTreesButton": "Referans Ağaçlar",
+    "aiChatButton": "AI Asistan",
+    "settingsButton": "Ayarlar"
   },
   "photo": {
     "screenTitle": "Fotoğraflar",
@@ -192,6 +201,7 @@
     "deleteButton": "Ağacı Sil",
     "viewObservationsButton": "Gözlemleri Görüntüle",
     "viewMaintenanceButton": "Bakımı Görüntüle",
+    "viewAiChatButton": "AI Asistan",
     "deleteConfirm": "Bu ağaç silinsin mi? Listelerinizden kaldırılacak.",
     "treeNumberRequired": "Ağaç numarası zorunludur.",
     "varietyRequired": "Çeşit alanı zorunludur.",

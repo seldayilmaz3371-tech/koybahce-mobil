@@ -49,7 +49,7 @@ afterEach(() => {
 
 describe("AiSettingsScreen", () => {
   it("başlangıçta AI KAPALI, İnternet İzni KAPALI olarak gösterilir (güvenli varsayılan)", async () => {
-    render(<AiSettingsScreen />);
+    render(<AiSettingsScreen onBack={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByLabelText("Enable AI features")).toBeTruthy());
     expect((screen.getByLabelText("Enable AI features") as HTMLInputElement).checked).toBe(false);
@@ -57,7 +57,7 @@ describe("AiSettingsScreen", () => {
   });
 
   it("'Enable AI features' checkbox'ına tıklamak GERÇEKTEN ayarı günceller", async () => {
-    render(<AiSettingsScreen />);
+    render(<AiSettingsScreen onBack={vi.fn()} />);
     await waitFor(() => expect(screen.getByLabelText("Enable AI features")).toBeTruthy());
 
     await act(async () => {
@@ -70,13 +70,13 @@ describe("AiSettingsScreen", () => {
   });
 
   it("API anahtarı girilmemişken input+Save butonu gösterilir", async () => {
-    render(<AiSettingsScreen />);
+    render(<AiSettingsScreen onBack={vi.fn()} />);
     await waitFor(() => expect(screen.getByLabelText("Gemini API Key")).toBeTruthy());
     expect(screen.getByText("Save")).toBeTruthy();
   });
 
   it("API anahtarı kaydedilince input KAYBOLUR, 'yapılandırıldı' mesajı ve Kaldır butonu gösterilir", async () => {
-    render(<AiSettingsScreen />);
+    render(<AiSettingsScreen onBack={vi.fn()} />);
     await waitFor(() => expect(screen.getByLabelText("Gemini API Key")).toBeTruthy());
 
     fireEvent.change(screen.getByLabelText("Gemini API Key"), { target: { value: "gizli-anahtar" } });
@@ -90,7 +90,7 @@ describe("AiSettingsScreen", () => {
   });
 
   it("boş anahtarla Save butonu DEVRE DIŞI kalır", async () => {
-    render(<AiSettingsScreen />);
+    render(<AiSettingsScreen onBack={vi.fn()} />);
     await waitFor(() => expect(screen.getByLabelText("Gemini API Key")).toBeTruthy());
 
     expect((screen.getByText("Save") as HTMLButtonElement).disabled).toBe(true);
@@ -98,7 +98,7 @@ describe("AiSettingsScreen", () => {
 
   it("Kaldır butonuna basıp onaylayınca anahtar SİLİNİR", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
-    render(<AiSettingsScreen />);
+    render(<AiSettingsScreen onBack={vi.fn()} />);
     await waitFor(() => expect(screen.getByLabelText("Gemini API Key")).toBeTruthy());
     fireEvent.change(screen.getByLabelText("Gemini API Key"), { target: { value: "anahtar" } });
     await act(async () => {
@@ -113,5 +113,15 @@ describe("AiSettingsScreen", () => {
     expect(secureStorage.remove).toHaveBeenCalledWith("gemini_api_key");
     await waitFor(() => expect(screen.getByLabelText("Gemini API Key")).toBeTruthy());
     vi.restoreAllMocks();
+  });
+
+  it("'Back' butonuna basmak onBack'i çağırır", async () => {
+    const onBack = vi.fn();
+    render(<AiSettingsScreen onBack={onBack} />);
+    await waitFor(() => expect(screen.getByText("Back")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Back"));
+
+    expect(onBack).toHaveBeenCalledTimes(1);
   });
 });

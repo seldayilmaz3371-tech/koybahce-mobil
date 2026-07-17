@@ -9,6 +9,10 @@
     "AI_004": "Please add your Gemini API key in AI Settings.",
     "SYS_001": "Something went wrong. Please try again."
   },
+  "settings": {
+    "screenTitle": "Settings",
+    "aiSectionLabel": "AI"
+  },
   "aiSettings": {
     "screenTitle": "AI Settings",
     "isEnabledLabel": "Enable AI features",
@@ -25,7 +29,8 @@
     "userLabel": "You",
     "assistantLabel": "Assistant",
     "inputLabel": "Ask a question about your farm data",
-    "sendButton": "Send"
+    "sendButton": "Send",
+    "settingsLinkLabel": "AI Settings"
   },
   "maintenancePlan": {
     "screenTitle": "Maintenance Plans",
@@ -94,6 +99,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "back": "Back",
     "continue": "Continue",
     "retry": "Try Again",
     "loading": "Loading…",
@@ -133,7 +139,10 @@
     "viewTreesButton": "View Trees",
     "viewFinanceButton": "View Finance",
     "viewMaintenanceButton": "View Maintenance",
-    "referenceTreesButton": "Reference Trees"
+    "viewAiChatButton": "AI Assistant",
+    "referenceTreesButton": "Reference Trees",
+    "aiChatButton": "AI Assistant",
+    "settingsButton": "Settings"
   },
   "photo": {
     "screenTitle": "Photos",
@@ -192,6 +201,7 @@
     "deleteButton": "Delete Tree",
     "viewObservationsButton": "View Observations",
     "viewMaintenanceButton": "View Maintenance",
+    "viewAiChatButton": "AI Assistant",
     "deleteConfirm": "Delete this tree? It will be removed from your lists.",
     "treeNumberRequired": "Tree number is required.",
     "varietyRequired": "Variety is required.",

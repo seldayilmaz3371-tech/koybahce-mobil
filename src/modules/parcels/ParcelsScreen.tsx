@@ -38,6 +38,12 @@ interface ParcelsScreenProps {
   onViewFinance: (parcel: Parcel) => void;
   /** Kullanıcı bir parselin bakım geçmişini görüntülemek istediğinde çağrılır (Sprint 5.3). */
   onViewMaintenance: (parcel: Parcel) => void;
+  /** Kullanıcı GENEL (parsel-bağımsız) AI Asistan'ı görüntülemek istediğinde çağrılır (Sprint 7.1). */
+  onViewAiChat: () => void;
+  /** Kullanıcı BİR PARSELİN bağlamında AI Asistan'ı görüntülemek istediğinde çağrılır (Sprint 7.1). */
+  onViewParcelAiChat: (parcel: Parcel) => void;
+  /** Kullanıcı Ayarlar'ı görüntülemek istediğinde çağrılır (Sprint 7.1). */
+  onViewSettings: () => void;
 }
 
 export function ParcelsScreen({
@@ -45,6 +51,9 @@ export function ParcelsScreen({
   onViewReferenceTrees,
   onViewFinance,
   onViewMaintenance,
+  onViewAiChat,
+  onViewParcelAiChat,
+  onViewSettings,
 }: ParcelsScreenProps) {
   const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState("");
@@ -101,6 +110,7 @@ export function ParcelsScreen({
         onViewTrees={view.mode === "edit" ? () => onViewTrees(view.parcel) : undefined}
         onViewFinance={view.mode === "edit" ? () => onViewFinance(view.parcel) : undefined}
         onViewMaintenance={view.mode === "edit" ? () => onViewMaintenance(view.parcel) : undefined}
+        onViewAiChat={view.mode === "edit" ? () => onViewParcelAiChat(view.parcel) : undefined}
       />
     );
   }
@@ -119,6 +129,14 @@ export function ParcelsScreen({
 
       <button type="button" className="lock-screen__button" onClick={onViewReferenceTrees}>
         {t("parcel.referenceTreesButton")}
+      </button>
+
+      <button type="button" className="lock-screen__button" onClick={onViewAiChat}>
+        {t("parcel.aiChatButton")}
+      </button>
+
+      <button type="button" className="lock-screen__button" onClick={onViewSettings}>
+        {t("parcel.settingsButton")}
       </button>
 
       <div className="search-field form-field">

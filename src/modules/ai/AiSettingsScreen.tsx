@@ -16,7 +16,12 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAiSettings } from "./hooks/useAiSettings";
 
-export function AiSettingsScreen() {
+interface AiSettingsScreenProps {
+  /** Sprint 7.1 — artık `/settings/ai` altında, `/settings`'e geri dönüş. */
+  onBack: () => void;
+}
+
+export function AiSettingsScreen({ onBack }: AiSettingsScreenProps) {
   const { t } = useTranslation();
   const { settings, status, errorCode, updateSettings, saveApiKey, removeApiKey } = useAiSettings();
   const [apiKeyInput, setApiKeyInput] = useState("");
@@ -108,6 +113,10 @@ export function AiSettingsScreen() {
           </>
         )}
       </div>
+
+      <button type="button" className="lock-screen__button" onClick={onBack} style={{ marginTop: 8 }}>
+        {t("common.back")}
+      </button>
     </main>
   );
 }

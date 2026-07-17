@@ -16,10 +16,15 @@ export const ROUTE_PATTERNS = {
   parcelTrees: "/parcels/:parcelId/trees",
   parcelFinance: "/parcels/:parcelId/finance",
   parcelMaintenance: "/parcels/:parcelId/maintenance",
+  parcelAiChat: "/parcels/:parcelId/ai",
   referenceTrees: "/reference-trees",
   treeObservations: "/trees/:treeId/observations",
   treeMaintenance: "/trees/:treeId/maintenance",
+  treeAiChat: "/trees/:treeId/ai",
   observationPhotos: "/observations/:observationId/photos",
+  aiChat: "/ai/chat",
+  settings: "/settings",
+  aiSettings: "/settings/ai",
 } as const;
 
 export const buildPath = {
@@ -27,10 +32,15 @@ export const buildPath = {
   parcelTrees: (parcelId: string) => `/parcels/${parcelId}/trees`,
   parcelFinance: (parcelId: string) => `/parcels/${parcelId}/finance`,
   parcelMaintenance: (parcelId: string) => `/parcels/${parcelId}/maintenance`,
+  parcelAiChat: (parcelId: string) => `/parcels/${parcelId}/ai`,
   referenceTrees: () => "/reference-trees",
   treeObservations: (treeId: string) => `/trees/${treeId}/observations`,
   treeMaintenance: (treeId: string) => `/trees/${treeId}/maintenance`,
+  treeAiChat: (treeId: string) => `/trees/${treeId}/ai`,
   observationPhotos: (observationId: string) => `/observations/${observationId}/photos`,
+  aiChat: () => "/ai/chat",
+  settings: () => "/settings",
+  aiSettings: () => "/settings/ai",
 } as const;
 
 /**
@@ -39,9 +49,9 @@ export const buildPath = {
  * isimlendirme tutarlılığı için burada belgeleniyor; gelecekteki
  * modüller bu isimlerle başlayacak.
  *
- * `finance` BURADAN KALDIRILDI (Sprint 4.3) — artık gerçek bir rota
- * (`ROUTE_PATTERNS.parcelFinance`), düz `/finance` DEĞİL, `/trees`
- * ile tutarlı `/parcels/:parcelId/finance` deseninde.
+ * `finance` BURADAN KALDIRILDI (Sprint 4.3), `settings` BURADAN
+ * KALDIRILDI (Sprint 7.1) — ikisi de artık GERÇEK birer rota
+ * (`ROUTE_PATTERNS.parcelFinance`/`ROUTE_PATTERNS.settings`).
  */
 export const FUTURE_ROUTE_NAMES = {
   parcelDetail: "/parcels/:parcelId",
@@ -49,5 +59,4 @@ export const FUTURE_ROUTE_NAMES = {
   observationDetail: "/observations/:observationId",
   harvest: "/harvest",
   dashboard: "/dashboard",
-  settings: "/settings",
 } as const;

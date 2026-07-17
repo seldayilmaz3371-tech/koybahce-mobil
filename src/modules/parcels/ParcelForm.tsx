@@ -35,6 +35,8 @@ interface ParcelFormProps {
   onViewFinance?: () => void;
   /** Sadece düzenleme modunda sağlanır (Sprint 5.3). Aynı desen. */
   onViewMaintenance?: () => void;
+  /** Sadece düzenleme modunda sağlanır (Sprint 7.1). Aynı desen. */
+  onViewAiChat?: () => void;
 }
 
 export function ParcelForm({
@@ -45,6 +47,7 @@ export function ParcelForm({
   onViewTrees,
   onViewFinance,
   onViewMaintenance,
+  onViewAiChat,
 }: ParcelFormProps) {
   const { t } = useTranslation();
 
@@ -203,6 +206,18 @@ export function ParcelForm({
           disabled={isSubmitting}
         >
           {t("parcel.viewMaintenanceButton")}
+        </button>
+      ) : null}
+
+      {onViewAiChat ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          style={{ marginTop: 8 }}
+          onClick={onViewAiChat}
+          disabled={isSubmitting}
+        >
+          {t("parcel.viewAiChatButton")}
         </button>
       ) : null}
 

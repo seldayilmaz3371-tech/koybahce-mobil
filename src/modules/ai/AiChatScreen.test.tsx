@@ -50,7 +50,7 @@ afterEach(() => {
 
 describe("AiChatScreen", () => {
   it("çevrimiçiyken mesaj gönderme etkin", async () => {
-    render(<AiChatScreen />);
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
     await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
 
     expect((screen.getByLabelText("Ask a question about your farm data") as HTMLInputElement).disabled).toBe(
@@ -60,7 +60,7 @@ describe("AiChatScreen", () => {
 
   it("çevrimdışıyken offline bildirimi gösterilir, giriş DEVRE DIŞI kalır", async () => {
     networkConnected = false;
-    render(<AiChatScreen />);
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText(/You're offline/)).toBeTruthy());
     expect((screen.getByLabelText("Ask a question about your farm data") as HTMLInputElement).disabled).toBe(
@@ -76,7 +76,7 @@ describe("AiChatScreen", () => {
       sendMessage: vi.fn().mockResolvedValue({ text: "3 sulama yaptınız.", toolCalls: [] }),
     });
 
-    render(<AiChatScreen />);
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
     await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
 
     fireEvent.change(screen.getByLabelText("Ask a question about your farm data"), {
@@ -91,7 +91,7 @@ describe("AiChatScreen", () => {
   });
 
   it("AI kapalıyken gönderim, çevrilmiş hata mesajını gösterir (ham AI_NOT_ENABLED metni DEĞİL)", async () => {
-    render(<AiChatScreen />);
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
     await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
 
     fireEvent.change(screen.getByLabelText("Ask a question about your farm data"), {
@@ -113,7 +113,7 @@ describe("AiChatScreen", () => {
       sendMessage: vi.fn().mockResolvedValue({ text: "cevap", toolCalls: [] }),
     });
 
-    render(<AiChatScreen />);
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
     await waitFor(() => expect(screen.getByLabelText("Ask a question about your farm data")).toBeTruthy());
 
     const input = screen.getByLabelText("Ask a question about your farm data") as HTMLInputElement;
@@ -123,5 +123,25 @@ describe("AiChatScreen", () => {
     });
 
     await waitFor(() => expect(input.value).toBe(""));
+  });
+
+  it("'Back' butonuna basmak onBack'i çağırır", async () => {
+    const onBack = vi.fn();
+    render(<AiChatScreen onBack={onBack} onViewSettings={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("Back")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Back"));
+
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("'AI Settings' bağlantısına basmak onViewSettings'i çağırır", async () => {
+    const onViewSettings = vi.fn();
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={onViewSettings} />);
+    await waitFor(() => expect(screen.getByText("AI Settings")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("AI Settings"));
+
+    expect(onViewSettings).toHaveBeenCalledTimes(1);
   });
 });

@@ -16,9 +16,11 @@ import type { ScreenContext } from "./context/IContextEngine.interface";
 
 interface AiChatScreenProps {
   screenContext?: ScreenContext;
+  onBack: () => void;
+  onViewSettings: () => void;
 }
 
-export function AiChatScreen({ screenContext }: AiChatScreenProps) {
+export function AiChatScreen({ screenContext, onBack, onViewSettings }: AiChatScreenProps) {
   const { t } = useTranslation();
   const { messages, status, errorCode, sendMessage } = useAiChat(screenContext);
   const [inputValue, setInputValue] = useState("");
@@ -80,6 +82,14 @@ export function AiChatScreen({ screenContext }: AiChatScreenProps) {
           {t("aiChat.sendButton")}
         </button>
       </form>
+
+      <button type="button" className="lock-screen__button" onClick={onViewSettings} style={{ marginTop: 8 }}>
+        {t("aiChat.settingsLinkLabel")}
+      </button>
+
+      <button type="button" className="lock-screen__button" onClick={onBack} style={{ marginTop: 8 }}>
+        {t("common.back")}
+      </button>
     </main>
   );
 }

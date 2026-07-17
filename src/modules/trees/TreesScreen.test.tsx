@@ -77,7 +77,7 @@ async function createTestParcel(): Promise<string> {
 describe("TreesScreen", () => {
   it("Loading State: mount sonrası hemen yükleniyor mesajı gösterir", async () => {
     const parcelId = await createTestParcel();
-    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
 
     expect(screen.getByText("Loading…")).toBeTruthy();
     await waitFor(() => expect(screen.queryByText("Loading…")).toBeNull());
@@ -85,7 +85,7 @@ describe("TreesScreen", () => {
 
   it("Empty State: hiç ağaç yoksa boş durum mesajı gösterir", async () => {
     const parcelId = await createTestParcel();
-    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
   });
@@ -96,7 +96,7 @@ describe("TreesScreen", () => {
       throw new Error("Test: veritabanı bağlantısı simülasyonu başarısız");
     });
 
-    render(<TreesScreen mode={{ mode: "parcel", parcelId: "herhangi-bir-id" }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId: "herhangi-bir-id" }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("Something went wrong. Please try again.")).toBeTruthy());
     expect(screen.queryByText(/simülasyonu başarısız/)).toBeNull();
@@ -108,7 +108,7 @@ describe("TreesScreen", () => {
     await treeRepository.create({ parcelId: parcelA, treeNumber: "A-1", variety: "Gemlik" });
     await treeRepository.create({ parcelId: parcelB, treeNumber: "B-1", variety: "Ayvalık" });
 
-    render(<TreesScreen mode={{ mode: "parcel", parcelId: parcelA }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId: parcelA }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("A-1")).toBeTruthy());
     expect(screen.queryByText("B-1")).toBeNull();
@@ -123,7 +123,7 @@ describe("TreesScreen", () => {
       isReferenceTree: true,
     });
 
-    render(<TreesScreen mode={{ mode: "reference" }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "reference" }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("A-1")).toBeTruthy());
     // Reference Mode'da 'Ekle' butonu bilinçli olarak gösterilmiyor (bkz. TreesScreen.tsx mimari notu).
@@ -133,7 +133,7 @@ describe("TreesScreen", () => {
   it("Navigation: 'Parsellere Dön' butonu onBack'i çağırır", async () => {
     const parcelId = await createTestParcel();
     const onBack = vi.fn();
-    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={onBack} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={onBack} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
 
     fireEvent.click(screen.getByText("Back to Parcels"));
 
@@ -142,7 +142,7 @@ describe("TreesScreen", () => {
 
   it("Create: 'Ağaç Ekle' → form doldur → kaydet → yeni ağaç listede görünür", async () => {
     const parcelId = await createTestParcel();
-    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Add Tree"));
@@ -159,7 +159,7 @@ describe("TreesScreen", () => {
   it("Edit: bir ağaca dokunmak düzenleme formunu doğru verilerle açar, kaydetmek listeyi günceller", async () => {
     const parcelId = await createTestParcel();
     await treeRepository.create({ parcelId, treeNumber: "A-1", variety: "Gemlik" });
-    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("A-1")).toBeTruthy());
 
     fireEvent.click(screen.getByText("A-1"));
@@ -177,7 +177,7 @@ describe("TreesScreen", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const parcelId = await createTestParcel();
     await treeRepository.create({ parcelId, treeNumber: "A-1", variety: "Gemlik" });
-    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("A-1")).toBeTruthy());
 
     fireEvent.click(screen.getByText("A-1"));
@@ -190,7 +190,7 @@ describe("TreesScreen", () => {
   it("Cancel: formda İptal, listeye döner, hiçbir değişiklik kaydedilmez", async () => {
     const parcelId = await createTestParcel();
     await treeRepository.create({ parcelId, treeNumber: "A-1", variety: "Gemlik" });
-    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("A-1")).toBeTruthy());
 
     fireEvent.click(screen.getByText("A-1"));
@@ -205,7 +205,7 @@ describe("TreesScreen", () => {
 describe("TreesScreen — Android Geri Tuşu", () => {
   it("form açıkken geri tuşu, kaydetmeden listeye döner", async () => {
     const parcelId = await createTestParcel();
-    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Add Tree"));
@@ -220,7 +220,7 @@ describe("TreesScreen — Android Geri Tuşu", () => {
   it("liste görünümündeyken geri tuşu onBack'i çağırır (Parsellere döner, uygulamadan ÇIKMAZ)", async () => {
     const parcelId = await createTestParcel();
     const onBack = vi.fn();
-    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={onBack} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "parcel", parcelId }} onBack={onBack} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
 
     pressBackButton();
@@ -240,7 +240,7 @@ describe("TreesScreen — Gözlemlere Yönlendirme (Sprint 3.5)", () => {
         mode={{ mode: "parcel", parcelId }}
         onBack={() => {}}
         onViewObservations={onViewObservations}
-      onViewMaintenance={vi.fn()}
+      onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()}
       />
     );
 
@@ -263,14 +263,14 @@ describe("TreesScreen — Toplu Ağaç Oluşturma (Sprint 3.10)", () => {
         mode={{ mode: "parcel", parcelId }}
         onBack={() => {}}
         onViewObservations={vi.fn()}
-      onViewMaintenance={vi.fn()}
+      onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()}
       />
     );
     await waitFor(() => expect(screen.getByText("Bulk Create")).toBeTruthy());
 
     cleanup();
 
-    render(<TreesScreen mode={{ mode: "reference" }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />);
+    render(<TreesScreen mode={{ mode: "reference" }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
     expect(screen.queryByText("Bulk Create")).toBeNull();
   });
@@ -278,7 +278,7 @@ describe("TreesScreen — Toplu Ağaç Oluşturma (Sprint 3.10)", () => {
   it("Madde 3 — canlı önizleme, başlangıç/adet girilirken güncellenir ('151 → 155 · Total: 5 Trees')", async () => {
     const parcelId = await createTestParcel();
     render(
-      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />
+      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />
     );
     await waitFor(() => expect(screen.getByText("Bulk Create")).toBeTruthy());
     fireEvent.click(screen.getByText("Bulk Create"));
@@ -292,7 +292,7 @@ describe("TreesScreen — Toplu Ağaç Oluşturma (Sprint 3.10)", () => {
   it("variety BOŞ bırakılarak (isteğe bağlı) toplu oluşturma başarıyla tamamlanır", async () => {
     const parcelId = await createTestParcel();
     render(
-      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />
+      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />
     );
     await waitFor(() => expect(screen.getByText("Bulk Create")).toBeTruthy());
     fireEvent.click(screen.getByText("Bulk Create"));
@@ -320,7 +320,7 @@ describe("TreesScreen — Toplu Ağaç Oluşturma (Sprint 3.10)", () => {
     await treeRepository.create({ parcelId, treeNumber: "5", variety: "Gemlik" });
 
     render(
-      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />
+      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />
     );
     await waitFor(() => expect(screen.getByText("Bulk Create")).toBeTruthy());
     fireEvent.click(screen.getByText("Bulk Create"));
@@ -345,7 +345,7 @@ describe("TreesScreen — Toplu Ağaç Oluşturma (Sprint 3.10)", () => {
   it("Cancel: toplu oluşturma formunda vazgeçmek listeye döner, HİÇBİR ağaç oluşturulmaz", async () => {
     const parcelId = await createTestParcel();
     render(
-      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />
+      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />
     );
     await waitFor(() => expect(screen.getByText("Bulk Create")).toBeTruthy());
     fireEvent.click(screen.getByText("Bulk Create"));
@@ -371,7 +371,7 @@ describe("TreesScreen — Bakıma Yönlendirme (Sprint 5.3)", () => {
         mode={{ mode: "parcel", parcelId }}
         onBack={() => {}}
         onViewObservations={vi.fn()}
-        onViewMaintenance={onViewMaintenance}
+        onViewMaintenance={onViewMaintenance} onViewAiChat={vi.fn()}
       />
     );
 
@@ -400,7 +400,7 @@ describe("TreesScreen — Bakıma Yönlendirme (Sprint 5.3)", () => {
         mode={{ mode: "reference" }}
         onBack={() => {}}
         onViewObservations={vi.fn()}
-        onViewMaintenance={onViewMaintenance}
+        onViewMaintenance={onViewMaintenance} onViewAiChat={vi.fn()}
       />
     );
 
@@ -415,7 +415,7 @@ describe("TreesScreen — Bakıma Yönlendirme (Sprint 5.3)", () => {
   it("oluşturma modunda (henüz kaydedilmemiş ağaç) 'View Maintenance' butonu gösterilmez", async () => {
     const parcelId = await createTestParcel();
     render(
-      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} />
+      <TreesScreen mode={{ mode: "parcel", parcelId }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />
     );
     await waitFor(() => expect(screen.getByText("Add Tree")).toBeTruthy());
 
