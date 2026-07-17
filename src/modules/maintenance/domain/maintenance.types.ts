@@ -78,3 +78,42 @@ export interface MaintenanceStatusLogEntry {
   newStatus: MaintenanceStatusValue;
   changedAt: string;
 }
+
+/**
+ * Bakım Planı — Sprint 5.4
+ * ===========================
+ * bkz. Module 5 Technical Blueprint. `maintenanceType`, YUKARIDAKİ
+ * `MaintenanceType` sabitini TEKRAR KULLANIYOR (DRY, Kural 8) — kayıt
+ * (`MaintenanceRecord`) ve plan (`MaintenancePlan`) AYNI tür
+ * kümesini paylaşıyor.
+ *
+ * BİLİNÇLİ SADELİK: SADECE `intervalDays` (gün cinsinden basit
+ * aralık) — RRULE/Cron/Calendar Engine YOK (Blueprint'in YAGNI
+ * talimatı). Bu, bir PLAN'ın "ÇALIŞTIRILMASI" (görev üretme,
+ * hatırlatma) İÇİN DEĞİL, SADECE plan BİLGİSİNİ saklamak içindir —
+ * çalıştırma motoru bu sprintin AÇIKÇA kapsamı DIŞINDA.
+ */
+export interface MaintenancePlan {
+  id: string;
+  parcelId: string;
+  /** nullable — bir plan parsel geneli olabilir (kayıtlarla tutarlı desen). */
+  treeId: string | null;
+  maintenanceType: MaintenanceTypeValue;
+  /** Gün cinsinden basit aralık — ör. 7 = haftalık, 30 = aylık. */
+  intervalDays: number;
+  /** Bir sonraki uygulamanın planlandığı tarih (ISO 8601). */
+  nextDueDate: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NewMaintenancePlanInput {
+  parcelId: string;
+  treeId?: string | null;
+  maintenanceType: MaintenanceTypeValue;
+  intervalDays: number;
+  nextDueDate: string;
+}
+
+export type MaintenancePlanUpdateInput = Partial<Omit<NewMaintenancePlanInput, "parcelId" | "treeId">>;

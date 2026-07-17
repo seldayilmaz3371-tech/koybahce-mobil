@@ -71,7 +71,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 8;
+export const CURRENT_SCHEMA_VERSION = 9;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -263,6 +263,31 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
          changed_at TEXT NOT NULL
        );`,
       `CREATE INDEX IF NOT EXISTS idx_maintenance_status_log_record_id ON maintenance_status_log(maintenance_record_id);`,
+    ],
+  },
+  {
+    toVersion: 9,
+    statements: [
+      // Modül 5, Sprint 5.4 — Bakım Planları. Blueprint'e sadık
+      // kalındı: SADECE `interval_days` (basit gün-aralığı) — RRULE/
+      // Cron/Calendar Engine YOK (YAGNI). Plan ÇALIŞTIRMA motoru
+      // (görev üretme, hatırlatma) bu sprintte YOK — sadece plan
+      // BİLGİSİ saklanıyor.
+      `CREATE TABLE IF NOT EXISTS maintenance_plans (
+         id TEXT PRIMARY KEY NOT NULL,
+         parcel_id TEXT NOT NULL REFERENCES parcels(id) ON DELETE RESTRICT,
+         tree_id TEXT REFERENCES trees(id) ON DELETE RESTRICT,
+         maintenance_type TEXT NOT NULL CHECK (maintenance_type IN
+           ('irrigation','fertilization','pesticide','pruning','soil_preparation','pre_harvest_care','other')),
+         interval_days INTEGER NOT NULL,
+         next_due_date TEXT NOT NULL,
+         is_active INTEGER NOT NULL DEFAULT 1,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `CREATE INDEX IF NOT EXISTS idx_maintenance_plans_parcel_id ON maintenance_plans(parcel_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_maintenance_plans_tree_id ON maintenance_plans(tree_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_maintenance_plans_next_due_date ON maintenance_plans(next_due_date);`,
     ],
   },
 ];

@@ -5,6 +5,20 @@
     "DB_005": "A related record could not be found.",
     "SYS_001": "Something went wrong. Please try again."
   },
+  "maintenancePlan": {
+    "screenTitle": "Maintenance Plans",
+    "emptyState": "No maintenance plans yet.",
+    "addButton": "Add Plan",
+    "loadMoreButton": "Load More",
+    "formTitleCreate": "New Maintenance Plan",
+    "formTitleEdit": "Edit Maintenance Plan",
+    "intervalDays": "Interval (Days)",
+    "nextDueDate": "Next Due Date",
+    "intervalDaysInvalid": "Interval must be a positive whole number of days.",
+    "nextDueDateInvalid": "Please select a valid date.",
+    "deleteButton": "Delete Plan",
+    "deleteConfirm": "Delete this maintenance plan? It will be removed from your lists."
+  },
   "maintenance": {
     "screenTitle": "Maintenance",
     "emptyState": "No maintenance records yet.",

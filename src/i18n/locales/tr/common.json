@@ -5,6 +5,20 @@
     "DB_005": "İlişkili bir kayıt bulunamadı.",
     "SYS_001": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
   },
+  "maintenancePlan": {
+    "screenTitle": "Bakım Planları",
+    "emptyState": "Henüz bakım planı yok.",
+    "addButton": "Plan Ekle",
+    "loadMoreButton": "Daha Fazla Yükle",
+    "formTitleCreate": "Yeni Bakım Planı",
+    "formTitleEdit": "Bakım Planını Düzenle",
+    "intervalDays": "Aralık (Gün)",
+    "nextDueDate": "Sonraki Tarih",
+    "intervalDaysInvalid": "Aralık, pozitif bir tam gün sayısı olmalıdır.",
+    "nextDueDateInvalid": "Lütfen geçerli bir tarih seçin.",
+    "deleteButton": "Planı Sil",
+    "deleteConfirm": "Bu bakım planı silinsin mi? Listelerinizden kaldırılacak."
+  },
   "maintenance": {
     "screenTitle": "Bakım",
     "emptyState": "Henüz bakım kaydı yok.",

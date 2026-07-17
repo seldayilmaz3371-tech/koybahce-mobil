@@ -100,9 +100,4 @@ describe("Şema Migration — Sürüm 8 (maintenance_records + maintenance_statu
 
     db.close();
   });
-
-  it("CURRENT_SCHEMA_VERSION 8'e güncellenmiş", async () => {
-    const { CURRENT_SCHEMA_VERSION } = await import("./schema");
-    expect(CURRENT_SCHEMA_VERSION).toBe(8);
-  });
 });
