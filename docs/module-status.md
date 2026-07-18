@@ -199,7 +199,7 @@ Modül 5 **kalıcı olarak donduruldu**. Sadece kritik güvenlik açığı/üret
 | Beta Versiyon Numaraları | ✅ Uygulandı (Sprint 7.4 — `0.1.0-beta.1`) |
 | Gerçek Cihaz İlk Doğrulama | ✅ Tamamlandı (Sprint 7.2 onayında — açılış/parsel/SQLite/AI Ayarları/Secure Storage/AI ekranı/galeri) |
 | Gerçek Cihaz TAM Doğrulama (zorunlu test seti) | 🔴 **Bekleniyor** (bkz. `sprint-7.4-release-readiness-report.md`) |
-| **İmzalama (Keystore)** | 🔴 **Bekleniyor — Beta Release'in TEK kritik engeli** |
+| **İmzalama (Keystore)** | 🟡 **Mimari belgelendi (ADR 0026, Sprint 7.5) — gerçek keystore kullanıcının kendi ortamında oluşturulmayı bekliyor, Beta Release'in TEK kritik engeli** |
 | APK Testi (imzalı, dağıtılabilir) | 🔴 Bekleniyor |
 | Production Ready | 🔴 **Henüz değil** |
 
@@ -213,7 +213,8 @@ AI Ayarları (güvenli varsayılanlar) + Provider Registry (Gemini) + Tool Regis
 | 7.1 | Gerçek navigasyon entegrasyonu (`/settings`, `/settings/ai`, `/ai/chat`, parsel/ağaç-bağlamlı) + `React.lazy` bundle optimizasyonu + `useTreeForRoute` soyutlaması | ✅ Onaylandı |
 | 7.2 | APK/Beta hazırlığı — UX/erişilebilirlik/dokümantasyon son kontrolleri | ✅ Onaylandı, **gerçek cihazda doğrulandı** |
 | 7.3 | AI Asistan mobil UX (sohbet balonları/textarea/klavye) + AI davranış doğrulaması (kod seviyesi) + Beta/Release öneri belgeleri (ADR 0025 taslak) | ✅ Onaylandı |
-| 7.4 | Beta versiyon altyapısı — `versionCode`/`versionName`/`package.json` gerçekten güncellendi | 🟡 Bu teslimat |
+| 7.4 | Beta versiyon altyapısı — `versionCode`/`versionName`/`package.json` gerçekten güncellendi | ✅ Onaylandı |
+| 7.5 | Release Signing mimarisi belgeleri (ADR 0026, Rehber, Checklist, Dağıtım Stratejisi) — SAF dokümantasyon, kod değişikliği yok | 🟡 Bu teslimat |
 
 ### Sonraki Adım
 Sprint 7.2 sonrası: APK üretimi → Gerçek cihaz doğrulaması (bkz. `docs/sprint-6-apk-device-test-plan.md`, gerçek navigasyona göre güncellendi) → Production Ready kararı.
