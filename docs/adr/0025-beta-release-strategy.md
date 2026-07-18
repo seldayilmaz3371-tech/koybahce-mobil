@@ -1,8 +1,17 @@
 # ADR 0025 — Beta Release Strategy
 
-**Durum:** Taslak — kullanıcı onayı bekliyor
-**Tarih:** 2026-07-17
+**Durum:** 🟡 Kısmen Kabul Edildi ve Uygulandı (Sprint 7.4, 2026-07-18) — **Karar 1 (Versioning) UYGULANDI**, **Karar 4 (Keystore) hâlâ bekliyor**
+**Tarih:** 2026-07-17 (kabul: 2026-07-18)
 **Kapsam:** Sprint 7.3, Madde 4. **Not:** Talimatta "ADR-0008" istenmişti — gerçek bir çakışma bulundu (`0008`, `docs/adr/0008-yedekleme-stratejisi.md` olarak zaten kayıtlı, ADR 0024'te izlenen desenle aynı şekilde doğru sıraya, **0025**'e taşındı).
+
+## Sprint 7.4 Uygulama Notu (2026-07-18)
+
+Kullanıcı, `sprint-7.3-version-proposal.md`'deki **Seçenek A**'yı (`0.1.0-beta.1`) onayladı. Bu ADR'nin **Karar 1**'i (Versioning Politikası) **gerçekten uygulandı**:
+- `android/app/build.gradle`: `versionCode 1→2`, `versionName "1.0"→"0.1.0-beta.1"`
+- `package.json`: `version "0.0.0"→"0.1.0-beta.1"`
+- Beta adı onaylandı: **"Bahçem Mobile Beta 1"**
+
+**Karar 4 (Keystore Stratejisi) BİLİNÇLİ OLARAK UYGULANMADI** — kullanıcının bu sprint için AÇIK yasağı gereği (`signingConfigs` eklenmedi, gerçek bir `.jks` dosyası oluşturulmadı). Bu, ayrı bir sprintte ele alınacak.
 
 ## Bağlam
 
