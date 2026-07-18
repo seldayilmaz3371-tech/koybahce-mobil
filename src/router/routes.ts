@@ -16,10 +16,12 @@ export const ROUTE_PATTERNS = {
   parcelTrees: "/parcels/:parcelId/trees",
   parcelFinance: "/parcels/:parcelId/finance",
   parcelMaintenance: "/parcels/:parcelId/maintenance",
+  parcelHarvest: "/parcels/:parcelId/harvest",
   parcelAiChat: "/parcels/:parcelId/ai",
   referenceTrees: "/reference-trees",
   treeObservations: "/trees/:treeId/observations",
   treeMaintenance: "/trees/:treeId/maintenance",
+  treeHarvest: "/trees/:treeId/harvest",
   treeAiChat: "/trees/:treeId/ai",
   observationPhotos: "/observations/:observationId/photos",
   aiChat: "/ai/chat",
@@ -32,10 +34,12 @@ export const buildPath = {
   parcelTrees: (parcelId: string) => `/parcels/${parcelId}/trees`,
   parcelFinance: (parcelId: string) => `/parcels/${parcelId}/finance`,
   parcelMaintenance: (parcelId: string) => `/parcels/${parcelId}/maintenance`,
+  parcelHarvest: (parcelId: string) => `/parcels/${parcelId}/harvest`,
   parcelAiChat: (parcelId: string) => `/parcels/${parcelId}/ai`,
   referenceTrees: () => "/reference-trees",
   treeObservations: (treeId: string) => `/trees/${treeId}/observations`,
   treeMaintenance: (treeId: string) => `/trees/${treeId}/maintenance`,
+  treeHarvest: (treeId: string) => `/trees/${treeId}/harvest`,
   treeAiChat: (treeId: string) => `/trees/${treeId}/ai`,
   observationPhotos: (observationId: string) => `/observations/${observationId}/photos`,
   aiChat: () => "/ai/chat",
@@ -50,13 +54,15 @@ export const buildPath = {
  * modüller bu isimlerle başlayacak.
  *
  * `finance` BURADAN KALDIRILDI (Sprint 4.3), `settings` BURADAN
- * KALDIRILDI (Sprint 7.1) — ikisi de artık GERÇEK birer rota
- * (`ROUTE_PATTERNS.parcelFinance`/`ROUTE_PATTERNS.settings`).
+ * KALDIRILDI (Sprint 7.1), `harvest` BURADAN KALDIRILDI (Sprint 8.3)
+ * — üçü de artık GERÇEK birer rota. `harvest: "/harvest"` (eski,
+ * bağlamsız placeholder) GERÇEK deseni (`parcelHarvest`/`treeHarvest`,
+ * Bakım/Finans/AI ile TUTARLI) yansıtmıyordu — bilinçli olarak
+ * değiştirildi, "keyfi" bir değişiklik değil.
  */
 export const FUTURE_ROUTE_NAMES = {
   parcelDetail: "/parcels/:parcelId",
   treeDetail: "/trees/:treeId",
   observationDetail: "/observations/:observationId",
-  harvest: "/harvest",
   dashboard: "/dashboard",
 } as const;

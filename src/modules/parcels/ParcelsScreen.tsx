@@ -38,6 +38,8 @@ interface ParcelsScreenProps {
   onViewFinance: (parcel: Parcel) => void;
   /** Kullanıcı bir parselin bakım geçmişini görüntülemek istediğinde çağrılır (Sprint 5.3). */
   onViewMaintenance: (parcel: Parcel) => void;
+  /** Kullanıcı bir parselin hasat kayıtlarını görüntülemek istediğinde çağrılır (Sprint 8.3). */
+  onViewHarvest: (parcel: Parcel) => void;
   /** Kullanıcı GENEL (parsel-bağımsız) AI Asistan'ı görüntülemek istediğinde çağrılır (Sprint 7.1). */
   onViewAiChat: () => void;
   /** Kullanıcı BİR PARSELİN bağlamında AI Asistan'ı görüntülemek istediğinde çağrılır (Sprint 7.1). */
@@ -51,6 +53,7 @@ export function ParcelsScreen({
   onViewReferenceTrees,
   onViewFinance,
   onViewMaintenance,
+  onViewHarvest,
   onViewAiChat,
   onViewParcelAiChat,
   onViewSettings,
@@ -110,6 +113,7 @@ export function ParcelsScreen({
         onViewTrees={view.mode === "edit" ? () => onViewTrees(view.parcel) : undefined}
         onViewFinance={view.mode === "edit" ? () => onViewFinance(view.parcel) : undefined}
         onViewMaintenance={view.mode === "edit" ? () => onViewMaintenance(view.parcel) : undefined}
+        onViewHarvest={view.mode === "edit" ? () => onViewHarvest(view.parcel) : undefined}
         onViewAiChat={view.mode === "edit" ? () => onViewParcelAiChat(view.parcel) : undefined}
       />
     );

@@ -35,6 +35,7 @@ import { ObservationScreen } from "../modules/observations/ObservationScreen";
 import { PhotoGalleryScreen } from "../modules/photos/PhotoGalleryScreen";
 import { FinanceScreen } from "../modules/finance/FinanceScreen";
 import { MaintenanceScreen } from "../modules/maintenance/MaintenanceScreen";
+import { HarvestScreen } from "../modules/harvest/HarvestScreen";
 import { SettingsScreen } from "../modules/settings/SettingsScreen";
 import { useTreeForRoute } from "./useTreeForRoute";
 import { ROUTE_PATTERNS, buildPath } from "./routes";
@@ -103,6 +104,7 @@ function ParcelsScreenRoute() {
       onViewReferenceTrees={() => navigate(buildPath.referenceTrees())}
       onViewFinance={(parcel) => navigate(buildPath.parcelFinance(parcel.id))}
       onViewMaintenance={(parcel) => navigate(buildPath.parcelMaintenance(parcel.id))}
+      onViewHarvest={(parcel) => navigate(buildPath.parcelHarvest(parcel.id))}
       onViewAiChat={() => navigate(buildPath.aiChat())}
       onViewParcelAiChat={(parcel) => navigate(buildPath.parcelAiChat(parcel.id))}
       onViewSettings={() => navigate(buildPath.settings())}
@@ -124,6 +126,7 @@ function TreesScreenRoute() {
       onBack={() => navigate(-1)}
       onViewObservations={(tree) => navigate(buildPath.treeObservations(tree.id))}
       onViewMaintenance={(tree) => navigate(buildPath.treeMaintenance(tree.id))}
+      onViewHarvest={(tree) => navigate(buildPath.treeHarvest(tree.id))}
       onViewAiChat={(tree) => navigate(buildPath.treeAiChat(tree.id))}
     />
   );
@@ -172,6 +175,23 @@ function MaintenanceScreenRoute() {
   );
 }
 
+function HarvestScreenRoute() {
+  const { parcelId } = useParams<{ parcelId: string }>();
+  const navigate = useNavigate();
+
+  if (!parcelId) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+
+  return (
+    <HarvestScreen
+      scope={{ mode: "parcel", parcelId }}
+      parcelId={parcelId}
+      onBack={() => navigate(-1)}
+    />
+  );
+}
+
 function ReferenceTreesScreenRoute() {
   const navigate = useNavigate();
   return (
@@ -180,6 +200,7 @@ function ReferenceTreesScreenRoute() {
       onBack={() => navigate(-1)}
       onViewObservations={(tree) => navigate(buildPath.treeObservations(tree.id))}
       onViewMaintenance={(tree) => navigate(buildPath.treeMaintenance(tree.id))}
+      onViewHarvest={(tree) => navigate(buildPath.treeHarvest(tree.id))}
       onViewAiChat={(tree) => navigate(buildPath.treeAiChat(tree.id))}
     />
   );
@@ -259,6 +280,42 @@ function TreeMaintenanceScreenRoute() {
 
   return (
     <MaintenanceScreen
+      scope={{ mode: "tree", treeId: tree.id }}
+      parcelId={tree.parcelId}
+      onBack={() => navigate(-1)}
+    />
+  );
+}
+
+/**
+ * `HarvestScreen`'in `parcelId` prop'u için `Tree` nesnesi ZORUNLU —
+ * rotada sadece `treeId` var. `useTreeForRoute` hook'unu kullanıyor
+ * (bkz. `router/useTreeForRoute.ts` — Sprint 7.1'de "3. tekrar" eşiği
+ * aşılınca gerçekleştirilen soyutlama; bu, 4. kullanım — YENİ bir
+ * soyutlama GEREKMİYOR, mevcut hook zaten hazır).
+ */
+function TreeHarvestScreenRoute() {
+  const { treeId } = useParams<{ treeId: string }>();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const tree = useTreeForRoute(treeId);
+
+  if (!treeId) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+  if (tree === "loading") {
+    return (
+      <main className="status-screen">
+        <p className="status-card__value">{t("common.loading")}</p>
+      </main>
+    );
+  }
+  if (tree === null) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+
+  return (
+    <HarvestScreen
       scope={{ mode: "tree", treeId: tree.id }}
       parcelId={tree.parcelId}
       onBack={() => navigate(-1)}
@@ -380,10 +437,12 @@ export function AppRouter() {
         <Route path={ROUTE_PATTERNS.parcelTrees} element={<TreesScreenRoute />} />
         <Route path={ROUTE_PATTERNS.parcelFinance} element={<FinanceScreenRoute />} />
         <Route path={ROUTE_PATTERNS.parcelMaintenance} element={<MaintenanceScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.parcelHarvest} element={<HarvestScreenRoute />} />
         <Route path={ROUTE_PATTERNS.parcelAiChat} element={<ParcelAiChatScreenRoute />} />
         <Route path={ROUTE_PATTERNS.referenceTrees} element={<ReferenceTreesScreenRoute />} />
         <Route path={ROUTE_PATTERNS.treeObservations} element={<ObservationScreenRoute />} />
         <Route path={ROUTE_PATTERNS.treeMaintenance} element={<TreeMaintenanceScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.treeHarvest} element={<TreeHarvestScreenRoute />} />
         <Route path={ROUTE_PATTERNS.treeAiChat} element={<TreeAiChatScreenRoute />} />
         <Route path={ROUTE_PATTERNS.observationPhotos} element={<PhotoGalleryScreenRoute />} />
         <Route path={ROUTE_PATTERNS.aiChat} element={<AiChatScreenRoute />} />
