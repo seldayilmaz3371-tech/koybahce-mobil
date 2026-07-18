@@ -18,6 +18,7 @@ import type {
   MaintenanceListOptions,
 } from "./maintenance.repository.interface";
 import type {
+  BulkCreateMaintenanceRecordsInput,
   MaintenanceRecord,
   MaintenanceRecordUpdateInput,
   NewMaintenanceRecordInput,
@@ -167,6 +168,34 @@ class MaintenanceRepository extends BaseRepository implements IMaintenanceReposi
     );
 
     return record;
+  }
+
+  /**
+   * bkz. Sprint 10.1. `Tree.createMany()`'nin (Sprint 3.10) KANITLANMIŞ
+   * deseni. `treeIds` boşsa hiçbir transaction AÇILMAZ.
+   */
+  async createMany(input: BulkCreateMaintenanceRecordsInput): Promise<MaintenanceRecord[]> {
+    if (input.treeIds.length === 0) {
+      return [];
+    }
+
+    return this.runInTransaction(async () => {
+      const created: MaintenanceRecord[] = [];
+      for (const treeId of input.treeIds) {
+        created.push(
+          await this.create({
+            parcelId: input.parcelId,
+            treeId,
+            maintenanceType: input.maintenanceType,
+            status: input.status,
+            scheduledDate: input.scheduledDate,
+            completedDate: input.completedDate,
+            notes: input.notes,
+          })
+        );
+      }
+      return created;
+    });
   }
 
   async update(id: string, changes: MaintenanceRecordUpdateInput): Promise<void> {
