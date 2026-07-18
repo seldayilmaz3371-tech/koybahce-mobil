@@ -3,27 +3,30 @@
 | Alan | Değer |
 |---|---|
 | **Project** | Bahçem Mobile |
-| **Module** | Modül 8 — Dashboard |
-| **Sprint** | 8.5 |
-| **Feature** | Navigasyon Entegrasyonu (buton girişi, ANA EKRAN DEĞİL) |
+| **Module** | Modül 3 (Fotoğraf altyapısı — GERÇEKTEN zaten mevcut) / Gelecekteki Modül 9 (Fotoğraf Analizi — tasarım aşaması) |
+| **Sprint** | 9.1 |
+| **Feature** | Fotoğraf Altyapısı Mimari Analizi + AI Analiz Veri Modeli Tasarımı (SAF DOKÜMANTASYON) |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 538/538 başarılı (+4 yeni) — **gerçekten çalıştırıldı** |
-| **Build** | ✅ Başarılı — ana bundle 407.00kB → 413.73kB (+6.73kB, Dashboard artık navigasyona bağlı) |
-| **Lint** | ✅ 0 uyarı/hata (201 dosya, 103 kural) — **gerçekten çalıştırıldı** |
-| **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) — **gerçekten çalıştırıldı** |
+| **Test/Build/Lint/Cap Sync Durumu** | **Bu sprintte kod DEĞİŞMEDİĞİ için `npm run test`/`build`/`lint`/`cap sync` YENİDEN ÇALIŞTIRILMADI** — Sprint 8.5'in sonucu (538/538 test, temiz build/lint, 9 plugin) hâlâ geçerlidir. Her belge değişikliğinden sonra `tsc -b` GERÇEKTEN çalıştırıldı (kod dokunulmadığının kanıtı). |
 | **Tarih** | 2026-07-18 |
-| **Git Commit** | `33b94b4` |
-| **ADR** | Yeni ADR gerekmedi — mevcut route/prop deseninin tekrarı |
+| **Git Commit** | `96d01fa` |
+| **ADR** | Yeni ADR gerekmedi — hiçbir yeni mimari karar alınmadı, sadece mevcut mimarinin analizi + gelecekteki bir tasarımın seçenekleri sunuldu |
 
-## Kararlaştırılan Navigasyon Yaklaşımı
+## 🔴 Kritik Bulgu — Bu Sprintte Kod Hiç Değişmedi
 
-**Dashboard ana ekran YAPILMADI** — Parseller mevcut ana ekran olarak kaldı. Gerekçe: Sprint 7.2'nin gerçek cihaz testli akışını (Kilit→Parseller) bozmamak, saha kullanımında ekstra tık maliyetinden kaçınmak, Beta geri bildirimi olmadan spekülatif değişiklik yapmamak. Dashboard, Parseller ekranından bir buton ile ("Add Parcel"dan hemen sonra) erişiliyor.
+Kod öncesi zorunlu analiz, Sprint 9.1'in istediği **"Fotoğraf modülünün temel altyapısı"nın Modül 3'ten (Sprint 3.6-3.7) beri zaten tam ve olgun bir şekilde mevcut olduğunu** kanıtladı. Bu, varsayılmadı — 7 önceliğin her biri gerçek dosyalardan (`IPhotoRepository`, `native/filesystem.ts`, `photos` şeması) tek tek doğrulandı.
+
+## Yeni Belgeler (Bu Sprint)
+
+- `docs/sprint-9.1-photo-infrastructure-analysis.md` — mevcut altyapının 7 öncelikle karşılaştırılması, gerçek kod kanıtlarıyla.
+- `docs/photo-ai-analysis-data-model-design.md` — AI analiz sonucunun gelecekte nereye kaydedileceğine dair 3 seçenekli tasarım (kod yok).
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
 | Modül 1-5 | ✅ FROZEN |
-| Sprint 6-8.4 | ✅ Onaylandı |
+| Sprint 6-8.5 | ✅ Onaylandı |
 | Modül 7 — Hasat | ✅ Onaylandı |
-| Modül 8 — Dashboard (TAM İŞLEVSEL) | 🟡 Bu teslimat |
+| Modül 8 — Dashboard | ✅ Onaylandı |
+| Sprint 9.1 (analiz+tasarım) | 🟡 Bu teslimat |
