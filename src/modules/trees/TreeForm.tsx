@@ -35,6 +35,8 @@ interface TreeFormProps {
   onViewObservations?: () => void;
   /** Sadece düzenleme modunda sağlanır (Sprint 5.3). AYNI desen — Parsel Modu VEYA Referans Modu fark etmeksizin çalışır, özel bir ayrım YOK (Sprint 5.1'in "referans ağaçlar için özel ayrım yok" kararıyla tutarlı — bu tek prop, hem "Ağaç→Bakım" hem "Referans Ağaç Bakım Geçmişi" ihtiyacını aynı anda karşılıyor). */
   onViewMaintenance?: () => void;
+  /** Sadece düzenleme modunda sağlanır (Sprint 8.3). AYNI desen — Parsel Modu VEYA Referans Modu fark etmeksizin çalışır. */
+  onViewHarvest?: () => void;
   /** Sadece düzenleme modunda sağlanır (Sprint 7.1). AYNI desen. */
   onViewAiChat?: () => void;
 }
@@ -47,6 +49,7 @@ export function TreeForm({
   onDelete,
   onViewObservations,
   onViewMaintenance,
+  onViewHarvest,
   onViewAiChat,
 }: TreeFormProps) {
   const { t } = useTranslation();
@@ -192,6 +195,18 @@ export function TreeForm({
           disabled={isSubmitting}
         >
           {t("tree.viewMaintenanceButton")}
+        </button>
+      ) : null}
+
+      {onViewHarvest ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          style={{ marginTop: 8 }}
+          onClick={onViewHarvest}
+          disabled={isSubmitting}
+        >
+          {t("tree.viewHarvestButton")}
         </button>
       ) : null}
 

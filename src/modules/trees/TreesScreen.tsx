@@ -49,11 +49,20 @@ interface TreesScreenProps {
   onViewObservations: (tree: Tree) => void;
   /** Kullanıcı bir ağacın bakım geçmişini görüntülemek istediğinde çağrılır (Sprint 5.3). Parsel VEYA Referans Modu'nda AYNI şekilde çalışır. */
   onViewMaintenance: (tree: Tree) => void;
+  /** Kullanıcı bir ağacın hasat kayıtlarını görüntülemek istediğinde çağrılır (Sprint 8.3). Aynı desen. */
+  onViewHarvest: (tree: Tree) => void;
   /** Kullanıcı bir ağacın bağlamında AI Asistan'ı görüntülemek istediğinde çağrılır (Sprint 7.1). */
   onViewAiChat: (tree: Tree) => void;
 }
 
-export function TreesScreen({ mode, onBack, onViewObservations, onViewMaintenance, onViewAiChat }: TreesScreenProps) {
+export function TreesScreen({
+  mode,
+  onBack,
+  onViewObservations,
+  onViewMaintenance,
+  onViewHarvest,
+  onViewAiChat,
+}: TreesScreenProps) {
   const { t } = useTranslation();
   const { trees, status, errorCode, createTree, createManyTrees, updateTree, deactivateTree } =
     useTrees(mode);
@@ -148,6 +157,7 @@ export function TreesScreen({ mode, onBack, onViewObservations, onViewMaintenanc
         onDelete={view.mode === "edit" ? handleDelete : undefined}
         onViewObservations={view.mode === "edit" ? () => onViewObservations(view.tree) : undefined}
         onViewMaintenance={view.mode === "edit" ? () => onViewMaintenance(view.tree) : undefined}
+        onViewHarvest={view.mode === "edit" ? () => onViewHarvest(view.tree) : undefined}
         onViewAiChat={view.mode === "edit" ? () => onViewAiChat(view.tree) : undefined}
       />
     );

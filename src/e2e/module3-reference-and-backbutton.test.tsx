@@ -82,7 +82,7 @@ describe("Modül 3 — Referans Ağaç Akışı (Sprint 3.9, Madde 3)", () => {
     // Reference Mode'da ağacı bul.
     const onViewObservations = vi.fn();
     render(
-      <TreesScreen mode={{ mode: "reference" }} onBack={() => {}} onViewObservations={onViewObservations} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />
+      <TreesScreen mode={{ mode: "reference" }} onBack={() => {}} onViewObservations={onViewObservations} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} />
     );
     await waitFor(() => expect(screen.getByText("REF-1")).toBeTruthy());
     expect(screen.queryByText("B-1")).toBeNull(); // referans değil, görünmemeli
@@ -112,7 +112,7 @@ describe("Modül 3 — Tam Geri Tuşu Zinciri (Sprint 3.9, Madde 4)", () => {
     const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 1 });
     const onBack = vi.fn();
     render(
-      <TreesScreen mode={{ mode: "parcel", parcelId: parcel.id }} onBack={onBack} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />
+      <TreesScreen mode={{ mode: "parcel", parcelId: parcel.id }} onBack={onBack} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} />
     );
     await waitFor(() => expect(screen.getByText("No trees yet.")).toBeTruthy());
 
@@ -144,7 +144,7 @@ describe("Modül 3 — Tam Geri Tuşu Zinciri (Sprint 3.9, Madde 4)", () => {
     const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 1 });
 
     render(
-      <TreesScreen mode={{ mode: "parcel", parcelId: parcel.id }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} />
+      <TreesScreen mode={{ mode: "parcel", parcelId: parcel.id }} onBack={() => {}} onViewObservations={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} />
     );
     await waitFor(() => expect(screen.getByText("Add Tree")).toBeTruthy());
     fireEvent.click(screen.getByText("Add Tree"));

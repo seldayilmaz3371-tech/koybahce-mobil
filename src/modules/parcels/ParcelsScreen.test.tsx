@@ -75,7 +75,7 @@ afterEach(() => {
 describe("ParcelsScreen — Navigasyon", () => {
   it("'Reference Trees' butonu onViewReferenceTrees'i çağırır", () => {
     const onViewReferenceTrees = vi.fn();
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={onViewReferenceTrees} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={onViewReferenceTrees} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
 
     fireEvent.click(screen.getByText("Reference Trees"));
 
@@ -90,7 +90,7 @@ describe("ParcelsScreen — Navigasyon", () => {
     });
     const onViewTrees = vi.fn();
 
-    render(<ParcelsScreen onViewTrees={onViewTrees} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={onViewTrees} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("Kuzey Zeytinliği")).toBeTruthy());
     fireEvent.click(screen.getByText("Kuzey Zeytinliği"));
@@ -103,7 +103,7 @@ describe("ParcelsScreen — Navigasyon", () => {
   });
 
   it("oluşturma modunda (henüz kaydedilmemiş parsel) 'View Trees' butonu gösterilmez", async () => {
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No parcels yet. Tap \"Add Parcel\" to create your first one.")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Add Parcel"));
@@ -120,7 +120,7 @@ describe("ParcelsScreen — Navigasyon", () => {
     });
     const onViewFinance = vi.fn();
 
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={onViewFinance} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={onViewFinance} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("Güney Bahçesi")).toBeTruthy());
     fireEvent.click(screen.getByText("Güney Bahçesi"));
@@ -133,7 +133,7 @@ describe("ParcelsScreen — Navigasyon", () => {
   });
 
   it("oluşturma modunda (henüz kaydedilmemiş parsel) 'View Finance' butonu gösterilmez (Sprint 4.3)", async () => {
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No parcels yet. Tap \"Add Parcel\" to create your first one.")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Add Parcel"));
@@ -146,7 +146,7 @@ describe("ParcelsScreen — Navigasyon", () => {
     const onViewMaintenance = vi.fn();
 
     render(
-      <ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={onViewMaintenance} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />
+      <ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={onViewMaintenance} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />
     );
 
     await waitFor(() => expect(screen.getByText("Bakım Bahçesi")).toBeTruthy());
@@ -160,7 +160,7 @@ describe("ParcelsScreen — Navigasyon", () => {
   });
 
   it("oluşturma modunda 'View Maintenance' butonu gösterilmez (Sprint 5.3)", async () => {
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("No parcels yet. Tap \"Add Parcel\" to create your first one.")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Add Parcel"));
@@ -171,7 +171,7 @@ describe("ParcelsScreen — Navigasyon", () => {
 
 describe("ParcelsScreen — Android Geri Tuşu", () => {
   it("form açıkken geri tuşu, kaydetmeden listeye döner (İptal ile aynı)", async () => {
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Add Parcel"));
@@ -184,7 +184,7 @@ describe("ParcelsScreen — Android Geri Tuşu", () => {
   });
 
   it("ana listedeyken geri tuşu uygulamadan çıkışı tetikler (exitApp)", async () => {
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
 
     pressBackButton();
@@ -200,7 +200,7 @@ describe("ParcelsScreen — Error Code Standard (Sprint 4.3.1)", () => {
       throw new Error("SQLITE_CONSTRAINT: test hatası, teknik detay");
     });
 
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("Something went wrong. Please try again.")).toBeTruthy());
     expect(screen.queryByText(/SQLITE_CONSTRAINT/)).toBeNull();

@@ -24,6 +24,7 @@ import { parcelRepository } from "../modules/parcels/data/parcel.repository";
 import { treeRepository } from "../modules/trees/data/tree.repository";
 import { observationRepository } from "../modules/observations/data/observation.repository";
 import { maintenanceRepository } from "../modules/maintenance/data/maintenance.repository";
+import { harvestRepository } from "../modules/harvest/data/harvest.repository";
 import { AppRouter } from "./AppRouter";
 
 const backButtonListeners: Array<() => void> = [];
@@ -442,5 +443,115 @@ describe("AppRouter — AI ve Ayarlar Navigasyonu (Sprint 7.1, GERÇEK navigasyo
     fireEvent.click(screen.getByText("Back"));
     await waitFor(() => expect(screen.getByText("AI")).toBeTruthy());
     expect(window.location.hash).toBe("#/settings");
+  });
+});
+
+describe("AppRouter — Hasat Navigasyonu (Sprint 8.3, GERÇEK navigasyon)", () => {
+  it("Parsel Formu (düzenleme) → 'View Harvest' DOĞRU parsel-bağlamlı rotaya gider", async () => {
+    const parcel = await parcelRepository.create({ name: "Hasat Parseli", cropType: "olive", areaDekar: 5 });
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Hasat Parseli")).toBeTruthy());
+    fireEvent.click(screen.getByText("Hasat Parseli"));
+
+    await waitFor(() => expect(screen.getByText("View Harvest")).toBeTruthy());
+    fireEvent.click(screen.getByText("View Harvest"));
+
+    await waitFor(() => expect(screen.getByText("No harvest records yet.")).toBeTruthy());
+    expect(window.location.hash).toBe(`#/parcels/${parcel.id}/harvest`);
+  });
+
+  it("Hasat kaydı DOĞRU parcelId ile oluşturulur (bağlam kanıtı)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    window.location.hash = `#/parcels/${parcel.id}/harvest`;
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Add Harvest Record")).toBeTruthy());
+    fireEvent.click(screen.getByText("Add Harvest Record"));
+    fireEvent.change(screen.getByLabelText("Harvest Date"), { target: { value: "2026-11-15" } });
+    fireEvent.change(screen.getByLabelText("Quantity (kg)"), { target: { value: "500" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
+
+    await waitFor(() => expect(screen.getByText(/500 kg/)).toBeTruthy());
+    const records = await harvestRepository.listByParcel(parcel.id);
+    expect(records).toHaveLength(1);
+    expect(records[0].parcelId).toBe(parcel.id);
+    expect(records[0].treeId).toBeNull(); // parsel geneli, ağaç bağlamı YOK
+  });
+
+  it("Ağaç Formu (düzenleme) → 'View Harvest' DOĞRU ağaç-bağlamlı rotaya gider (Tree'den parcelId DOĞRU çekilir)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const tree = await treeRepository.create({ parcelId: parcel.id, treeNumber: "H-1", variety: "Gemlik" });
+    window.location.hash = `#/parcels/${parcel.id}/trees`;
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("H-1")).toBeTruthy());
+    fireEvent.click(screen.getByText("H-1"));
+    await waitFor(() => expect(screen.getByText("View Harvest")).toBeTruthy());
+    fireEvent.click(screen.getByText("View Harvest"));
+
+    await waitFor(() => expect(screen.getByText("No harvest records yet.")).toBeTruthy());
+    expect(window.location.hash).toBe(`#/trees/${tree.id}/harvest`);
+  });
+
+  it("Ağaç bağlamında oluşturulan hasat kaydı DOĞRU treeId VE parcelId taşır (bağlam kanıtı)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const tree = await treeRepository.create({ parcelId: parcel.id, treeNumber: "H-2", variety: "Gemlik" });
+    window.location.hash = `#/trees/${tree.id}/harvest`;
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Add Harvest Record")).toBeTruthy());
+    fireEvent.click(screen.getByText("Add Harvest Record"));
+    fireEvent.change(screen.getByLabelText("Harvest Date"), { target: { value: "2026-11-15" } });
+    fireEvent.change(screen.getByLabelText("Quantity (kg)"), { target: { value: "75" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
+
+    await waitFor(() => expect(screen.getByText(/75 kg/)).toBeTruthy());
+    const records = await harvestRepository.listByTree(tree.id);
+    expect(records).toHaveLength(1);
+    expect(records[0].treeId).toBe(tree.id);
+    expect(records[0].parcelId).toBe(parcel.id); // Tree'den DOĞRU çekildi
+  });
+
+  it("Referans Ağaç Formu → 'View Harvest' AYNI desende çalışır (özel bir ayrım YOK)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const tree = await treeRepository.create({
+      parcelId: parcel.id,
+      treeNumber: "REF-1",
+      variety: "Gemlik",
+      isReferenceTree: true,
+    });
+    window.location.hash = "#/reference-trees";
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("REF-1")).toBeTruthy());
+    fireEvent.click(screen.getByText("REF-1"));
+    await waitFor(() => expect(screen.getByText("View Harvest")).toBeTruthy());
+    fireEvent.click(screen.getByText("View Harvest"));
+
+    await waitFor(() => expect(screen.getByText("No harvest records yet.")).toBeTruthy());
+    expect(window.location.hash).toBe(`#/trees/${tree.id}/harvest`);
+  });
+
+  it("Hasat → donanım geri tuşu doğru şekilde bir önceki ekrana döner", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    window.location.hash = `#/parcels/${parcel.id}/harvest`;
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("No harvest records yet.")).toBeTruthy());
+
+    act(() => backButtonListeners[backButtonListeners.length - 1]());
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+
+  it("Geçersiz/var olmayan treeId ile Ağaç Hasat rotası Parsellere yönlendirir", async () => {
+    window.location.hash = "#/trees/var-olmayan-id/harvest";
+
+    render(<AppRouter />);
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
   });
 });
