@@ -4,30 +4,30 @@
 |---|---|
 | **Project** | Bahçem Mobile |
 | **Module** | Modül 7 — Hasat (Harvest) |
-| **Sprint** | 8.2 |
-| **Feature** | Hook + Form + Screen (UI katmanı) |
+| **Sprint** | 8.3 |
+| **Feature** | Navigasyon Entegrasyonu + Finans Entegrasyon Tasarımı |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 518/518 başarılı (+19 yeni — 8 hook + 6 form + 5 screen) — **gerçekten çalıştırıldı** |
-| **Build** | ✅ Başarılı — ana bundle 396.57kB → 397.52kB (+0.95kB, makul) |
+| **Test Sonucu** | ✅ 525/525 başarılı (+7 yeni — navigasyon testleri) — **gerçekten çalıştırıldı** |
+| **Build** | ✅ Başarılı — ana bundle 397.52kB → 406.43kB (+8.91kB, Hasat ekranı artık lazy-load edilmiyor, Bakım/Finans ile tutarlı, makul) |
 | **Lint** | ✅ 0 uyarı/hata (197 dosya, 103 kural) — **gerçekten çalıştırıldı** |
 | **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) — **gerçekten çalıştırıldı** |
-| **Şema Sürümü** | 11 (değişmedi — bu sprint sadece UI) |
+| **Şema Sürümü** | 11 (değişmedi) |
 | **Tarih** | 2026-07-18 |
-| **Git Commit** | `c60d752` |
-| **ADR** | Yeni ADR gerekmedi — Bakım Kaydı'nın (Sprint 5.2) birebir tekrarı, yeni mimari karar YOK |
+| **Git Commit** | `90e649b` |
+| **ADR** | Yeni ADR gerekmedi — Bakım'ın (Sprint 5.3) birebir tekrarı; Finans-Hasat entegrasyonu için henüz kesin bir karar yok, sadece tasarım seçenekleri sunuldu |
 
 ## Bu Sprintte Yapılanlar (Gerçek, Kanıtlı)
 
-`useHarvestRecords` (dual-scope hook), `HarvestRecordForm` (gerçek zorunlu alan doğrulaması — Bakım'ın aksine), `HarvestScreen` (liste/form geçişleri, Error Code Standard). `harvest.*` i18n anahtarları eklendi, `keySymmetry` testi gerçekten çalıştırılıp doğrulandı.
+`routes.ts`'e `parcelHarvest`/`treeHarvest` eklendi (eski, bağlamsız `FUTURE_ROUTE_NAMES.harvest` kaldırıldı). `AppRouter.tsx`'e `HarvestScreenRoute`/`TreeHarvestScreenRoute` eklendi (mevcut `useTreeForRoute` hook'u — 4. kullanım, yeni soyutlama yok). `ParcelsScreen`/`ParcelForm`/`TreesScreen`/`TreeForm`'a `onViewHarvest` prop'u eklendi. `docs/harvest-finance-integration-design.md` — 3 seçenekli mimari tasarım (kod yok).
 
-## Sonraki Sprint
+## Sonraki Adım
 
-Sprint 8.3: Parsel/Ağaç navigasyon entegrasyonu + Finans'a "hasat geliri" bağlantısı tasarım kararı.
+Roadmap'in bir sonraki adımı: Sprint 8.4 (Dashboard). Finans-Hasat entegrasyonu, kullanıcının tasarım belgesindeki seçeneklerden birini onaylamasını bekliyor.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
 | Modül 1-5 | ✅ FROZEN |
-| Sprint 6-8.1 | ✅ Onaylandı |
-| Modül 7 — Hasat, Sprint 8.2 | 🟡 Bu teslimat (UI katmanı) |
+| Sprint 6-8.2 | ✅ Onaylandı |
+| Modül 7 — Hasat (TAM İŞLEVSEL) | 🟡 Bu teslimat |
