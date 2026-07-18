@@ -250,11 +250,37 @@ Aşağıda, **öncelik sırasına göre**, her kalan modül gerçekçi sprint pa
 
 ## 6. 1.0 Roadmap (Beta Sonrası)
 
+### 🔴 Product Owner Kararı (2026-07-18) — Öncelik Sıralaması GÜNCELLENDİ
+
+Aşağıdaki sıralama, Product Owner'ın 2026-07-18 tarihli kararıyla **güncellenmiştir**. Bu, önceki (Bölüm 6'nın orijinal) sıralamanın **yerini alır**:
+
+0. **🔴 Saha Operasyonları Paketi (Toplu İşlemler)** — **YENİ EN YÜKSEK ÖNCELİK**. Gerçek saha kullanımında onlarca/yüzlerce ağaca aynı işlemin tek tek uygulanması pratik değil. Kapsam: Toplu Gözlem, Toplu Bakım Kaydı (Sulama/Gübreleme/İlaçlama/Budama — **mimari olarak TEK mekanizma**, bkz. `docs/saha-operasyonlari-mimari-analiz.md`), Toplu İşlem Merkezi (Parsel ekranı). Toplu Ağaç Oluşturma **zaten mevcut** (Sprint 3.10) — yeniden geliştirilmiyor. Performans hedefi: 100/250/500 ağaçlı parsellerde sorunsuz çalışma (gerçek test edilecek).
+1. Fotoğraf Analizi'nin navigasyon entegrasyonu (Sprint 9.2'de kod tamamlandı, navigasyon bekliyor)
+2. **Finans + Hasat Mimari Revizyonu** (aşağıdaki alt bölüme bkz. — **BÜYÜK bir mimari değişiklik**, sadece PLANLANIYOR, henüz kodlanmıyor)
+3. Dashboard'ın yeni veri modeline göre yeniden tasarımı (Finans/Hasat revizyonundan SONRA yapılmalı — bağımlılık)
+4. Ayarlar Hub Genişletmesi, Hava Durumu, Raporlar, Harita, Sesli Asistan, RAG/Embedding — **eski sıralama korunuyor** (Bölüm 6'nın orijinal listesi)
+
+### 🔴 Finans + Hasat Mimari Revizyonu — BÜYÜK Bir Mimari Değişiklik (Sadece Planlanıyor)
+
+**Product Owner kararı:** Finans ve Hasat, varsayılan olarak **işletme seviyesinde** (parsel-bağımsız, tek merkezden) çalışacak — parsel bazlı kayıt sadece **isteğe bağlı, gelişmiş bir özellik** olacak.
+
+**🔴 DÜRÜSTÇE BELİRTİLMESİ GEREKEN GERÇEK RİSK:** Bu, **önceki bilinçli mimari kararların gerçek bir TERS ÇEVRİLMESİDİR** — spekülatif değil, kod düzeyinde kanıtlı:
+- Hasat: `harvest_records.parcel_id` bugün **`NOT NULL`** bir FK (Sprint 8.1'in kendi kararı — "Hasat, Finans'tan Modül 4'te bilinçli olarak ayrıldı" VE "parsel/ağaç bazlı" olarak tasarlandı). İşletme-seviyesi bir kayıt için bu, **`parcel_id`'nin NULLABLE olması** anlamına gelir — additive bir migration ile mümkün (ADR 0005 deseni, mevcut veriye dokunmaz), ama **gerçek bir ADR gerektirir**.
+- Finans: `finance_records.parcel_id`'nin bugünkü NOT NULL/NULLABLE durumu **bu mesajda doğrulanmadı** — gerçek geliştirme başladığında **ilk adım** bu olmalı (varsayılmamalı).
+- **Öneri (bu belge sadece plan, henüz karar/uygulama DEĞİL):** Additive migration (nullable `parcel_id`) — mevcut parsel-bazlı kayıtlar BOZULMADAN, yeni kayıtlar `parcel_id: null` ile "işletme geneli" olarak girilebilir. Bu, Sprint 8.1/Modül 4'ün kararlarını **iptal etmiyor**, üzerine **genişletiyor**.
+- **Bu değişiklik gerçek geliştirmeye başladığında, gerçek bir ADR (kullanıcının kendi kuralı: "mimari değişiklik gerekiyorsa önce açıkla, sonra uygula") YAZILMALI** — bu roadmap notu, o ADR'nin YERİNE geçmez.
+
+**Dashboard'ın yeniden tasarımı** (Toplam Hasat/Gelir/Gider/Net Kâr/Gider Dağılımı/Ağaç Başına Verim/Dekar Başına Verim/Aylık Karşılaştırmalar), bu mimari revizyon TAMAMLANMADAN anlamlı şekilde yapılamaz — **bağımlılık sırası: Finans/Hasat Revizyonu → Dashboard v2**.
+
+---
+
+### Eski Sıralama (Product Owner Kararı Öncesi, Referans İçin Korunuyor)
+
 Öncelik sırasına göre (Bölüm 2'deki analiz temelinde):
 
-1. **Hasat** (en düşük risk, Finans/Bakım deseninin doğrudan tekrarı)
-2. **Dashboard** (kullanıcı deneyimini hemen iyileştirir)
-3. **Fotoğraf Analizi** (AI altyapısı zaten hazır, doğal genişleme)
+1. **Hasat** (en düşük risk, Finans/Bakım deseninin doğrudan tekrarı) — ✅ Tamamlandı (Sprint 8.1-8.3)
+2. **Dashboard** (kullanıcı deneyimini hemen iyileştirir) — ✅ Tamamlandı (Sprint 8.4-8.5), **ama YUKARIDAKİ mimari revizyon sonrası YENİDEN TASARLANACAK**
+3. **Fotoğraf Analizi** (AI altyapısı zaten hazır, doğal genişleme) — ✅ Kod tamamlandı (Sprint 9.1-9.2), navigasyon bekliyor
 4. **Ayarlar Hub Genişletmesi** (Yedekleme dahil — ADR 0008 zaten kararlı)
 5. **Hava Durumu** (Parsel konum eklentisiyle birlikte)
 6. **Raporlar** (Hasat'a bağımlı, ondan sonra gelmeli)
