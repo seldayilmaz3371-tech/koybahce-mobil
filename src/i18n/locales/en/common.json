@@ -35,6 +35,27 @@
     "settingsLinkLabel": "AI Settings",
     "thinkingLabel": "Thinking..."
   },
+  "bulkOperations": {
+    "screenTitle": "Bulk Operations",
+    "treeCount": "{{count}} trees in this parcel",
+    "observationMenuItem": "Bulk Observation",
+    "mowingLabel": "Mowing",
+    "applyToAll": "Apply to All Trees ({{count}})",
+    "applyToSelected": "Select Trees to Apply",
+    "selectAllButton": "Select All",
+    "clearSelectionButton": "Clear Selection",
+    "selectedCount": "{{count}} trees selected",
+    "observationFormTitle": "Bulk Observation",
+    "maintenanceFormTitle": "Bulk Maintenance Record",
+    "applyButton": "Apply",
+    "confirmMessage": "{{operation}} will be applied to {{count}} trees. Continue?",
+    "noTreesSelectedError": "Please select at least one tree.",
+    "applyError": "Something went wrong while applying this operation. Please try again.",
+    "resultTitle": "Result",
+    "resultSummary": "{{count}} records created. 0 errors.",
+    "undoButton": "Undo",
+    "undoError": "Something went wrong while undoing this operation. Please try again."
+  },
   "dashboard": {
     "screenTitle": "Dashboard",
     "totalParcels": "Total Parcels",

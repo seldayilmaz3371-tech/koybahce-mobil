@@ -35,6 +35,27 @@
     "settingsLinkLabel": "AI Ayarları",
     "thinkingLabel": "Düşünüyor..."
   },
+  "bulkOperations": {
+    "screenTitle": "Toplu İşlemler",
+    "treeCount": "Bu parselde {{count}} ağaç var",
+    "observationMenuItem": "Toplu Gözlem",
+    "mowingLabel": "Biçme",
+    "applyToAll": "Tüm Ağaçlara Uygula ({{count}})",
+    "applyToSelected": "Ağaç Seçerek Uygula",
+    "selectAllButton": "Tümünü Seç",
+    "clearSelectionButton": "Seçimi Temizle",
+    "selectedCount": "{{count}} ağaç seçildi",
+    "observationFormTitle": "Toplu Gözlem",
+    "maintenanceFormTitle": "Toplu Bakım Kaydı",
+    "applyButton": "Uygula",
+    "confirmMessage": "{{count}} ağaca {{operation}} uygulanacak. Devam etmek istiyor musunuz?",
+    "noTreesSelectedError": "Lütfen en az bir ağaç seçin.",
+    "applyError": "Bu işlem uygulanırken bir sorun oluştu. Lütfen tekrar deneyin.",
+    "resultTitle": "Sonuç",
+    "resultSummary": "{{count}} kayıt oluşturuldu. 0 hata.",
+    "undoButton": "Geri Al",
+    "undoError": "Bu işlem geri alınırken bir sorun oluştu. Lütfen tekrar deneyin."
+  },
   "dashboard": {
     "screenTitle": "Ana Sayfa",
     "totalParcels": "Toplam Parsel",

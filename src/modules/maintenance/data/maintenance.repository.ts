@@ -251,6 +251,17 @@ class MaintenanceRepository extends BaseRepository implements IMaintenanceReposi
       id,
     ]);
   }
+
+  async deactivateMany(ids: string[]): Promise<void> {
+    if (ids.length === 0) {
+      return;
+    }
+    return this.runInTransaction(async () => {
+      for (const id of ids) {
+        await this.deactivate(id);
+      }
+    });
+  }
 }
 
 export const maintenanceRepository: IMaintenanceRepository = new MaintenanceRepository();

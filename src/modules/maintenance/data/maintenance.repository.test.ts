@@ -505,3 +505,25 @@ describe("MaintenanceRepository — createMany (Sprint 10.1, Saha Operasyonları
     expect(pruning[0].maintenanceType).toBe(MaintenanceType.Pruning);
   });
 });
+
+describe("MaintenanceRepository — deactivateMany (Sprint 10.2, Toplu İşlemler 'Geri Al')", () => {
+  it("createMany() sonrası deactivateMany() ile TÜM oluşturulan kayıtlar geri alınabilir", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const treeA = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-1", variety: "Gemlik" });
+    const treeB = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-2", variety: "Gemlik" });
+    const created = await maintenanceRepository.createMany({
+      parcelId: parcel.id,
+      treeIds: [treeA.id, treeB.id],
+      maintenanceType: MaintenanceType.Irrigation,
+    });
+
+    await maintenanceRepository.deactivateMany(created.map((r) => r.id));
+
+    expect(await maintenanceRepository.listByTree(treeA.id)).toHaveLength(0);
+    expect(await maintenanceRepository.listByTree(treeB.id)).toHaveLength(0);
+  });
+
+  it("boş id listesiyle hata FIRLATILMAZ", async () => {
+    await expect(maintenanceRepository.deactivateMany([])).resolves.not.toThrow();
+  });
+});

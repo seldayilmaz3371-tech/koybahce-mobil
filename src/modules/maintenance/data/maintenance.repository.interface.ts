@@ -61,4 +61,9 @@ export interface IMaintenanceRepository {
    */
   update(id: string, changes: MaintenanceRecordUpdateInput): Promise<void>;
   deactivate(id: string): Promise<void>;
+  /**
+   * bkz. Sprint 10.2 (Toplu İşlemler "Geri Al" özelliği). `createMany()`'nin
+   * BİREBİR AYNI deseni — soft-delete, fiziksel SİLME DEĞİL.
+   */
+  deactivateMany(ids: string[]): Promise<void>;
 }
