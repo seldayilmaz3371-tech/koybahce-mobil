@@ -3,30 +3,40 @@
 | Alan | Değer |
 |---|---|
 | **Project** | Bahçem Mobile |
-| **Module** | Modül 3 (Fotoğraf altyapısı — GERÇEKTEN zaten mevcut) / Gelecekteki Modül 9 (Fotoğraf Analizi — tasarım aşaması) |
-| **Sprint** | 9.1 |
-| **Feature** | Fotoğraf Altyapısı Mimari Analizi + AI Analiz Veri Modeli Tasarımı (SAF DOKÜMANTASYON) |
+| **Module** | Modül 9 — Fotoğraf Analizi (AI) |
+| **Sprint** | 9.2 |
+| **Feature** | Gemini Vision Entegrasyonu — İlk Çalışan Akış |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test/Build/Lint/Cap Sync Durumu** | **Bu sprintte kod DEĞİŞMEDİĞİ için `npm run test`/`build`/`lint`/`cap sync` YENİDEN ÇALIŞTIRILMADI** — Sprint 8.5'in sonucu (538/538 test, temiz build/lint, 9 plugin) hâlâ geçerlidir. Her belge değişikliğinden sonra `tsc -b` GERÇEKTEN çalıştırıldı (kod dokunulmadığının kanıtı). |
+| **Test Sonucu** | ✅ 557/557 başarılı (+19 yeni) — **gerçekten çalıştırıldı** |
+| **Build** | ✅ Başarılı — ana bundle 413.73kB → 414.47kB (+0.74kB, makul) |
+| **Lint** | ✅ 0 uyarı/hata (208 dosya, 103 kural) — **gerçekten çalıştırıldı** |
+| **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) — **gerçekten çalıştırıldı** |
+| **Şema Sürümü** | 11 (değişmedi — bu sprint hiçbir migration içermiyor) |
 | **Tarih** | 2026-07-18 |
-| **Git Commit** | `96d01fa` |
-| **ADR** | Yeni ADR gerekmedi — hiçbir yeni mimari karar alınmadı, sadece mevcut mimarinin analizi + gelecekteki bir tasarımın seçenekleri sunuldu |
+| **Git Commit** | `d10997f` |
+| **ADR** | Yeni ADR yazılmadı — `analyzeImage()` ADR 0024'ün önceden öngördüğü genişleme; kalıcı saklama olmaması kararı Sprint 9.1'in tasarım belgesindeki necessity analizine dayanıyor |
 
-## 🔴 Kritik Bulgu — Bu Sprintte Kod Hiç Değişmedi
+## Bu Sprintte Yapılanlar (Gerçek, Kanıtlı)
 
-Kod öncesi zorunlu analiz, Sprint 9.1'in istediği **"Fotoğraf modülünün temel altyapısı"nın Modül 3'ten (Sprint 3.6-3.7) beri zaten tam ve olgun bir şekilde mevcut olduğunu** kanıtladı. Bu, varsayılmadı — 7 önceliğin her biri gerçek dosyalardan (`IPhotoRepository`, `native/filesystem.ts`, `photos` şeması) tek tek doğrulandı.
+`AIProvider.analyzeImage()` + `GeminiProvider` implementasyonu (gerçek `inlineData` API şekli doğrulanmış). `native/filesystem.ts`'e `readFileAsBase64()` eklendi (mevcut `persistPhotoFile`'a dokunulmadı). `usePhotoAnalysis` + `PhotoAnalysisScreen` — kalıcı saklama YOK (bilinçli necessity kararı). `getActiveAiProvider()` — kod tekrarından kaçınmak için `AiSessionService`'ten çıkarıldı (davranış aynı kaldı, 8/8 mevcut test hâlâ geçiyor).
 
-## Yeni Belgeler (Bu Sprint)
+## Mimari Sınırlar Korundu
 
-- `docs/sprint-9.1-photo-infrastructure-analysis.md` — mevcut altyapının 7 öncelikle karşılaştırılması, gerçek kod kanıtlarıyla.
-- `docs/photo-ai-analysis-data-model-design.md` — AI analiz sonucunun gelecekte nereye kaydedileceğine dair 3 seçenekli tasarım (kod yok).
+- ❌ Photo Repository değiştirilmedi.
+- ❌ Filesystem yapısı değiştirilmedi (sadece genişletildi).
+- ❌ Yeni tablo/migration/repository oluşturulmadı.
+- ❌ Teşhis/tedavi önerisi/karşılaştırmalı analiz yazılmadı.
+
+## Sonraki Adım
+
+PhotoGalleryScreen'den navigasyon entegrasyonu — ayrı bir sprint.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
 | Modül 1-5 | ✅ FROZEN |
-| Sprint 6-8.5 | ✅ Onaylandı |
+| Sprint 6-9.1 | ✅ Onaylandı |
 | Modül 7 — Hasat | ✅ Onaylandı |
 | Modül 8 — Dashboard | ✅ Onaylandı |
-| Sprint 9.1 (analiz+tasarım) | 🟡 Bu teslimat |
+| Modül 9 — Fotoğraf Analizi (ilk akış) | 🟡 Bu teslimat |
