@@ -34,6 +34,16 @@
     "settingsLinkLabel": "AI Settings",
     "thinkingLabel": "Thinking..."
   },
+  "dashboard": {
+    "screenTitle": "Dashboard",
+    "totalParcels": "Total Parcels",
+    "totalTrees": "Total Trees",
+    "overdueMaintenance": "Overdue Maintenance",
+    "upcomingMaintenance": "Upcoming Maintenance",
+    "totalHarvest": "Total Harvest",
+    "recentObservationsTitle": "Recent Observations",
+    "noRecentObservations": "No recent observations."
+  },
   "harvest": {
     "screenTitle": "Harvest",
     "emptyState": "No harvest records yet.",
