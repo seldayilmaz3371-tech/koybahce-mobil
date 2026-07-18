@@ -111,6 +111,9 @@ Gözlem (5 tür: general/health_concern/growth_stage/weather_impact/other) tam C
 - `isSubmitting` yarış durumu sadece Photo'da düzeltilmişti — Sprint 4.2'de Finans'a da baştan uygulandı, Parcel/Tree/Observation formlarında hâlâ teorik risk
 - Router eksikliği (bu noktada kritik önceliğe çıkmıştı) — ✅ Modül 4'te çözüldü
 
+### Sprint 9.1 Notu (2026-07-18) — Fotoğraf Analizi Altyapısı
+Sprint 9.1'in kod öncesi analizi, buradaki `IPhotoRepository`/`native/filesystem.ts`/`photos` şemasının **gelecekteki AI Fotoğraf Analizi için zaten yeterli ve olgun** olduğunu kanıtladı (bkz. `docs/sprint-9.1-photo-infrastructure-analysis.md`). Kronolojik sıralama (`taken_at ASC`) zaten bu amaçla tasarlanmıştı. **Eksik olan tek şey** — AI analiz sonucunun nereye kaydedileceği — `docs/photo-ai-analysis-data-model-design.md`'de 3 seçenekli bir tasarım olarak (kod yazılmadan) belgelendi.
+
 ### Dondurma Kuralı
 Modül 3'e **yeni özellik eklenmeyecek**. Yalnızca **kritik güvenlik açığı veya kritik hata** bulunursa düzeltme yapılacak (Sprint 3.10.1 bu kural altında uygulandı).
 
@@ -290,7 +293,7 @@ Router'da isim alanı ayrılmış (`docs/router` altında `FUTURE_ROUTE_NAMES`),
 
 - **Hava Durumu (Weather)**
 - **Harita (Map)**
-- **Fotoğraf Analizi** — AI Master Architecture Bölüm 11, Modül 6'da bilinçli olarak ertelendi
+- **Fotoğraf Analizi** — AI Master Architecture Bölüm 11, Modül 6'da bilinçli olarak ertelendi. **Sprint 9.1'de altyapısı analiz edildi:** temel veri katmanı (Repository/Filesystem/SQLite ilişkisi) Modül 3'te zaten hazır, sadece AI analiz sonucu için veri modeli TASARLANDI (kod yazılmadan) — bkz. `docs/photo-ai-analysis-data-model-design.md`.
 - **Sesli Asistan** — Bölüm 12, ertelendi
 - **RAG/Embedding** — ertelendi
 - **Ayarlar (Settings)**
