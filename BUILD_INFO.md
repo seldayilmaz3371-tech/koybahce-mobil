@@ -4,35 +4,26 @@
 |---|---|
 | **Project** | Bahçem Mobile |
 | **Module** | Modül 8 — Dashboard |
-| **Sprint** | 8.4 |
-| **Feature** | Hook + Screen (özet ekranı) |
+| **Sprint** | 8.5 |
+| **Feature** | Navigasyon Entegrasyonu (buton girişi, ANA EKRAN DEĞİL) |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 534/534 başarılı (+9 yeni — 6 hook + 3 screen) — **gerçekten çalıştırıldı** |
-| **Build** | ✅ Başarılı — ana bundle 406.43kB → 407.00kB (+0.57kB, ekran henüz navigasyona bağlı değil) |
+| **Test Sonucu** | ✅ 538/538 başarılı (+4 yeni) — **gerçekten çalıştırıldı** |
+| **Build** | ✅ Başarılı — ana bundle 407.00kB → 413.73kB (+6.73kB, Dashboard artık navigasyona bağlı) |
 | **Lint** | ✅ 0 uyarı/hata (201 dosya, 103 kural) — **gerçekten çalıştırıldı** |
 | **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) — **gerçekten çalıştırıldı** |
-| **Şema Sürümü** | 11 (değişmedi — bu sprint hiçbir migration/repository içermiyor) |
 | **Tarih** | 2026-07-18 |
-| **Git Commit** | `1ce38d8` |
-| **ADR** | Yeni ADR gerekmedi — mevcut repository'lerin Hook seviyesinde birleştirilmesi, yeni mimari kategori YOK |
+| **Git Commit** | `33b94b4` |
+| **ADR** | Yeni ADR gerekmedi — mevcut route/prop deseninin tekrarı |
 
-## Bu Sprintte Yapılanlar (Gerçek, Kanıtlı)
+## Kararlaştırılan Navigasyon Yaklaşımı
 
-`useDashboardSummary` — hiçbir repository'ye yeni metod eklenmeden, mevcut `listByParcel` sorgularının `Promise.all` ile paralel toplanması. `DashboardScreen` — toplam parsel/ağaç, geciken/yaklaşan bakım, son 5 gözlem, toplam hasat. **Hiçbir henüz-geliştirilmemiş modüle (Hava Durumu, Fotoğraf Analizi, Raporlar) bağlı öge yok.**
-
-## Bilinen Sınır (Gerçek, Kayıtlı)
-
-`parcelRepository.list()`'in varsayılan limiti (50) aşılırsa Dashboard eksik gösterir — bugün sorun değil, gerçek bir ölçek sorunu çıkarsa değerlendirilecek (YAGNI).
-
-## Sonraki Adım
-
-Dashboard'ın navigasyonu (yeni ana ekran mı, Parseller'e ek giriş mi) **kullanıcı kararı gerektiriyor** — App.tsx'in varsayılan rotasını etkileyebilecek bir değişiklik, tek taraflı yapılmadı.
+**Dashboard ana ekran YAPILMADI** — Parseller mevcut ana ekran olarak kaldı. Gerekçe: Sprint 7.2'nin gerçek cihaz testli akışını (Kilit→Parseller) bozmamak, saha kullanımında ekstra tık maliyetinden kaçınmak, Beta geri bildirimi olmadan spekülatif değişiklik yapmamak. Dashboard, Parseller ekranından bir buton ile ("Add Parcel"dan hemen sonra) erişiliyor.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
 | Modül 1-5 | ✅ FROZEN |
-| Sprint 6-8.3 | ✅ Onaylandı |
-| Modül 7 — Hasat (TAM İŞLEVSEL) | ✅ Onaylandı |
-| Modül 8 — Dashboard (Hook+Screen) | 🟡 Bu teslimat |
+| Sprint 6-8.4 | ✅ Onaylandı |
+| Modül 7 — Hasat | ✅ Onaylandı |
+| Modül 8 — Dashboard (TAM İŞLEVSEL) | 🟡 Bu teslimat |
