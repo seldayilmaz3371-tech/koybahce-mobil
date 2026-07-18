@@ -34,6 +34,7 @@ yapmıştık?" sorusuna kod kazmadan cevap verebilmektir.
 | [0023](0023-native-run-transaction-parametresi.md) | Native `run()` Transaction Parametresi Kök Neden Bulgusu | ✅ Gerçek cihaz hatasından bulundu, düzeltildi, iki yönlü test kanıtı (Sprint 3.10.1) |
 | [0024](0024-ai-architecture-decisions.md) | AI Architecture Decisions — Provider Registry, Tool Registry, AiSessionService, IContextEngine | ✅ Kabul edildi (Sprint 6) |
 | [0025](0025-beta-release-strategy.md) | Beta Release Strategy — Versioning, Keystore, APK/Dağıtım Süreci, Git Tag Politikası | 🟡 Kısmen kabul edildi (Versioning UYGULANDI, Keystore bekliyor — Sprint 7.4) |
+| [0026](0026-release-signing-architecture.md) | Release Signing Architecture — local.properties, signingConfigs, minifyEnabled kararı, .gitignore güvenlik düzeltmesi | ✅ Mimari kabul edildi (Sprint 7.5) — gerçek keystore kullanıcının kendi ortamında oluşturulacak |
 
 ## Yeni bir ADR ne zaman eklenir?
 
