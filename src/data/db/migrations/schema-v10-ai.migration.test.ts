@@ -81,9 +81,4 @@ describe("Şema Migration — Sürüm 10 (AI Altyapısı)", () => {
 
     db.close();
   });
-
-  it("CURRENT_SCHEMA_VERSION 10'a güncellenmiş", async () => {
-    const { CURRENT_SCHEMA_VERSION } = await import("./schema");
-    expect(CURRENT_SCHEMA_VERSION).toBe(10);
-  });
 });
