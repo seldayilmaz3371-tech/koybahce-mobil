@@ -34,6 +34,21 @@
     "settingsLinkLabel": "AI Settings",
     "thinkingLabel": "Thinking..."
   },
+  "harvest": {
+    "screenTitle": "Harvest",
+    "emptyState": "No harvest records yet.",
+    "addButton": "Add Harvest Record",
+    "loadMoreButton": "Load More",
+    "formTitleCreate": "New Harvest Record",
+    "formTitleEdit": "Edit Harvest Record",
+    "date": "Harvest Date",
+    "dateRequired": "Please select a harvest date.",
+    "quantityKg": "Quantity (kg)",
+    "quantityInvalid": "Quantity must be a positive number.",
+    "quantityValue": "{{value}} kg",
+    "deleteButton": "Delete Record",
+    "deleteConfirm": "Delete this harvest record? This cannot be undone."
+  },
   "maintenancePlan": {
     "screenTitle": "Maintenance Plans",
     "emptyState": "No maintenance plans yet.",

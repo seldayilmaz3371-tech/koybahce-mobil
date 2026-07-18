@@ -34,6 +34,21 @@
     "settingsLinkLabel": "AI Ayarları",
     "thinkingLabel": "Düşünüyor..."
   },
+  "harvest": {
+    "screenTitle": "Hasat",
+    "emptyState": "Henüz hasat kaydı yok.",
+    "addButton": "Hasat Kaydı Ekle",
+    "loadMoreButton": "Daha Fazla Yükle",
+    "formTitleCreate": "Yeni Hasat Kaydı",
+    "formTitleEdit": "Hasat Kaydını Düzenle",
+    "date": "Hasat Tarihi",
+    "dateRequired": "Lütfen bir hasat tarihi seçin.",
+    "quantityKg": "Miktar (kg)",
+    "quantityInvalid": "Miktar pozitif bir sayı olmalıdır.",
+    "quantityValue": "{{value}} kg",
+    "deleteButton": "Kaydı Sil",
+    "deleteConfirm": "Bu hasat kaydı silinsin mi? Bu işlem geri alınamaz."
+  },
   "maintenancePlan": {
     "screenTitle": "Bakım Planları",
     "emptyState": "Henüz bakım planı yok.",
