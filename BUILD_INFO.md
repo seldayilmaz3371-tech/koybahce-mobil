@@ -4,30 +4,30 @@
 |---|---|
 | **Project** | Bahçem Mobile |
 | **Module** | Modül 7 — Hasat (Harvest) |
-| **Sprint** | 8.1 |
-| **Feature** | Migration + Domain + Repository (veri katmanı) |
+| **Sprint** | 8.2 |
+| **Feature** | Hook + Form + Screen (UI katmanı) |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 499/499 başarılı (+16 yeni — 12 repository + 4 migration) — **gerçekten çalıştırıldı** |
-| **Build** | ✅ Başarılı — ana bundle 395.82kB → 396.57kB (+0.75kB, yeni migration/repository kodu, makul) |
-| **Lint** | ✅ 0 uyarı/hata (189 dosya, 103 kural) — **gerçekten çalıştırıldı** |
+| **Test Sonucu** | ✅ 518/518 başarılı (+19 yeni — 8 hook + 6 form + 5 screen) — **gerçekten çalıştırıldı** |
+| **Build** | ✅ Başarılı — ana bundle 396.57kB → 397.52kB (+0.95kB, makul) |
+| **Lint** | ✅ 0 uyarı/hata (197 dosya, 103 kural) — **gerçekten çalıştırıldı** |
 | **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) — **gerçekten çalıştırıldı** |
-| **Şema Sürümü** | 11 (yeni: `harvest_records`) |
+| **Şema Sürümü** | 11 (değişmedi — bu sprint sadece UI) |
 | **Tarih** | 2026-07-18 |
-| **Git Commit** | `1353f3a` |
-| **ADR** | Yeni ADR gerekmedi — mevcut desenlerin (dual-scope repository, soft-delete) doğrudan tekrarı, yeni bir mimari karar YOK |
+| **Git Commit** | `c60d752` |
+| **ADR** | Yeni ADR gerekmedi — Bakım Kaydı'nın (Sprint 5.2) birebir tekrarı, yeni mimari karar YOK |
 
 ## Bu Sprintte Yapılanlar (Gerçek, Kanıtlı)
 
-Şema Sürüm 11 (`harvest_records` — `parcel_id` NOT NULL FK, `tree_id` NULLABLE FK, `harvest_date`, `quantity_kg`, `notes`, `is_active`), domain tipleri, `IHarvestRepository` (dual-scope: `listByParcel`/`listByTree`, Finans/Bakım/Gözlem ile aynı desen). **Audit-log/durum geçişi bilinçli olarak eklenmedi** (Hasat, Bakım'dan farklı — sadece gerçekleşmiş bir olayın kaydı).
+`useHarvestRecords` (dual-scope hook), `HarvestRecordForm` (gerçek zorunlu alan doğrulaması — Bakım'ın aksine), `HarvestScreen` (liste/form geçişleri, Error Code Standard). `harvest.*` i18n anahtarları eklendi, `keySymmetry` testi gerçekten çalıştırılıp doğrulandı.
 
 ## Sonraki Sprint
 
-Sprint 8.2: Hook + Form + Screen (Bakım Kaydı'nın Sprint 5.2 deseni).
+Sprint 8.3: Parsel/Ağaç navigasyon entegrasyonu + Finans'a "hasat geliri" bağlantısı tasarım kararı.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
 | Modül 1-5 | ✅ FROZEN |
-| Sprint 6-7.5 | ✅ Onaylandı |
-| Modül 7 — Hasat, Sprint 8.1 | 🟡 Bu teslimat (veri katmanı) |
+| Sprint 6-8.1 | ✅ Onaylandı |
+| Modül 7 — Hasat, Sprint 8.2 | 🟡 Bu teslimat (UI katmanı) |
