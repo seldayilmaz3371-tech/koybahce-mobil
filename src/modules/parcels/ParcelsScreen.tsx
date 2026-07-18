@@ -46,6 +46,8 @@ interface ParcelsScreenProps {
   onViewParcelAiChat: (parcel: Parcel) => void;
   /** Kullanıcı Ayarlar'ı görüntülemek istediğinde çağrılır (Sprint 7.1). */
   onViewSettings: () => void;
+  /** Kullanıcı Dashboard özet ekranını görüntülemek istediğinde çağrılır (Sprint 8.5). Kullanıcı kararı: Dashboard ANA EKRAN değil, buton girişli bir alt ekran. */
+  onViewDashboard: () => void;
 }
 
 export function ParcelsScreen({
@@ -57,6 +59,7 @@ export function ParcelsScreen({
   onViewAiChat,
   onViewParcelAiChat,
   onViewSettings,
+  onViewDashboard,
 }: ParcelsScreenProps) {
   const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState("");
@@ -129,6 +132,10 @@ export function ParcelsScreen({
         onClick={() => setView({ mode: "create" })}
       >
         {t("parcel.addButton")}
+      </button>
+
+      <button type="button" className="lock-screen__button" onClick={onViewDashboard}>
+        {t("parcel.dashboardButton")}
       </button>
 
       <button type="button" className="lock-screen__button" onClick={onViewReferenceTrees}>

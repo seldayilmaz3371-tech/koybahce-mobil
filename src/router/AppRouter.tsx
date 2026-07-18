@@ -36,6 +36,7 @@ import { PhotoGalleryScreen } from "../modules/photos/PhotoGalleryScreen";
 import { FinanceScreen } from "../modules/finance/FinanceScreen";
 import { MaintenanceScreen } from "../modules/maintenance/MaintenanceScreen";
 import { HarvestScreen } from "../modules/harvest/HarvestScreen";
+import { DashboardScreen } from "../modules/dashboard/DashboardScreen";
 import { SettingsScreen } from "../modules/settings/SettingsScreen";
 import { useTreeForRoute } from "./useTreeForRoute";
 import { ROUTE_PATTERNS, buildPath } from "./routes";
@@ -108,6 +109,7 @@ function ParcelsScreenRoute() {
       onViewAiChat={() => navigate(buildPath.aiChat())}
       onViewParcelAiChat={(parcel) => navigate(buildPath.parcelAiChat(parcel.id))}
       onViewSettings={() => navigate(buildPath.settings())}
+      onViewDashboard={() => navigate(buildPath.dashboard())}
     />
   );
 }
@@ -323,6 +325,11 @@ function TreeHarvestScreenRoute() {
   );
 }
 
+function DashboardScreenRoute() {
+  const navigate = useNavigate();
+  return <DashboardScreen onBack={() => navigate(-1)} />;
+}
+
 function SettingsScreenRoute() {
   const navigate = useNavigate();
   return <SettingsScreen onViewAiSettings={() => navigate(buildPath.aiSettings())} />;
@@ -447,6 +454,7 @@ export function AppRouter() {
         <Route path={ROUTE_PATTERNS.observationPhotos} element={<PhotoGalleryScreenRoute />} />
         <Route path={ROUTE_PATTERNS.aiChat} element={<AiChatScreenRoute />} />
         <Route path={ROUTE_PATTERNS.settings} element={<SettingsScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.dashboard} element={<DashboardScreenRoute />} />
         <Route path={ROUTE_PATTERNS.aiSettings} element={<AiSettingsScreenRoute />} />
         <Route path="*" element={<Navigate to={buildPath.parcels()} replace />} />
       </Routes>

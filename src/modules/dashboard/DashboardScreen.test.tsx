@@ -8,7 +8,7 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import en from "../../i18n/locales/en/common.json";
 import {
   setDatabaseExecutorProviderForTesting,
@@ -44,7 +44,7 @@ afterEach(() => {
 
 describe("DashboardScreen", () => {
   it("hiç veri yokken sıfır değerleri GERÇEKTEN gösterir (uydurma veri DEĞİL)", async () => {
-    render(<DashboardScreen />);
+    render(<DashboardScreen onBack={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("Dashboard")).toBeTruthy());
     expect(screen.getByText("Total Parcels")).toBeTruthy();
@@ -57,7 +57,7 @@ describe("DashboardScreen", () => {
     await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-2", variety: "Gemlik" });
     await harvestRepository.create({ parcelId: parcel.id, harvestDate: "2026-11-01", quantityKg: 640 });
 
-    render(<DashboardScreen />);
+    render(<DashboardScreen onBack={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("Dashboard")).toBeTruthy());
     // "1" (toplam parsel) ve "2" (toplam ağaç) gerçek DOM'da görünmeli.
@@ -73,9 +73,19 @@ describe("DashboardScreen", () => {
       throw new Error("simülasyon hatası");
     });
 
-    render(<DashboardScreen />);
+    render(<DashboardScreen onBack={vi.fn()} />);
 
     await waitFor(() => expect(screen.getByText("Something went wrong. Please try again.")).toBeTruthy());
     expect(screen.queryByText(/simülasyon hatası/)).toBeNull();
+  });
+
+  it("'Back' butonuna basmak onBack'i çağırır", async () => {
+    const onBack = vi.fn();
+    render(<DashboardScreen onBack={onBack} />);
+    await waitFor(() => expect(screen.getByText("Back")).toBeTruthy());
+
+    screen.getByText("Back").click();
+
+    expect(onBack).toHaveBeenCalledTimes(1);
   });
 });

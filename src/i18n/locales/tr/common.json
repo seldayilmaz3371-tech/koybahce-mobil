@@ -170,7 +170,8 @@
     "viewAiChatButton": "AI Asistan",
     "referenceTreesButton": "Referans Ağaçlar",
     "aiChatButton": "AI Asistan",
-    "settingsButton": "Ayarlar"
+    "settingsButton": "Ayarlar",
+    "dashboardButton": "Ana Sayfa"
   },
   "photo": {
     "screenTitle": "Fotoğraflar",

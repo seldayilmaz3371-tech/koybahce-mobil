@@ -555,3 +555,37 @@ describe("AppRouter — Hasat Navigasyonu (Sprint 8.3, GERÇEK navigasyon)", () 
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
   });
 });
+
+describe("AppRouter — Dashboard Navigasyonu (Sprint 8.5, GERÇEK navigasyon — buton girişi, ANA EKRAN DEĞİL)", () => {
+  it("Parsel Listesi → 'Dashboard' butonu doğru rotaya gider (ana ekran Parseller olarak KALIR)", async () => {
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Dashboard")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Dashboard"));
+
+    await waitFor(() => expect(screen.getByText("Total Parcels")).toBeTruthy());
+    expect(window.location.hash).toBe("#/dashboard");
+  });
+
+  it("Dashboard gerçek verileri (parsel/ağaç sayısı) doğru gösterir", async () => {
+    const parcel = await parcelRepository.create({ name: "Dashboard Parseli", cropType: "olive", areaDekar: 5 });
+    await treeRepository.create({ parcelId: parcel.id, treeNumber: "D-1", variety: "Gemlik" });
+    window.location.hash = "#/dashboard";
+
+    render(<AppRouter />);
+
+    await waitFor(() => expect(screen.getByText("Total Parcels")).toBeTruthy());
+    const values = screen.getAllByText(/^\d+$/).map((el) => el.textContent);
+    expect(values).toContain("1"); // 1 parsel
+  });
+
+  it("Dashboard → 'Back' butonu Parsellere döner", async () => {
+    window.location.hash = "#/dashboard";
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Total Parcels")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Back"));
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+});
