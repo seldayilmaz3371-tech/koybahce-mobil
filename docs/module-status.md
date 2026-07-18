@@ -326,38 +326,40 @@ PhotoGalleryScreen'den `PhotoAnalysisScreen`'e navigasyon entegrasyonu (Hasat/Da
 
 ## Modül 10 — Saha Operasyonları (Toplu İşlemler)
 
-**Durum: 🟡 REPOSITORY KATMANI TAMAMLANDI, UI BEKLİYOR** (Sprint 10.1, 2026-07-18) — **Product Owner kararıyla yeni en yüksek öncelik**
+**Durum: 🟡 UI TAMAMLANDI, NAVİGASYON BEKLİYOR** (Sprint 10.2, 2026-07-18) — Product Owner kararıyla yeni en yüksek öncelik
 
 | Alan | Durum |
 |---|---|
 | Kod öncesi mimari analizi | ✅ Tamamlandı — bkz. `docs/saha-operasyonlari-mimari-analiz.md` |
 | Roadmap güncellemesi | ✅ Tamamlandı |
-| `observationRepository.createMany()` | ✅ Tamamlandı (3 test) |
-| `maintenanceRepository.createMany()` | ✅ Tamamlandı (3 test) |
-| **Gerçek performans testi (100/250/500 ağaç)** | ✅ Tamamlandı (7 test) — bkz. aşağıdaki gerçek ölçümler |
-| "Toplu İşlemler" UI (ağaç seçim mekanizması) | 🔴 Bekliyor (Sprint 10.2) |
+| `observationRepository.createMany()`/`deactivateMany()` | ✅ Tamamlandı (5 test) |
+| `maintenanceRepository.createMany()`/`deactivateMany()` | ✅ Tamamlandı (5 test) |
+| Gerçek performans testi (100/250/500 ağaç, in-memory) | ✅ Tamamlandı (7 test) |
+| `useTreeSelection` + `TreeSelectorList` (ağaç seçim UI'ı) | ✅ Tamamlandı (11 test) |
+| `BulkObservationForm` + `BulkMaintenanceForm` (5 bakım türü tek formda) | ✅ Tamamlandı (8 test) |
+| `BulkOperationsScreen` (giriş noktası) | ✅ Tamamlandı (3 test) |
+| Geri Al (Undo) | ✅ Tamamlandı — gerçek feasibility analizi sonucu |
+| Gerçek cihaz performans test planı (100/250/500) | ✅ Belge hazır — **testler henüz çalıştırılmadı** (gerçek cihaz yok) |
 | Navigasyon Entegrasyonu | 🔴 Bekliyor (Sprint 10.3) |
 
-### Kritik Mimari Bulgular
-1. **Toplu Ağaç Oluşturma (Madde 1) zaten mevcut** (Sprint 3.10, `treeRepository.createMany()`) — yeniden geliştirilmedi.
-2. **Toplu Sulama/Gübreleme/İlaçlama/Budama (Madde 3-6) mimari olarak TEK özellik** — `MaintenanceType` enum'unun 4 değeri, `maintenanceRepository.createMany()`'nin `maintenanceType` parametresiyle tek mekanizma. 4 ayrı repository/UI YERİNE 1 ortak mekanizma.
+### Kritik Mimari Kararlar
+1. **Toplu Ağaç Oluşturma zaten mevcuttu** (Sprint 3.10) — yeniden geliştirilmedi.
+2. **Sulama/Gübreleme/İlaçlama/Budama/Biçme mimari olarak TEK özellik** — `MaintenanceType` enum'unun değerleri, tek `createMany()` mekanizması.
+3. **"Biçme" enum değeri YOK, `other` ile temsil ediliyor** — SQLite `CHECK` kısıtı değişikliği (tablo yeniden oluşturma) riskinden kaçınıldı. Gerçek bir "mowing" değeri gelecekte istenirse, gerçek bir ADR + migration gerekir.
+4. **Geri Al (Undo) mimari olarak uygun bulundu** — mevcut soft-delete deseni (`deactivateMany()`) yeterli, yeni bir mekanizma icat edilmedi.
 
-### Gerçek Performans Ölçümleri (`src/perf/bulkOperations.perf.test.ts`)
-| Ağaç Sayısı | Toplu Gözlem | Toplu Bakım |
-|---|---|---|
-| 100 | ~17ms | ~13ms |
-| 250 | ~15ms | ~26ms |
-| 500 | ~29ms | ~53ms |
-
-**🔴 Dürüst sınır:** Bu ölçümler in-memory test ortamında (`better-sqlite3`) alındı — gerçek bir Android cihazın disk I/O'suyla birebir aynı performansı göstermez. Gerçek cihaz doğrulaması ayrıca yapılmalı (`docs/sprint-6-apk-device-test-plan.md` emsaliyle).
+### Bilinen Riskler (Gerçek Cihazda Doğrulanmalı)
+- `TreeSelectorList` hiçbir sanallaştırma (virtualization) içermiyor — 500 satırlık liste tamamen DOM'a render ediliyor.
+- `runInTransaction()`'ın ana thread'i bloke edip etmediği (ANR riski) gerçek cihazda doğrulanmadı.
 
 ### Sprint Geçmişi
 | Sprint | İçerik | Durum |
 |---|---|---|
 | 10.1 | Repository katmanı (toplu oluşturma) + gerçek performans testi | ✅ Tamamlandı |
+| 10.2 | Toplu İşlemler UI (ağaç seçimi, formlar, geri al) | ✅ Tamamlandı |
 
 ### Sonraki Adım
-Sprint 10.2: "Toplu İşlemler" UI — Parsel ekranında ağaç seçim mekanizması (mevcutta yok, yeni bir bileşen) + Toplu Gözlem formu + Toplu Bakım formu (4 tip tek formda).
+Sprint 10.3: Navigasyon entegrasyonu (ParcelForm'dan "Toplu İşlemler" butonu) + gerçek cihaz performans testlerinin çalıştırılması.
 
 ---
 

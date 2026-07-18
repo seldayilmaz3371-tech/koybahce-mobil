@@ -4,42 +4,43 @@
 |---|---|
 | **Project** | Bahçem Mobile |
 | **Module** | Modül 10 — Saha Operasyonları (Toplu İşlemler) |
-| **Sprint** | 10.1 |
-| **Feature** | Repository Katmanı: Toplu Gözlem + Toplu Bakım Kaydı + Gerçek Performans Testi |
+| **Sprint** | 10.2 |
+| **Feature** | Toplu İşlemler UI — Ağaç Seçim Sistemi + Formlar + Geri Al |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 570/570 başarılı (+13 yeni) — **gerçekten çalıştırıldı** |
-| **Build** | ✅ Başarılı — ana bundle 414.47kB → 415.03kB (+0.56kB, makul) |
-| **Lint** | ✅ 0 uyarı/hata (209 dosya, 103 kural) — **gerçekten çalıştırıldı** |
+| **Test Sonucu** | ✅ 596/596 başarılı (+26 yeni) — **gerçekten çalıştırıldı** |
+| **Build** | ✅ Başarılı — ana bundle 415.03kB → 416.97kB (+1.94kB, makul) |
+| **Lint** | ✅ 0 uyarı/hata (219 dosya, 103 kural) — **gerçekten çalıştırıldı** |
 | **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) — **gerçekten çalıştırıldı** |
 | **Şema Sürümü** | 11 (değişmedi — bu sprint hiçbir migration içermiyor) |
 | **Tarih** | 2026-07-18 |
-| **Git Commit** | `8608f2c` |
-| **ADR** | Yeni ADR yazılmadı — Tree'nin (Sprint 3.10) kanıtlanmış `createMany`/`runInTransaction` deseninin tekrarı, yeni mimari karar yok |
+| **Git Commit** | `19677c8` |
+| **ADR** | Yeni ADR yazılmadı — "Biçme" kararı ve Geri Al mimarisi mevcut desenlerin genişletmesi, gerçek bir yeni mimari kategori değil |
 
-## 🔴 Product Owner Kararı — Öncelik Değişikliği
+## Kritik Mimari Karar — "Biçme"
 
-Saha Operasyonları Paketi, Product Owner kararıyla **yeni en yüksek öncelik**. Roadmap güncellendi (`docs/roadmap/01-current-state-and-roadmap.md`) — Finans/Hasat işletme-seviyesi mimari revizyonu **sadece planlandı, henüz kodlanmadı** (kullanıcının açık talimatı).
+`MaintenanceType` enum'unda ne TS'te ne SQLite `CHECK` kısıtında "mowing" değeri yok. SQLite'ta `CHECK` kısıtı değiştirmek tablo yeniden oluşturmayı gerektirir (gerçek risk). **Karar:** "Biçme" kullanıcıya seçenek olarak gösteriliyor, arka planda `maintenanceType: "other"` kaydediliyor — hiçbir migration gerekmedi (testte doğrulandı).
 
-## Kritik Mimari Bulgular
+## Geri Al (Undo)
 
-1. Toplu Ağaç Oluşturma (Madde 1) **zaten mevcuttu** (Sprint 3.10) — yeniden geliştirilmedi.
-2. Toplu Sulama/Gübreleme/İlaçlama/Budama (Madde 3-6) **mimari olarak TEK özellik** — `MaintenanceType` enum'unun 4 değeri.
+Mimari olarak uygun bulundu — mevcut soft-delete deseni (`deactivateMany()`) yeterli.
 
-## Gerçek Performans Ölçümleri
+## Bilinen Riskler (Gerçek Cihazda Doğrulanmalı)
 
-500 ağaç için: Toplu Gözlem ~29ms, Toplu Bakım ~53ms (in-memory test ortamında — **gerçek cihaz için ayrıca doğrulama gerekli**, dürüstçe belirtildi).
+- `TreeSelectorList` sanallaştırma içermiyor (500 satır tamamen DOM'a render ediliyor).
+- `runInTransaction()`'ın ANR riski gerçek cihazda doğrulanmadı.
+- Test planı hazır (`docs/sprint-10.2-device-performance-test-plan.md`) ama **çalıştırılmadı**.
 
 ## Sonraki Adım
 
-Sprint 10.2: "Toplu İşlemler" UI (ağaç seçim mekanizması, yeni bir bileşen).
+Sprint 10.3: Navigasyon entegrasyonu + gerçek cihaz performans testlerinin çalıştırılması.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
 | Modül 1-5 | ✅ FROZEN |
-| Sprint 6-9.2 | ✅ Onaylandı |
+| Sprint 6-10.1 | ✅ Onaylandı |
 | Modül 7 — Hasat | ✅ Onaylandı |
 | Modül 8 — Dashboard | ✅ Onaylandı |
 | Modül 9 — Fotoğraf Analizi (ilk akış) | ✅ Onaylandı |
-| Modül 10 — Saha Operasyonları (Repository katmanı) | 🟡 Bu teslimat |
+| Modül 10 — Saha Operasyonları (UI) | 🟡 Bu teslimat |
