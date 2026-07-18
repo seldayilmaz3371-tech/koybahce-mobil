@@ -4,38 +4,32 @@
 |---|---|
 | **Project** | Bahçem Mobile |
 | **Module** | Modül 6 — AI Altyapısı |
-| **Sprint** | 7.3 |
-| **Feature** | AI Asistan Mobil UX + AI Davranış Doğrulaması + Beta/Release Hazırlığı |
-| **Test Sonucu** | ✅ 484/484 başarılı (+5 yeni — mobil UX testleri) |
-| **Build** | ✅ Başarılı — ana bundle 395.82kB, AI chunk 346.40kB (değişmedi) |
-| **Lint** | ✅ 0 uyarı / 0 hata (183 dosya, 103 kural) |
+| **Sprint** | 7.4 |
+| **Feature** | Beta Versiyon Altyapısı (versionCode/versionName/package.json) |
+| **App Version** | `0.1.0-beta.1` ("Bahçem Mobile Beta 1") — **YENİ, bu sprintte gerçekten yazıldı** |
+| **versionCode** | `2` |
+| **Test Sonucu** | ✅ 484/484 başarılı (kod değişikliği yok, sadece versiyon) |
+| **Build** | ✅ Başarılı — bundle boyutu değişmedi (395.82kB ana + 346.40kB AI chunk) |
+| **Lint** | ✅ 0 uyarı/hata — çıktı artık `bahcem-mobile@0.1.0-beta.1` gösteriyor (gerçek kanıt) |
 | **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) |
-| **Tarih** | 2026-07-17 |
-| **Git Commit** | `98edca6` |
-| **ADR** | [0024 — AI Architecture Decisions](docs/adr/0024-ai-architecture-decisions.md), [0025 — Beta Release Strategy (taslak)](docs/adr/0025-beta-release-strategy.md) |
+| **Tarih** | 2026-07-18 |
+| **ADR** | [0025 — Beta Release Strategy](docs/adr/0025-beta-release-strategy.md) — **Karar 1 (Versioning) UYGULANDI, Karar 4 (Keystore) hâlâ bekliyor** |
 
-## Gerçek Cihaz Doğrulaması (Sprint 7.2'de Kullanıcı Tarafından Onaylandı)
+## 🔴 Beta Release'e Giden Yolda Kalan TEK Kritik Engel
 
-APK üretildi, Android cihaza kuruldu, çöküş gözlenmedi. Parsel listesi/SQLite/AI Ayarları/Secure Storage/AI ekranı/Galeri fotoğraf seçimi doğrulandı.
+**İmzalama.** `signingConfigs` hâlâ yok, hiçbir keystore oluşturulmadı — bu sprintte **bilinçli olarak** yapılmadı (kullanıcı yasağı). Detay: `docs/sprint-7.4-release-readiness-report.md`.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
-| Modül 1 — Altyapı | ✅ FROZEN |
-| Modül 2 — Parseller + Ağaçlar | ✅ FROZEN |
-| Modül 3 — Gözlemler + Fotoğraflar | ✅ FROZEN |
-| Modül 4 — Router + Finans | ✅ FROZEN |
-| Modül 5 — Bakım Yönetimi | ✅ FROZEN |
+| Modül 1-5 | ✅ FROZEN |
 | Sprint 6 — AI Altyapısı (kod) | ✅ Onaylandı |
 | Sprint 7.1 — Navigasyon + Bundle Optimizasyonu | ✅ Onaylandı |
-| Sprint 7.2 — UX/Kalite Son Kontrolleri | ✅ Onaylandı, **gerçek cihazda doğrulandı** |
-| Sprint 7.3 — Mobil UX + AI Doğrulaması + Beta Hazırlığı | 🟡 Bu teslimat |
+| Sprint 7.2 — UX/Kalite, Gerçek Cihazda Doğrulandı | ✅ Onaylandı |
+| Sprint 7.3 — Mobil UX + AI Doğrulaması + Beta Hazırlığı | ✅ Onaylandı |
+| Sprint 7.4 — Beta Versiyon Altyapısı | 🟡 Bu teslimat |
 
 ## Kısa Değişiklik Özeti
 
-**AI Asistan mobil UX'i tamamen yenilendi:** çok satırlı otomatik büyüyen textarea (4-10 satır), sohbet balonları (kullanıcı sağda/AI solda), gönderim sırasında spinner+"Düşünüyor..." göstergesi, `android:windowSoftInputMode="adjustResize"` (gerçek bulgu — hiç yapılandırılmamıştı). **AI mimarisi hiç değişmedi.**
-
-**AI davranışı kod seviyesinde doğrulandı:** Gemini API'ye gerçekten istek gittiği, `gemini-2.5-flash` modelinin kullanıldığı, hiçbir fallback/sahte cevap mekanizması olmadığı kanıtlandı. Dürüstçe belirtilen sınır: gerçek Logcat/cihaz erişimi bu ortamda mümkün değil, analiz kod seviyesinde yapıldı.
-
-**Beta/Release hazırlığı:** Versiyon önerileri (`sprint-7.3-version-proposal.md`) ve ADR 0025 (Beta Release Strategy) hazırlandı — **hiçbir dosya değiştirilmedi**, hepsi kullanıcı onayı bekliyor.
+`android/app/build.gradle` (`versionCode`/`versionName`) ve `package.json` (`version`) **gerçekten güncellendi** — `sprint-7.3-version-proposal.md`'nin Seçenek A'sı kullanıcı tarafından onaylandı. **Hiçbir başka dosya değişmedi** — keystore/imzalama/Release APK bu sprintin kapsamı DIŞINDA bırakıldı (kullanıcının açık talimatı).

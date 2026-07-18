@@ -184,18 +184,23 @@ Modül 5 **kalıcı olarak donduruldu**. Sadece kritik güvenlik açığı/üret
 
 ## Modül 6 — AI Altyapısı
 
-**Durum: 🟡 KOD+NAVİGASYON TAMAMLANDI — Production Ready DEĞİL** (kullanıcı kararı, 2026-07-17)
+**Durum: 🟡 KOD+NAVİGASYON+MOBİL UX TAMAMLANDI, GERÇEK CİHAZDA KISMEN DOĞRULANDI — Production Ready DEĞİL** (kullanıcı kararı, 2026-07-18)
 
 | Alan | Durum |
 |---|---|
 | Kodlama | ✅ Tamamlandı |
 | Mimari | ✅ Tamamlandı (ADR 0024) |
-| Testler | ✅ Tamamlandı (479/479) |
-| Dokümantasyon | ✅ Tamamlandı (ADR 0024, BUILD_INFO.md, APK Test Planı) |
+| Testler | ✅ Tamamlandı (484/484) |
+| Dokümantasyon | ✅ Tamamlandı (ADR 0024/0025, BUILD_INFO.md, APK Test Planı) |
 | Navigasyon Entegrasyonu | ✅ Tamamlandı (Sprint 7.1) |
 | Bundle Optimizasyonu | ✅ Tamamlandı (Sprint 7.1 — ana bundle 744kB→396kB, ölçüldü) |
-| APK Testi | 🔴 Bekleniyor |
-| Gerçek Android Cihaz Doğrulaması | 🔴 Bekleniyor |
+| Mobil UX (Sohbet balonları, textarea, klavye) | ✅ Tamamlandı (Sprint 7.3) |
+| AI Davranış Doğrulaması (kod seviyesi) | ✅ Tamamlandı (Sprint 7.3) |
+| Beta Versiyon Numaraları | ✅ Uygulandı (Sprint 7.4 — `0.1.0-beta.1`) |
+| Gerçek Cihaz İlk Doğrulama | ✅ Tamamlandı (Sprint 7.2 onayında — açılış/parsel/SQLite/AI Ayarları/Secure Storage/AI ekranı/galeri) |
+| Gerçek Cihaz TAM Doğrulama (zorunlu test seti) | 🔴 **Bekleniyor** (bkz. `sprint-7.4-release-readiness-report.md`) |
+| **İmzalama (Keystore)** | 🔴 **Bekleniyor — Beta Release'in TEK kritik engeli** |
+| APK Testi (imzalı, dağıtılabilir) | 🔴 Bekleniyor |
 | Production Ready | 🔴 **Henüz değil** |
 
 ### Kapsam
@@ -206,7 +211,9 @@ AI Ayarları (güvenli varsayılanlar) + Provider Registry (Gemini) + Tool Regis
 |---|---|---|
 | 6 | AI Altyapısı — Provider/Tool Registry, Context Engine, Sohbet (ADR 0024) | ✅ Kod tamamlandı |
 | 7.1 | Gerçek navigasyon entegrasyonu (`/settings`, `/settings/ai`, `/ai/chat`, parsel/ağaç-bağlamlı) + `React.lazy` bundle optimizasyonu + `useTreeForRoute` soyutlaması | ✅ Onaylandı |
-| 7.2 | APK/Beta hazırlığı — UX/erişilebilirlik/dokümantasyon son kontrolleri | 🟡 Bu teslimat |
+| 7.2 | APK/Beta hazırlığı — UX/erişilebilirlik/dokümantasyon son kontrolleri | ✅ Onaylandı, **gerçek cihazda doğrulandı** |
+| 7.3 | AI Asistan mobil UX (sohbet balonları/textarea/klavye) + AI davranış doğrulaması (kod seviyesi) + Beta/Release öneri belgeleri (ADR 0025 taslak) | ✅ Onaylandı |
+| 7.4 | Beta versiyon altyapısı — `versionCode`/`versionName`/`package.json` gerçekten güncellendi | 🟡 Bu teslimat |
 
 ### Sonraki Adım
 Sprint 7.2 sonrası: APK üretimi → Gerçek cihaz doğrulaması (bkz. `docs/sprint-6-apk-device-test-plan.md`, gerçek navigasyona göre güncellendi) → Production Ready kararı.
