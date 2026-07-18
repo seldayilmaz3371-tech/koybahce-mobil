@@ -54,6 +54,7 @@ describe("useAiChat", () => {
     const fakeProvider: AIProvider = {
       providerName: "gemini",
       sendMessage: vi.fn().mockResolvedValue({ text: "cevap metni", toolCalls: [] }),
+      analyzeImage: vi.fn().mockResolvedValue("test analiz"),
     };
     providerRegistry.register(fakeProvider);
 
@@ -71,7 +72,11 @@ describe("useAiChat", () => {
     await aiSettingsRepository.getOrCreate();
     await aiSettingsRepository.update({ isEnabled: true, internetPermission: true });
     const sendMessageSpy = vi.fn().mockResolvedValue({ text: "cevap", toolCalls: [] });
-    providerRegistry.register({ providerName: "gemini", sendMessage: sendMessageSpy });
+    providerRegistry.register({
+      providerName: "gemini",
+      sendMessage: sendMessageSpy,
+      analyzeImage: vi.fn().mockResolvedValue("test analiz"),
+    });
 
     const { result } = renderHook(() => useAiChat({ parcelId: "p1" }));
     await waitFor(() => expect(result.current.status).toBe("ready"));

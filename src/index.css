@@ -371,3 +371,21 @@ button {
 .ai-chat__textarea:disabled {
   opacity: 0.6;
 }
+
+/* --- Genel Yükleniyor Göstergesi (Sprint 9.2) ---
+ * `.ai-chat__spinner` ile AYNI görsel, ama AI Chat'e ÖZEL OLMAYAN bir
+ * bağlamda (Fotoğraf Analizi) kullanılmak üzere GENEL bir sınıf.
+ * `.ai-chat__spinner`'a BİLİNÇLİ olarak dokunulmadı (Sprint 7.3'ün
+ * kodu/testleri etkilenmesin diye) — bu, kabul edilebilir küçük bir
+ * CSS tekrarı (Kural 4'ün önemsiz ölçekli istisnası).
+ */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: ai-chat-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}

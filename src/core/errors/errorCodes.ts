@@ -31,6 +31,7 @@ export const ErrorCode = {
   AI_002: "AI_002", // İnternet izni verilmemiş
   AI_003: "AI_003", // Sağlayıcı kayıtlı değil (iç tutarsızlık)
   AI_004: "AI_004", // API anahtarı yapılandırılmamış
+  AI_005: "AI_005", // Fotoğraf analizi boş yanıt döndü (ör. güvenlik filtresi)
 
   SYS_001: "SYS_001", // Beklenmeyen/sınıflandırılamayan hata
 } as const;
