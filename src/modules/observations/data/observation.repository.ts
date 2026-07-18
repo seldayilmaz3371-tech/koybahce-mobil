@@ -177,6 +177,17 @@ class ObservationRepository extends BaseRepository implements IObservationReposi
       id,
     ]);
   }
+
+  async deactivateMany(ids: string[]): Promise<void> {
+    if (ids.length === 0) {
+      return;
+    }
+    return this.runInTransaction(async () => {
+      for (const id of ids) {
+        await this.deactivate(id);
+      }
+    });
+  }
 }
 
 export const observationRepository: IObservationRepository = new ObservationRepository();

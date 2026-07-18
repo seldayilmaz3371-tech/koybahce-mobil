@@ -46,4 +46,11 @@ export interface IObservationRepository {
   createMany(input: BulkCreateObservationsInput): Promise<Observation[]>;
   update(id: string, changes: ObservationUpdateInput): Promise<void>;
   deactivate(id: string): Promise<void>;
+  /**
+   * bkz. Sprint 10.2 (Toplu İşlemler "Geri Al" özelliği). `createMany()`'nin
+   * döndürdüğü id listesini TEK bir transaction içinde pasife alır —
+   * `createMany()`'nin BİREBİR AYNI deseni (`runInTransaction()` içinde
+   * döngü). Fiziksel SİLME DEĞİL — soft-delete (Kural: mevcut desen).
+   */
+  deactivateMany(ids: string[]): Promise<void>;
 }
