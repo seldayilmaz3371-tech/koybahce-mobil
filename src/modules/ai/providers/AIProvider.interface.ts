@@ -5,12 +5,10 @@
  * doğrudan bir sağlayıcının SDK'sını çağırmaz — her zaman bu arayüz
  * üzerinden (native eklenti sarmalayıcı deseniyle tutarlı, Kural 12).
  *
- * BİLİNÇLİ SADELİK (YAGNI — kullanıcı onayı, "gereksiz karmaşık/büyük
- * olmamalı"): Sadece `sendMessage()` var. `streamMessage()`/
- * `analyzeImage()` (AI Master Architecture Bölüm 9-10'da tanımlı)
- * Sprint 6'nın kapsamı DIŞINDA (Sesli Asistan/Fotoğraf Analizi
- * ertelendi) — bugün YAZILMIYOR. İleride gerektiğinde bu arayüze
- * eklenecek, mevcut `GeminiProvider` implementasyonu genişletilecek.
+ * `analyzeImage()` — Sprint 9.2'de eklendi (ADR 0024'ün önceden
+ * öngördüğü genişleme, "İleride gerektiğinde bu arayüze eklenecek").
+ * `streamMessage()` HÂLÂ YOK (Sesli Asistan hâlâ ertelendi, bu
+ * genişlemenin kapsamı DIŞINDA).
  */
 
 export interface AIToolDefinition {
@@ -75,4 +73,17 @@ export interface AIProvider {
       pendingToolResults?: AIToolResult[];
     }
   ): Promise<AIProviderResponse>;
+
+  /**
+   * Bir görseli (base64 kodlanmış) ve bir metin talimatını Gemini
+   * Vision'a gönderir, modelin metin yanıtını döner. Sprint 9.2 —
+   * sadece Fotoğraf Analizi'nin "ilk çalışan akışı" için — HİÇBİR
+   * yapılandırılmış (JSON şemalı) çıktı, tool calling veya kalıcı
+   * saklama YOK, sadece serbest metin analiz sonucu.
+   *
+   * GERÇEK API DOĞRULAMASI (varsayılmadı): `Part.inlineData: { data:
+   * string (base64), mimeType: string }` — resmi `@google/genai`
+   * tip tanımlarından (`Blob_2`) doğrulandı.
+   */
+  analyzeImage(imageBase64: string, mimeType: string, prompt: string, systemInstruction?: string): Promise<string>;
 }

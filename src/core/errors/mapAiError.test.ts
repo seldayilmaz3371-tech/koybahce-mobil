@@ -19,6 +19,10 @@ describe("mapAiError", () => {
     expect(mapAiError(new Error("AI_PROVIDER_API_KEY_NOT_CONFIGURED"))).toBe(ErrorCode.AI_004);
   });
 
+  it("AI_PHOTO_ANALYSIS_EMPTY_RESPONSE -> AI_005", () => {
+    expect(mapAiError(new Error("AI_PHOTO_ANALYSIS_EMPTY_RESPONSE"))).toBe(ErrorCode.AI_005);
+  });
+
   it("bilinmeyen bir hata SYS_001'e düşer (fallback)", () => {
     expect(mapAiError(new Error("hiç bilinmeyen bir hata"))).toBe(ErrorCode.SYS_001);
   });

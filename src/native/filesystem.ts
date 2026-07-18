@@ -57,3 +57,26 @@ export async function persistPhotoFile(sourceUri: string, fileNameSeed: string):
   });
   return result.uri;
 }
+
+/**
+ * Kalıcı bir fotoğraf dosyasını (ör. `persistPhotoFile()`'ın döndürdüğü
+ * TAM URI) base64 metne okur — Gemini Vision'a gönderilecek `inlineData`
+ * için (bkz. Sprint 9.2, ADR gerekmeyen bir uzantı — mevcut
+ * `persistPhotoFile`'a HİÇ dokunulmadı, sadece bu fonksiyon eklendi).
+ *
+ * GERÇEK API DOĞRULAMASI (varsayılmadı): `Filesystem.readFile`'ın
+ * resmi tip tanımları — `encoding` VERİLMEZSE "data is read as binary
+ * and returned as base64 encoded" (dokümantasyon metni birebir).
+ * `directory` VERİLMEDİ çünkü `path`, `persistPhotoFile()`'ın
+ * döndürdüğü TAM bir URI (`CopyResult.uri`) — göreli bir yol DEĞİL.
+ */
+export async function readFileAsBase64(filePath: string): Promise<string> {
+  const result = await Filesystem.readFile({ path: filePath });
+  if (typeof result.data !== "string") {
+    // Native platformda HER ZAMAN string döner (resmi dokümantasyon:
+    // "On native, the data is returned as a string") — bu dal SADECE
+    // web'de Blob dönme ihtimaline karşı bir güvenlik notu.
+    throw new Error("PHOTO_READ_UNEXPECTED_BLOB_RESULT");
+  }
+  return result.data;
+}

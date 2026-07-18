@@ -80,6 +80,7 @@ describe("AiChatScreen", () => {
     providerRegistry.register({
       providerName: "gemini",
       sendMessage: vi.fn().mockResolvedValue({ text: "3 sulama yaptınız.", toolCalls: [] }),
+      analyzeImage: vi.fn().mockResolvedValue("test analiz"),
     });
 
     render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
@@ -117,6 +118,7 @@ describe("AiChatScreen", () => {
     providerRegistry.register({
       providerName: "gemini",
       sendMessage: vi.fn().mockResolvedValue({ text: "cevap", toolCalls: [] }),
+      analyzeImage: vi.fn().mockResolvedValue("test analiz"),
     });
 
     render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
@@ -173,6 +175,7 @@ describe("AiChatScreen — Mobil UX (Sprint 7.3)", () => {
     providerRegistry.register({
       providerName: "gemini",
       sendMessage: vi.fn().mockResolvedValue({ text: "cevap metni", toolCalls: [] }),
+      analyzeImage: vi.fn().mockResolvedValue("test analiz"),
     });
 
     render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
@@ -204,6 +207,7 @@ describe("AiChatScreen — Mobil UX (Sprint 7.3)", () => {
             resolveResponse = resolve;
           })
       ),
+      analyzeImage: vi.fn().mockResolvedValue("test analiz"),
     });
 
     render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
@@ -232,6 +236,7 @@ describe("AiChatScreen — Mobil UX (Sprint 7.3)", () => {
     providerRegistry.register({
       providerName: "gemini",
       sendMessage: vi.fn(() => new Promise<never>(() => {})), // asla resolve olmaz — "sending" durumunu SABİTLE
+      analyzeImage: vi.fn().mockResolvedValue("test analiz"),
     });
 
     render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);

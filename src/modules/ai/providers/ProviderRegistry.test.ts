@@ -14,6 +14,9 @@ function fakeProvider(name: string): AIProvider {
     async sendMessage(): Promise<AIProviderResponse> {
       return { text: `${name} yanıtı`, toolCalls: [] };
     },
+    async analyzeImage(): Promise<string> {
+      return `${name} analiz sonucu`;
+    },
   };
 }
 

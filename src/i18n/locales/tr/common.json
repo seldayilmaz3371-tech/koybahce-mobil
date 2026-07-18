@@ -7,6 +7,7 @@
     "AI_002": "AI'nin internet iznine ihtiyacı var. AI Ayarları'ndan verebilirsiniz.",
     "AI_003": "AI sağlayıcısı şu an kullanılamıyor.",
     "AI_004": "Lütfen AI Ayarları'ndan Gemini API anahtarınızı girin.",
+    "AI_005": "AI bu fotoğrafı şu anda analiz edemedi. Lütfen tekrar deneyin.",
     "SYS_001": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
   },
   "settings": {
@@ -43,6 +44,13 @@
     "totalHarvest": "Toplam Hasat",
     "recentObservationsTitle": "Son Gözlemler",
     "noRecentObservations": "Henüz gözlem yok."
+  },
+  "photoAnalysis": {
+    "screenTitle": "AI Fotoğraf Analizi",
+    "disclaimer": "Bu, genel bir AI gözlemidir, profesyonel bir teşhis DEĞİLDİR. Tedavi kararları için lütfen bir ziraat mühendisine danışın.",
+    "analyzeButton": "AI ile Analiz Et",
+    "analyzing": "Analiz ediliyor...",
+    "resultTitle": "AI Gözlemi"
   },
   "harvest": {
     "screenTitle": "Hasat",

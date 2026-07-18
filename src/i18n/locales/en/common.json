@@ -7,6 +7,7 @@
     "AI_002": "AI needs internet permission. You can enable it in AI Settings.",
     "AI_003": "AI provider is not available right now.",
     "AI_004": "Please add your Gemini API key in AI Settings.",
+    "AI_005": "AI couldn't analyze this photo right now. Please try again.",
     "SYS_001": "Something went wrong. Please try again."
   },
   "settings": {
@@ -43,6 +44,13 @@
     "totalHarvest": "Total Harvest",
     "recentObservationsTitle": "Recent Observations",
     "noRecentObservations": "No recent observations."
+  },
+  "photoAnalysis": {
+    "screenTitle": "AI Photo Analysis",
+    "disclaimer": "This is a general AI observation, not a professional diagnosis. For treatment decisions, please consult a local agricultural engineer.",
+    "analyzeButton": "Analyze with AI",
+    "analyzing": "Analyzing...",
+    "resultTitle": "AI Observation"
   },
   "harvest": {
     "screenTitle": "Harvest",

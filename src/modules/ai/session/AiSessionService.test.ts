@@ -28,6 +28,7 @@ function fakeProvider(sendMessageImpl: (...args: unknown[]) => Promise<AIProvide
   return {
     providerName: "gemini",
     sendMessage: sendMessageImpl as AIProvider["sendMessage"],
+    analyzeImage: vi.fn().mockResolvedValue("test analiz sonucu"),
   };
 }
 

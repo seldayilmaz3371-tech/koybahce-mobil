@@ -24,5 +24,8 @@ export function mapAiError(error: unknown): ErrorCodeValue {
   if (message.includes("AI_PROVIDER_API_KEY_NOT_CONFIGURED")) {
     return ErrorCode.AI_004;
   }
+  if (message.includes("AI_PHOTO_ANALYSIS_EMPTY_RESPONSE")) {
+    return ErrorCode.AI_005;
+  }
   return ErrorCode.SYS_001;
 }

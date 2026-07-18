@@ -23,14 +23,13 @@
  */
 
 import { aiConversationRepository } from "../data/aiConversation.repository";
-import { aiSettingsRepository } from "../data/aiSettings.repository";
 import type { AiMessage } from "../domain/ai.types";
-import { providerRegistry } from "../providers/ProviderRegistry";
 import type { AIMessage, AIToolResult } from "../providers/AIProvider.interface";
 import { toolRegistry } from "../tools/ToolRegistry";
 import { keywordContextEngine } from "../context/KeywordContextEngine";
 import type { ScreenContext } from "../context/IContextEngine.interface";
 import { buildSystemPrompt, buildUserTurnMessage } from "../prompt/promptBuilder";
+import { getActiveAiProvider } from "./getActiveAiProvider";
 
 export interface SendUserMessageInput {
   conversationId: string;
@@ -44,22 +43,11 @@ export interface SendUserMessageResult {
 
 class AiSessionService {
   async sendUserMessage(input: SendUserMessageInput): Promise<SendUserMessageResult> {
-    const settings = await aiSettingsRepository.getOrCreate();
-
-    // Bölüm 15 — güvenli varsayılanlar: her iki izin de AÇIK olmadan
-    // hiçbir AI çağrısı yapılmaz. Ham teknik hata kodları — UI katmanı
-    // (Error Code Standard) çevirir, burada metin YAZILMAZ.
-    if (!settings.isEnabled) {
-      throw new Error("AI_NOT_ENABLED");
-    }
-    if (!settings.internetPermission) {
-      throw new Error("AI_INTERNET_PERMISSION_DENIED");
-    }
-
-    const provider = providerRegistry.get(settings.providerName);
-    if (!provider) {
-      throw new Error("AI_PROVIDER_NOT_REGISTERED");
-    }
+    // bkz. Sprint 9.2 — izin kontrolü + provider alma mantığı
+    // `getActiveAiProvider()`'a ÇIKARILDI (Fotoğraf Analizi de AYNI
+    // mantığa ihtiyaç duyuyor, Kural: "kod tekrarından kaçın").
+    // Davranış BİREBİR AYNI (aynı hata kodları, aynı sıra).
+    const { provider, settings } = await getActiveAiProvider();
 
     // 1. Kullanıcı mesajını kaydet.
     await aiConversationRepository.addMessage({

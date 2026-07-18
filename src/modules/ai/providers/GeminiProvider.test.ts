@@ -179,3 +179,55 @@ describe("GeminiProvider — Retry Stratejisi (Web Projesinden BİREBİR Taşın
     expect(generateContentMock).toHaveBeenCalledTimes(3); // 1 ilk deneme + 2 retry
   }, 10000);
 });
+
+describe("GeminiProvider — analyzeImage (Sprint 9.2)", () => {
+  it("GERÇEK inlineData formatında (base64+mimeType) görsel gönderir", async () => {
+    generateContentMock.mockResolvedValue({ text: "Yapraklar sağlıklı görünüyor.", functionCalls: undefined });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    const result = await geminiProvider.analyzeImage("BASE64VERISI", "image/jpeg", "Bu yaprağı analiz et");
+
+    expect(result).toBe("Yapraklar sağlıklı görünüyor.");
+    const sentContents = generateContentMock.mock.calls[0][0].contents;
+    expect(sentContents[0].parts[0]).toEqual({ inlineData: { data: "BASE64VERISI", mimeType: "image/jpeg" } });
+    expect(sentContents[0].parts[1]).toEqual({ text: "Bu yaprağı analiz et" });
+  });
+
+  it("systemInstruction verilirse GERÇEK config.systemInstruction alanına gönderilir", async () => {
+    generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await geminiProvider.analyzeImage("BASE64", "image/jpeg", "soru", "Sen bir tarım uzmanısın.");
+
+    const sentConfig = generateContentMock.mock.calls[0][0].config;
+    expect(sentConfig.systemInstruction).toBe("Sen bir tarım uzmanısın.");
+  });
+
+  it("boş yanıt (response.text yok) AÇIK bir hata fırlatır — sessizce boş sonuç DÖNMEZ", async () => {
+    generateContentMock.mockResolvedValue({ text: undefined, functionCalls: undefined });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await expect(geminiProvider.analyzeImage("BASE64", "image/jpeg", "soru")).rejects.toThrow(
+      "AI_PHOTO_ANALYSIS_EMPTY_RESPONSE"
+    );
+  });
+
+  it("API anahtarı yoksa AÇIK bir hata fırlatır (sendMessage ile AYNI kural)", async () => {
+    vi.mocked(secureStorage.get).mockResolvedValue(null);
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await expect(geminiProvider.analyzeImage("BASE64", "image/jpeg", "soru")).rejects.toThrow(
+      "AI_PROVIDER_API_KEY_NOT_CONFIGURED"
+    );
+    expect(generateContentMock).not.toHaveBeenCalled();
+  });
+
+  it("kota hatası (RESOURCE_EXHAUSTED) YENİDEN DENENMEZ (sendMessage ile AYNI retry mantığı)", async () => {
+    generateContentMock.mockRejectedValue(new Error('{"code":429,"message":"RESOURCE_EXHAUSTED"}'));
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await expect(geminiProvider.analyzeImage("BASE64", "image/jpeg", "soru")).rejects.toThrow();
+
+    expect(generateContentMock).toHaveBeenCalledTimes(1);
+  });
+});
