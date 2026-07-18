@@ -71,7 +71,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 10;
+export const CURRENT_SCHEMA_VERSION = 11;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -331,6 +331,32 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
        );`,
       `CREATE INDEX IF NOT EXISTS idx_ai_messages_conversation_id ON ai_messages(conversation_id);`,
       `CREATE INDEX IF NOT EXISTS idx_ai_conversations_updated_at ON ai_conversations(updated_at);`,
+    ],
+  },
+  {
+    toVersion: 11,
+    statements: [
+      // Sprint 8.1 — Hasat (Harvest). Roadmap kararı (docs/roadmap/
+      // 01-current-state-and-roadmap.md, Bölüm 2.1): Hasat, Finans'tan
+      // BİLİNÇLİ olarak ayrı tutulur (Modül 4'ün kararı) — bu tablo
+      // SADECE miktar (kg) kaydı tutar, finansal bir alan İÇERMEZ.
+      // `tree_id` NULLABLE — Bakım/Gözlem'in "dual-scope" deseniyle
+      // TUTARLI (parsel geneli VEYA belirli bir ağaç). `is_active`
+      // soft-delete — Bakım/Finans/Parsel ile AYNI proje standardı.
+      `CREATE TABLE IF NOT EXISTS harvest_records (
+         id TEXT PRIMARY KEY NOT NULL,
+         parcel_id TEXT NOT NULL REFERENCES parcels(id) ON DELETE RESTRICT,
+         tree_id TEXT REFERENCES trees(id) ON DELETE RESTRICT,
+         harvest_date TEXT NOT NULL,
+         quantity_kg REAL NOT NULL,
+         notes TEXT,
+         is_active INTEGER NOT NULL DEFAULT 1,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );`,
+      `CREATE INDEX IF NOT EXISTS idx_harvest_records_parcel_id ON harvest_records(parcel_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_harvest_records_tree_id ON harvest_records(tree_id);`,
+      `CREATE INDEX IF NOT EXISTS idx_harvest_records_harvest_date ON harvest_records(harvest_date);`,
     ],
   },
 ];
