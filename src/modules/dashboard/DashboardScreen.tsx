@@ -1,9 +1,11 @@
 /**
  * DashboardScreen
  * ==================
- * bkz. Sprint 8.4, roadmap Bölüm 2.7. Uygulamayı açınca (kilit
- * sonrası) görülecek özet ekran. Mevcut `status-screen`/kart deseni
- * (Kural 12) — yeni bir UI dili YOK.
+ * bkz. Sprint 8.4/8.5, roadmap Bölüm 2.7. Uygulamayı açınca (kilit
+ * sonrası) görülecek özet ekran DEĞİL — kullanıcı kararı (2026-07-18):
+ * "Dashboard'ı ana ekran yapma, en azından şimdi değil, riskli bir
+ * navigasyon değişikliği." Bunun yerine, Parseller (mevcut ana ekran)
+ * ekranından bir BUTON ile erişilen bir alt ekran (Sprint 8.5).
  *
  * KAPSAM (roadmap'in kendi tanımıyla sınırlı — vizyon belgesindeki
  * "mini grafikler"/"ilerleme çubukları"/"hava durumu" gibi ÖGELER
@@ -12,9 +14,8 @@
  * yaklaşan bakım sayısı, son 5 gözlem (tüm parseller genelinde),
  * toplam hasat (kg).
  *
- * NAVİGASYON: Bu ekran henüz hiçbir rotaya bağlı DEĞİL (diğer
- * modüllerin — Hasat/AI — aşamalı yaklaşımıyla tutarlı, navigasyon
- * ayrı bir sonraki sprint).
+ * `onBack` — AI Sohbet/AI Ayarları ile AYNI desen (basit, tek-görünümlü
+ * ekran, iç view-state/CRUD yok) — GÖRÜNÜR bir "Geri" butonu.
  *
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
@@ -23,7 +24,11 @@ import { useTranslation } from "react-i18next";
 import { useDashboardSummary } from "./hooks/useDashboardSummary";
 import { formatDate } from "../../i18n/formatters";
 
-export function DashboardScreen() {
+interface DashboardScreenProps {
+  onBack: () => void;
+}
+
+export function DashboardScreen({ onBack }: DashboardScreenProps) {
   const { t, i18n } = useTranslation();
   const { summary, status, errorCode } = useDashboardSummary();
 
@@ -91,6 +96,10 @@ export function DashboardScreen() {
           </ul>
         )}
       </section>
+
+      <button type="button" className="lock-screen__button" onClick={onBack} style={{ marginTop: 8 }}>
+        {t("common.back")}
+      </button>
     </main>
   );
 }

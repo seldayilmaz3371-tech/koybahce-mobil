@@ -27,6 +27,7 @@ export const ROUTE_PATTERNS = {
   aiChat: "/ai/chat",
   settings: "/settings",
   aiSettings: "/settings/ai",
+  dashboard: "/dashboard",
 } as const;
 
 export const buildPath = {
@@ -45,6 +46,7 @@ export const buildPath = {
   aiChat: () => "/ai/chat",
   settings: () => "/settings",
   aiSettings: () => "/settings/ai",
+  dashboard: () => "/dashboard",
 } as const;
 
 /**
@@ -54,15 +56,12 @@ export const buildPath = {
  * modüller bu isimlerle başlayacak.
  *
  * `finance` BURADAN KALDIRILDI (Sprint 4.3), `settings` BURADAN
- * KALDIRILDI (Sprint 7.1), `harvest` BURADAN KALDIRILDI (Sprint 8.3)
- * — üçü de artık GERÇEK birer rota. `harvest: "/harvest"` (eski,
- * bağlamsız placeholder) GERÇEK deseni (`parcelHarvest`/`treeHarvest`,
- * Bakım/Finans/AI ile TUTARLI) yansıtmıyordu — bilinçli olarak
- * değiştirildi, "keyfi" bir değişiklik değil.
+ * KALDIRILDI (Sprint 7.1), `harvest` BURADAN KALDIRILDI (Sprint 8.3),
+ * `dashboard` BURADAN KALDIRILDI (Sprint 8.5) — dördü de artık GERÇEK
+ * birer rota.
  */
 export const FUTURE_ROUTE_NAMES = {
   parcelDetail: "/parcels/:parcelId",
   treeDetail: "/trees/:treeId",
   observationDetail: "/observations/:observationId",
-  dashboard: "/dashboard",
 } as const;

@@ -99,7 +99,7 @@ afterEach(() => {
 describe("Modül 3 — Golden Path (Sprint 3.9)", () => {
   it("Parsel→Ağaç→Gözlem→2 Fotoğraf→Düzenle→Geri Dön→Veri Bütünlüğü", async () => {
     // ============ 1. YENİ PARSEL ============
-    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} />);
+    render(<ParcelsScreen onViewTrees={vi.fn()} onViewReferenceTrees={vi.fn()} onViewFinance={vi.fn()} onViewMaintenance={vi.fn()} onViewHarvest={vi.fn()} onViewAiChat={vi.fn()} onViewParcelAiChat={vi.fn()} onViewSettings={vi.fn()} onViewDashboard={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
     fireEvent.click(screen.getByText("Add Parcel"));
     fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Golden Path Parseli" } });

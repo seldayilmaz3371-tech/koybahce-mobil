@@ -170,7 +170,8 @@
     "viewAiChatButton": "AI Assistant",
     "referenceTreesButton": "Reference Trees",
     "aiChatButton": "AI Assistant",
-    "settingsButton": "Settings"
+    "settingsButton": "Settings",
+    "dashboardButton": "Dashboard"
   },
   "photo": {
     "screenTitle": "Photos",
