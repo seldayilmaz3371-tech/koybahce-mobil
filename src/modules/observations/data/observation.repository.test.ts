@@ -198,3 +198,55 @@ describe("ObservationRepository", () => {
     expect(secondPage).toHaveLength(5);
   });
 });
+
+describe("ObservationRepository — createMany (Sprint 10.1, Saha Operasyonları)", () => {
+  it("AYNI gözlem içeriği, treeIds'teki HER ağaç için AYRI bir kayıt olarak oluşturulur", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const treeA = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-1", variety: "Gemlik" });
+    const treeB = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-2", variety: "Gemlik" });
+    const treeC = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-3", variety: "Gemlik" });
+
+    const created = await observationRepository.createMany({
+      parcelId: parcel.id,
+      treeIds: [treeA.id, treeB.id, treeC.id],
+      observationType: "health_concern",
+      note: "Toplu yaprak biti gözlemi",
+      observedAt: "2026-07-18T00:00:00.000Z",
+    });
+
+    expect(created).toHaveLength(3);
+    expect(created.map((o) => o.treeId).sort()).toEqual([treeA.id, treeB.id, treeC.id].sort());
+    expect(created.every((o) => o.note === "Toplu yaprak biti gözlemi")).toBe(true);
+  });
+
+  it("boş treeIds ile hiçbir kayıt oluşturulmaz, hata FIRLATILMAZ", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+
+    const created = await observationRepository.createMany({
+      parcelId: parcel.id,
+      treeIds: [],
+      observationType: "general",
+      observedAt: "2026-07-18T00:00:00.000Z",
+    });
+
+    expect(created).toEqual([]);
+  });
+
+  it("var olmayan bir treeId İÇEREN bir liste, TÜM işlemi geri alır (transaction bütünlüğü)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const treeA = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-1", variety: "Gemlik" });
+
+    await expect(
+      observationRepository.createMany({
+        parcelId: parcel.id,
+        treeIds: [treeA.id, "var-olmayan-agac-id"],
+        observationType: "general",
+        observedAt: "2026-07-18T00:00:00.000Z",
+      })
+    ).rejects.toThrow();
+
+    // Transaction GERİ ALINDI — treeA için BİLE hiçbir kayıt KALICI olmamalı.
+    const remaining = await observationRepository.listByTree(treeA.id);
+    expect(remaining).toHaveLength(0);
+  });
+});

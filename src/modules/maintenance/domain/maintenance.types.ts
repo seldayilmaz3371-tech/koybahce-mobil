@@ -70,6 +70,23 @@ export interface NewMaintenanceRecordInput {
 
 export type MaintenanceRecordUpdateInput = Partial<Omit<NewMaintenanceRecordInput, "parcelId" | "treeId">>;
 
+/**
+ * bkz. Sprint 10.1 (Saha Operasyonları Paketi). "Toplu Sulama"/
+ * "Toplu Gübreleme"/"Toplu İlaçlama"/"Toplu Budama" — mimari olarak
+ * TEK bir mekanizma (`MaintenanceType` enum'unun 4 farklı değeri,
+ * bkz. `docs/saha-operasyonlari-mimari-analiz.md`, Kritik Bulgu 2).
+ */
+export interface BulkCreateMaintenanceRecordsInput {
+  parcelId: string;
+  /** Hangi ağaçlara uygulanacak. Boş dizi verilirse HİÇBİR kayıt oluşturulmaz. */
+  treeIds: string[];
+  maintenanceType: MaintenanceTypeValue;
+  status?: MaintenanceStatusValue;
+  scheduledDate?: string | null;
+  completedDate?: string | null;
+  notes?: string | null;
+}
+
 /** bkz. `IMaintenanceRepository.update()` — durum geçmişi asla UI'dan yazılmaz (Revizyon 4). */
 export interface MaintenanceStatusLogEntry {
   id: string;

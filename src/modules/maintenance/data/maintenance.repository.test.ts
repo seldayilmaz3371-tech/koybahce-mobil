@@ -448,3 +448,60 @@ describe("MaintenanceRepository — Integration Test (Parsel→Ağaç→Bakım T
     expect(treeStillExists?.isActive).toBe(true);
   });
 });
+
+describe("MaintenanceRepository — createMany (Sprint 10.1, Saha Operasyonları)", () => {
+  it("TEK bir maintenanceType (ör. sulama), treeIds'teki HER ağaç için AYRI bir kayıt olarak oluşturulur", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const treeA = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-1", variety: "Gemlik" });
+    const treeB = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-2", variety: "Gemlik" });
+
+    const created = await maintenanceRepository.createMany({
+      parcelId: parcel.id,
+      treeIds: [treeA.id, treeB.id],
+      maintenanceType: MaintenanceType.Irrigation,
+      status: MaintenanceStatus.Completed,
+      completedDate: "2026-07-18",
+    });
+
+    expect(created).toHaveLength(2);
+    expect(created.every((r) => r.maintenanceType === MaintenanceType.Irrigation)).toBe(true);
+    expect(created.map((r) => r.treeId).sort()).toEqual([treeA.id, treeB.id].sort());
+  });
+
+  it("boş treeIds ile hiçbir kayıt oluşturulmaz, hata FIRLATILMAZ", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+
+    const created = await maintenanceRepository.createMany({
+      parcelId: parcel.id,
+      treeIds: [],
+      maintenanceType: MaintenanceType.Pruning,
+    });
+
+    expect(created).toEqual([]);
+  });
+
+  it("Gübreleme/İlaçlama/Budama AYNI mekanizmayla (SADECE maintenanceType farkıyla) çalışır", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const tree = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-1", variety: "Gemlik" });
+
+    const fertilization = await maintenanceRepository.createMany({
+      parcelId: parcel.id,
+      treeIds: [tree.id],
+      maintenanceType: MaintenanceType.Fertilization,
+    });
+    const pesticide = await maintenanceRepository.createMany({
+      parcelId: parcel.id,
+      treeIds: [tree.id],
+      maintenanceType: MaintenanceType.Pesticide,
+    });
+    const pruning = await maintenanceRepository.createMany({
+      parcelId: parcel.id,
+      treeIds: [tree.id],
+      maintenanceType: MaintenanceType.Pruning,
+    });
+
+    expect(fertilization[0].maintenanceType).toBe(MaintenanceType.Fertilization);
+    expect(pesticide[0].maintenanceType).toBe(MaintenanceType.Pesticide);
+    expect(pruning[0].maintenanceType).toBe(MaintenanceType.Pruning);
+  });
+});

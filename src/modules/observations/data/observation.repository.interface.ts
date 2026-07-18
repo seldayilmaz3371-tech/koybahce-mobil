@@ -16,6 +16,7 @@
  */
 
 import type {
+  BulkCreateObservationsInput,
   NewObservationInput,
   Observation,
   ObservationUpdateInput,
@@ -35,6 +36,14 @@ export interface IObservationRepository {
   listByParcel(parcelId: string, options?: ObservationListOptions): Promise<Observation[]>;
   getById(id: string): Promise<Observation | null>;
   create(input: NewObservationInput): Promise<Observation>;
+  /**
+   * bkz. Sprint 10.1 (Saha Operasyonları Paketi). AYNI gözlem
+   * içeriğini `input.treeIds`'teki HER ağaç için TEK bir transaction
+   * içinde oluşturur (`Tree.createMany()`'nin KANITLANMIŞ deseni —
+   * `runInTransaction()` içinde döngü). `treeIds` boşsa boş dizi
+   * döner, hata FIRLATILMAZ.
+   */
+  createMany(input: BulkCreateObservationsInput): Promise<Observation[]>;
   update(id: string, changes: ObservationUpdateInput): Promise<void>;
   deactivate(id: string): Promise<void>;
 }

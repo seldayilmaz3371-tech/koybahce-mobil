@@ -12,6 +12,7 @@ import type {
   ObservationListOptions,
 } from "./observation.repository.interface";
 import type {
+  BulkCreateObservationsInput,
   NewObservationInput,
   Observation,
   ObservationUpdateInput,
@@ -121,6 +122,34 @@ class ObservationRepository extends BaseRepository implements IObservationReposi
     );
 
     return observation;
+  }
+
+  /**
+   * bkz. Sprint 10.1. `Tree.createMany()`'nin (Sprint 3.10) KANITLANMIŞ
+   * deseni — `runInTransaction()` içinde döngü, tek transaction'da
+   * çoklu insert. `treeIds` boşsa hiçbir transaction AÇILMAZ (gereksiz
+   * bir boş transaction maliyetinden kaçınmak için).
+   */
+  async createMany(input: BulkCreateObservationsInput): Promise<Observation[]> {
+    if (input.treeIds.length === 0) {
+      return [];
+    }
+
+    return this.runInTransaction(async () => {
+      const created: Observation[] = [];
+      for (const treeId of input.treeIds) {
+        created.push(
+          await this.create({
+            parcelId: input.parcelId,
+            treeId,
+            observationType: input.observationType,
+            note: input.note,
+            observedAt: input.observedAt,
+          })
+        );
+      }
+      return created;
+    });
   }
 
   async update(id: string, changes: ObservationUpdateInput): Promise<void> {

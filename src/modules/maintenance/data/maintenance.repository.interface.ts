@@ -18,6 +18,7 @@
  */
 
 import type {
+  BulkCreateMaintenanceRecordsInput,
   MaintenanceRecord,
   MaintenanceRecordUpdateInput,
   MaintenanceTypeValue,
@@ -44,6 +45,15 @@ export interface IMaintenanceRepository {
   listByTree(treeId: string, options?: MaintenanceListOptions): Promise<MaintenanceRecord[]>;
   getById(id: string): Promise<MaintenanceRecord | null>;
   create(input: NewMaintenanceRecordInput): Promise<MaintenanceRecord>;
+  /**
+   * bkz. Sprint 10.1 (Saha Operasyonları Paketi). "Toplu Sulama/
+   * Gübreleme/İlaçlama/Budama" — `input.maintenanceType` parametresiyle
+   * TEK bir mekanizma. `input.treeIds`'teki HER ağaç için TEK bir
+   * transaction içinde `create()` çağrılır — `create()`'in KENDİ
+   * audit-log mantığı (`maintenance_status_log`) HER kayıt için DOĞAL
+   * olarak tetiklenir (özel bir ek mantık GEREKMEZ).
+   */
+  createMany(input: BulkCreateMaintenanceRecordsInput): Promise<MaintenanceRecord[]>;
   /**
    * `changes.status` mevcut durumdan FARKLIYSA, `maintenance_status_log`'a
    * otomatik bir satır eklenir — TEK transaction içinde (Revizyon 4:
