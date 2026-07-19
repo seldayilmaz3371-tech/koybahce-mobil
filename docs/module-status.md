@@ -326,40 +326,47 @@ PhotoGalleryScreen'den `PhotoAnalysisScreen`'e navigasyon entegrasyonu (Hasat/Da
 
 ## Modül 10 — Saha Operasyonları (Toplu İşlemler)
 
-**Durum: 🟡 UI TAMAMLANDI, NAVİGASYON BEKLİYOR** (Sprint 10.2, 2026-07-18) — Product Owner kararıyla yeni en yüksek öncelik
+**Durum: ✅ TAM İŞLEVSEL — Kullanıcı Tarafından Erişilebilir** (Sprint 10.3, 2026-07-18) — Product Owner kararıyla yeni en yüksek öncelik
 
 | Alan | Durum |
 |---|---|
-| Kod öncesi mimari analizi | ✅ Tamamlandı — bkz. `docs/saha-operasyonlari-mimari-analiz.md` |
-| Roadmap güncellemesi | ✅ Tamamlandı |
-| `observationRepository.createMany()`/`deactivateMany()` | ✅ Tamamlandı (5 test) |
-| `maintenanceRepository.createMany()`/`deactivateMany()` | ✅ Tamamlandı (5 test) |
-| Gerçek performans testi (100/250/500 ağaç, in-memory) | ✅ Tamamlandı (7 test) |
-| `useTreeSelection` + `TreeSelectorList` (ağaç seçim UI'ı) | ✅ Tamamlandı (11 test) |
-| `BulkObservationForm` + `BulkMaintenanceForm` (5 bakım türü tek formda) | ✅ Tamamlandı (8 test) |
-| `BulkOperationsScreen` (giriş noktası) | ✅ Tamamlandı (3 test) |
-| Geri Al (Undo) | ✅ Tamamlandı — gerçek feasibility analizi sonucu |
-| Gerçek cihaz performans test planı (100/250/500) | ✅ Belge hazır — **testler henüz çalıştırılmadı** (gerçek cihaz yok) |
-| Navigasyon Entegrasyonu | 🔴 Bekliyor (Sprint 10.3) |
+| Kod öncesi mimari analizi | ✅ Tamamlandı |
+| Repository katmanı (`createMany`/`deactivateMany`) | ✅ Tamamlandı |
+| Gerçek performans testi (100/250/500 ağaç, in-memory) | ✅ Tamamlandı |
+| Ağaç seçim UI'ı + arama kutusu | ✅ Tamamlandı |
+| Toplu Gözlem/Bakım formları (5 bakım türü tek formda) | ✅ Tamamlandı |
+| Son Kullanılan İşlem hızlı erişimi | ✅ Tamamlandı — `localPreferences` ile |
+| Ardışık İşlem Sihirbazı | ✅ Tamamlandı |
+| Undo güvenliği (ayrı onay + net sayı) | ✅ Tamamlandı |
+| Navigasyon Entegrasyonu | ✅ Tamamlandı — ParcelForm'dan buton, gerçek route |
+| Filtre sistemi (Aktif/Pasif/Hasta/Sağlıklı/Genç/Yaşlı) | 🔴 Veri modeli desteklemiyor — alternatifler önerildi, kodlanmadı |
+| İşlem Şablonları | 🔴 Tasarlandı, kapsam disiplini gereği ertelendi |
+| Favori İşlemler | 🔴 Tasarlandı, kapsam disiplini gereği ertelendi |
+| Gerçek cihaz performans testleri | 🔴 Test planı hazır, çalıştırılmadı (gerçek cihaz gerekiyor) |
 
 ### Kritik Mimari Kararlar
-1. **Toplu Ağaç Oluşturma zaten mevcuttu** (Sprint 3.10) — yeniden geliştirilmedi.
-2. **Sulama/Gübreleme/İlaçlama/Budama/Biçme mimari olarak TEK özellik** — `MaintenanceType` enum'unun değerleri, tek `createMany()` mekanizması.
-3. **"Biçme" enum değeri YOK, `other` ile temsil ediliyor** — SQLite `CHECK` kısıtı değişikliği (tablo yeniden oluşturma) riskinden kaçınıldı. Gerçek bir "mowing" değeri gelecekte istenirse, gerçek bir ADR + migration gerekir.
-4. **Geri Al (Undo) mimari olarak uygun bulundu** — mevcut soft-delete deseni (`deactivateMany()`) yeterli, yeni bir mekanizma icat edilmedi.
+1. Toplu Ağaç Oluşturma zaten mevcuttu (Sprint 3.10).
+2. Sulama/Gübreleme/İlaçlama/Budama/Biçme mimari olarak TEK özellik.
+3. "Biçme" enum değeri yok, `other` ile temsil ediliyor.
+4. Geri Al (Undo) mevcut soft-delete deseniyle mümkün, yeni mekanizma gerekmedi.
+5. "Son Kullanılan İşlem" için `@capacitor/preferences` (mevcut, ADR 0011) kullanıldı — SQLite migration gerekmedi.
+
+### Bağımsız UX Öz-Denetimi (Sprint 10.3)
+`docs/sprint-10.3-ux-self-audit.md` — 8 gerçek yavaşlatıcı nokta bulundu (en kritiği: Undo butonunun görsel olarak yeterince ayrışmaması). Hiçbiri bu sprintte düzeltilmedi, sonraki sprint için önceliklendirildi.
 
 ### Bilinen Riskler (Gerçek Cihazda Doğrulanmalı)
-- `TreeSelectorList` hiçbir sanallaştırma (virtualization) içermiyor — 500 satırlık liste tamamen DOM'a render ediliyor.
-- `runInTransaction()`'ın ana thread'i bloke edip etmediği (ANR riski) gerçek cihazda doğrulanmadı.
+- `TreeSelectorList` sanallaştırma içermiyor.
+- `runInTransaction()`'ın ANR riski doğrulanmadı.
 
 ### Sprint Geçmişi
 | Sprint | İçerik | Durum |
 |---|---|---|
-| 10.1 | Repository katmanı (toplu oluşturma) + gerçek performans testi | ✅ Tamamlandı |
+| 10.1 | Repository katmanı + gerçek performans testi | ✅ Tamamlandı |
 | 10.2 | Toplu İşlemler UI (ağaç seçimi, formlar, geri al) | ✅ Tamamlandı |
+| 10.3 | Saha UX iyileştirmeleri + navigasyon + UX öz-denetimi | ✅ Tamamlandı |
 
 ### Sonraki Adım
-Sprint 10.3: Navigasyon entegrasyonu (ParcelForm'dan "Toplu İşlemler" butonu) + gerçek cihaz performans testlerinin çalıştırılması.
+UX öz-denetiminin önceliklendirdiği iyileştirmeler (Undo görsel vurgusu öncelikli), İşlem Şablonları/Favoriler (gerçek kullanıcı ihtiyacı kanıtlanırsa), gerçek cihaz performans testleri (kullanıcı tarafından).
 
 ---
 
