@@ -45,6 +45,8 @@
     "selectAllButton": "Tümünü Seç",
     "clearSelectionButton": "Seçimi Temizle",
     "selectedCount": "{{count}} ağaç seçildi",
+    "searchPlaceholder": "Ağaç numarası veya çeşit ara...",
+    "noSearchResults": "Aramanızla eşleşen ağaç yok.",
     "observationFormTitle": "Toplu Gözlem",
     "maintenanceFormTitle": "Toplu Bakım Kaydı",
     "applyButton": "Uygula",
@@ -54,7 +56,11 @@
     "resultTitle": "Sonuç",
     "resultSummary": "{{count}} kayıt oluşturuldu. 0 hata.",
     "undoButton": "Geri Al",
-    "undoError": "Bu işlem geri alınırken bir sorun oluştu. Lütfen tekrar deneyin."
+    "undoConfirmMessage": "Bu işlem {{count}} kaydı geri alacak. Bu işlem kolayca geri alınamaz. Devam etmek istiyor musunuz?",
+    "undoError": "Bu işlem geri alınırken bir sorun oluştu. Lütfen tekrar deneyin.",
+    "applyAnotherButton": "Aynı Ağaçlara Başka İşlem Uygula",
+    "carriedSelectionNotice": "Önceki işlemden {{count}} ağaç aktarıldı.",
+    "lastUsedButton": "Son Kullanılan: {{operation}}"
   },
   "dashboard": {
     "screenTitle": "Ana Sayfa",
@@ -196,6 +202,7 @@
     "viewFinanceButton": "Finansı Görüntüle",
     "viewMaintenanceButton": "Bakımı Görüntüle",
     "viewHarvestButton": "Hasadı Görüntüle",
+    "viewBulkOperationsButton": "Toplu İşlemler",
     "viewAiChatButton": "AI Asistan",
     "referenceTreesButton": "Referans Ağaçlar",
     "aiChatButton": "AI Asistan",

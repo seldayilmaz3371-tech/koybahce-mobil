@@ -134,6 +134,45 @@ describe("BulkMaintenanceForm — Geri Al (Undo)", () => {
   });
 });
 
+describe("BulkMaintenanceForm — Undo Güvenliği (Sprint 10.3, Madde 8)", () => {
+  it("Undo AYRI bir onay ister — kaç kaydın etkileneceği AÇIKÇA belirtilir", async () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    const { parcel, trees } = await createParcelWithTrees(5);
+
+    render(<BulkMaintenanceForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+    await act(async () => {
+      fireEvent.click(screen.getByText("Apply"));
+    });
+    await waitFor(() => expect(screen.getByText("5 records created. 0 errors.")).toBeTruthy());
+    confirmSpy.mockClear();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("Undo"));
+    });
+
+    expect(confirmSpy).toHaveBeenCalledWith("This will undo 5 records. This cannot be easily reversed. Continue?");
+  });
+
+  it("Undo onayı REDDEDİLİRSE, kayıtlar KALICI olarak KALIR (yanlışlıkla geri alma ENGELLENİR)", async () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    const { parcel, trees } = await createParcelWithTrees(3);
+
+    render(<BulkMaintenanceForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+    await act(async () => {
+      fireEvent.click(screen.getByText("Apply"));
+    });
+    await waitFor(() => expect(screen.getByText("3 records created. 0 errors.")).toBeTruthy());
+
+    confirmSpy.mockReturnValue(false); // Kullanıcı Undo onayında "İptal" der
+    await act(async () => {
+      fireEvent.click(screen.getByText("Undo"));
+    });
+
+    const records = await maintenanceRepository.listByParcel(parcel.id);
+    expect(records).toHaveLength(3); // GERİ ALINMADI
+  });
+});
+
 describe("BulkMaintenanceForm — 'Biçme' Kararı (Sprint 10.2 mimari kararı)", () => {
   it("'Biçme' seçilirse, GERÇEKTEN 'other' maintenanceType ile kaydedilir", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);

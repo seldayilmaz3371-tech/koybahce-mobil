@@ -589,3 +589,29 @@ describe("AppRouter — Dashboard Navigasyonu (Sprint 8.5, GERÇEK navigasyon �
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
   });
 });
+
+describe("AppRouter — Toplu İşlemler Navigasyonu (Sprint 10.3, GERÇEK navigasyon)", () => {
+  it("Parsel Formu → 'Bulk Operations' DOĞRU parsel-bağlamlı rotaya gider", async () => {
+    const parcel = await parcelRepository.create({ name: "Toplu Parseli", cropType: "olive", areaDekar: 5 });
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Toplu Parseli")).toBeTruthy());
+    fireEvent.click(screen.getByText("Toplu Parseli"));
+
+    await waitFor(() => expect(screen.getByText("Bulk Operations")).toBeTruthy());
+    fireEvent.click(screen.getByText("Bulk Operations"));
+
+    await waitFor(() => expect(screen.getByText("Bulk Observation")).toBeTruthy());
+    expect(window.location.hash).toBe(`#/parcels/${parcel.id}/bulk-operations`);
+  });
+
+  it("Toplu İşlemler → donanım geri tuşu doğru şekilde bir önceki ekrana döner", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    window.location.hash = `#/parcels/${parcel.id}/bulk-operations`;
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Bulk Observation")).toBeTruthy());
+
+    act(() => backButtonListeners[backButtonListeners.length - 1]());
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+});

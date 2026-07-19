@@ -1,9 +1,14 @@
 /**
  * BulkObservationForm
  * ======================
- * bkz. Sprint 10.2. "Toplu Gözlem" — `BulkMaintenanceForm` ile AYNI
- * desen (Kural: kod tekrarından kaçın), `TreeSelectorList`/
+ * bkz. Sprint 10.2/10.3. "Toplu Gözlem" — `BulkMaintenanceForm` ile
+ * AYNI desen (Kural: kod tekrarından kaçın), `TreeSelectorList`/
  * `useTreeSelection` ORTAK bileşenleri paylaşılıyor.
+ *
+ * Sprint 10.3 eklentileri BulkMaintenanceForm ile BİREBİR AYNI —
+ * `initialSelectedTreeIds` (Ardışık İşlem Sihirbazı), son kullanılan
+ * işlem türünü kaydetme, "Aynı Ağaçlara Başka İşlem Uygula" butonu,
+ * Undo'nun yeniden değerlendirilmiş (sayı-net + ayrı onay) hali.
  *
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
@@ -16,12 +21,15 @@ import { SelectField } from "../../shared/components/form/SelectField";
 import { TextAreaField } from "../../shared/components/form/TextAreaField";
 import { observationRepository } from "../observations/data/observation.repository";
 import type { ObservationType } from "../observations/domain/observation.types";
+import { localPreferences, LocalPreferenceKey } from "../../native/preferences";
 import type { Tree } from "../trees/domain/tree.types";
 
 interface BulkObservationFormProps {
   parcelId: string;
   trees: Tree[];
   onBack: () => void;
+  initialSelectedTreeIds?: string[];
+  onApplyAnotherOperation?: (treeIds: string[]) => void;
 }
 
 type ResultState = { createdIds: string[]; count: number } | null;
@@ -34,15 +42,30 @@ const OBSERVATION_TYPE_OPTIONS: { value: ObservationType; labelKey: string }[] =
   { value: "other", labelKey: "observation.type.other" },
 ];
 
-export function BulkObservationForm({ parcelId, trees, onBack }: BulkObservationFormProps) {
+/** "Son kullanılan işlem" tercihinde Gözlem'in kendi işaretleyicisi (Bakım türleriyle KARIŞMASIN). */
+const OBSERVATION_PREFERENCE_MARKER = "observation";
+
+export function BulkObservationForm({
+  parcelId,
+  trees,
+  onBack,
+  initialSelectedTreeIds,
+  onApplyAnotherOperation,
+}: BulkObservationFormProps) {
   const { t } = useTranslation();
   const [observationType, setObservationType] = useState<ObservationType>("general");
   const [note, setNote] = useState("");
-  const [selectionMode, setSelectionMode] = useState<TreeSelectionMode>("all");
-  const selection = useTreeSelection();
+  const [selectionMode, setSelectionMode] = useState<TreeSelectionMode>(
+    initialSelectedTreeIds && initialSelectedTreeIds.length > 0 ? "select" : "all"
+  );
+  const selection = useTreeSelection(initialSelectedTreeIds);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<ResultState>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Bkz. BulkMaintenanceForm.tsx'teki AYNI gerekçe — useTreeSelection'a
+  // verilen lazy initializer, useEffect GEREKTİRMEDEN "mount'ta bir kez"
+  // davranışını sağlıyor.
 
   const targetTreeIds = selectionMode === "all" ? trees.map((tree) => tree.id) : Array.from(selection.selectedIds);
 
@@ -69,6 +92,11 @@ export function BulkObservationForm({ parcelId, trees, onBack }: BulkObservation
         observedAt: new Date().toISOString(),
       });
       setResult({ createdIds: created.map((o) => o.id), count: created.length });
+      try {
+        await localPreferences.set(LocalPreferenceKey.LAST_USED_BULK_OPERATION, OBSERVATION_PREFERENCE_MARKER);
+      } catch {
+        // Sessizce yut — SADECE bir UX hızlandırma tercihi.
+      }
     } catch {
       setErrorMessage(t("bulkOperations.applyError"));
     } finally {
@@ -78,6 +106,9 @@ export function BulkObservationForm({ parcelId, trees, onBack }: BulkObservation
 
   const handleUndo = async () => {
     if (!result) return;
+    const confirmed = window.confirm(t("bulkOperations.undoConfirmMessage", { count: result.count }));
+    if (!confirmed) return;
+
     setIsSubmitting(true);
     try {
       await observationRepository.deactivateMany(result.createdIds);
@@ -97,7 +128,24 @@ export function BulkObservationForm({ parcelId, trees, onBack }: BulkObservation
         <div className="status-card">
           <p className="status-card__value">{t("bulkOperations.resultSummary", { count: result.count })}</p>
         </div>
-        <button type="button" className="lock-screen__button" onClick={handleUndo} disabled={isSubmitting}>
+
+        {onApplyAnotherOperation ? (
+          <button
+            type="button"
+            className="lock-screen__button"
+            onClick={() => onApplyAnotherOperation(targetTreeIds)}
+          >
+            {t("bulkOperations.applyAnotherButton")}
+          </button>
+        ) : null}
+
+        <button
+          type="button"
+          className="lock-screen__button"
+          onClick={handleUndo}
+          disabled={isSubmitting}
+          style={{ marginTop: 8 }}
+        >
           {t("bulkOperations.undoButton")}
         </button>
         <button type="button" className="lock-screen__button" onClick={onBack} style={{ marginTop: 8 }}>

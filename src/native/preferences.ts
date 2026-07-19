@@ -33,6 +33,16 @@ export const LocalPreferenceKey = {
    * bayrak, o kalıntı verinin bir kez temizlendiğini işaretler.
    */
   LEGACY_AUTO_LANGUAGE_CLEARED: "legacy_auto_language_cleared_v1",
+  /**
+   * bkz. Sprint 10.3 (Toplu İşlemler UX). Kullanıcının EN SON kullandığı
+   * toplu işlem türü — "irrigation"/"fertilization"/"pesticide"/
+   * "pruning"/"other" (Biçme)/"observation". Bu, hassas bir veri
+   * DEĞİL, sadece bir UX hızlandırma tercihi — Preferences katmanının
+   * (kimlik doğrulama öncesi/basit ayarlar) doğal bir kullanımı,
+   * SQLite'a yeni bir tablo AÇMAKTAN daha basit (Kural: gereksiz
+   * migration oluşturma).
+   */
+  LAST_USED_BULK_OPERATION: "last_used_bulk_operation_v1",
 } as const;
 
 export type LocalPreferenceKeyName =

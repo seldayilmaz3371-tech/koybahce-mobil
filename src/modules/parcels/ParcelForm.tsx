@@ -37,6 +37,8 @@ interface ParcelFormProps {
   onViewMaintenance?: () => void;
   /** Sadece düzenleme modunda sağlanır (Sprint 8.3). Aynı desen. */
   onViewHarvest?: () => void;
+  /** Sadece düzenleme modunda sağlanır (Sprint 10.3). Aynı desen. */
+  onViewBulkOperations?: () => void;
   /** Sadece düzenleme modunda sağlanır (Sprint 7.1). Aynı desen. */
   onViewAiChat?: () => void;
 }
@@ -50,6 +52,7 @@ export function ParcelForm({
   onViewFinance,
   onViewMaintenance,
   onViewHarvest,
+  onViewBulkOperations,
   onViewAiChat,
 }: ParcelFormProps) {
   const { t } = useTranslation();
@@ -221,6 +224,18 @@ export function ParcelForm({
           disabled={isSubmitting}
         >
           {t("parcel.viewHarvestButton")}
+        </button>
+      ) : null}
+
+      {onViewBulkOperations ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          style={{ marginTop: 8, border: "2px solid var(--color-primary)" }}
+          onClick={onViewBulkOperations}
+          disabled={isSubmitting}
+        >
+          {t("parcel.viewBulkOperationsButton")}
         </button>
       ) : null}
 

@@ -45,6 +45,8 @@
     "selectAllButton": "Select All",
     "clearSelectionButton": "Clear Selection",
     "selectedCount": "{{count}} trees selected",
+    "searchPlaceholder": "Search by tree number or variety...",
+    "noSearchResults": "No trees match your search.",
     "observationFormTitle": "Bulk Observation",
     "maintenanceFormTitle": "Bulk Maintenance Record",
     "applyButton": "Apply",
@@ -54,7 +56,11 @@
     "resultTitle": "Result",
     "resultSummary": "{{count}} records created. 0 errors.",
     "undoButton": "Undo",
-    "undoError": "Something went wrong while undoing this operation. Please try again."
+    "undoConfirmMessage": "This will undo {{count}} records. This cannot be easily reversed. Continue?",
+    "undoError": "Something went wrong while undoing this operation. Please try again.",
+    "applyAnotherButton": "Apply Another Operation to Same Trees",
+    "carriedSelectionNotice": "{{count}} trees carried over from previous operation.",
+    "lastUsedButton": "Last Used: {{operation}}"
   },
   "dashboard": {
     "screenTitle": "Dashboard",
@@ -196,6 +202,7 @@
     "viewFinanceButton": "View Finance",
     "viewMaintenanceButton": "View Maintenance",
     "viewHarvestButton": "View Harvest",
+    "viewBulkOperationsButton": "Bulk Operations",
     "viewAiChatButton": "AI Assistant",
     "referenceTreesButton": "Reference Trees",
     "aiChatButton": "AI Assistant",
