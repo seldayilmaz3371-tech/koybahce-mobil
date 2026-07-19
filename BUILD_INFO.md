@@ -4,43 +4,43 @@
 |---|---|
 | **Project** | Bahçem Mobile |
 | **Module** | Modül 10 — Saha Operasyonları (Toplu İşlemler) |
-| **Sprint** | 10.2 |
-| **Feature** | Toplu İşlemler UI — Ağaç Seçim Sistemi + Formlar + Geri Al |
+| **Sprint** | 10.3 |
+| **Feature** | Saha UX İyileştirmeleri + Navigasyon + Bağımsız UX Öz-Denetimi |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 596/596 başarılı (+26 yeni) — **gerçekten çalıştırıldı** |
-| **Build** | ✅ Başarılı — ana bundle 415.03kB → 416.97kB (+1.94kB, makul) |
-| **Lint** | ✅ 0 uyarı/hata (219 dosya, 103 kural) — **gerçekten çalıştırıldı** |
+| **Test Sonucu** | ✅ 607/607 başarılı (+11 yeni) — **gerçekten çalıştırıldı** |
+| **Build** | ✅ Başarılı — ana bundle 416.97kB → 429.66kB (+12.69kB, Toplu İşlemler artık navigasyona bağlı) |
+| **Lint** | ✅ 0 uyarı/hata (220 dosya, 103 kural) — **2 gerçek uyarı bulundu ve kökten düzeltildi** |
 | **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) — **gerçekten çalıştırıldı** |
-| **Şema Sürümü** | 11 (değişmedi — bu sprint hiçbir migration içermiyor) |
+| **Şema Sürümü** | 11 (değişmedi) |
 | **Tarih** | 2026-07-18 |
-| **Git Commit** | `19677c8` |
-| **ADR** | Yeni ADR yazılmadı — "Biçme" kararı ve Geri Al mimarisi mevcut desenlerin genişletmesi, gerçek bir yeni mimari kategori değil |
+| **Git Commit** | `86a877c` |
+| **ADR** | Yeni ADR yazılmadı — mevcut desenlerin (Preferences, soft-delete) genişletmesi |
 
-## Kritik Mimari Karar — "Biçme"
+## Gerçek Bulgular
 
-`MaintenanceType` enum'unda ne TS'te ne SQLite `CHECK` kısıtında "mowing" değeri yok. SQLite'ta `CHECK` kısıtı değiştirmek tablo yeniden oluşturmayı gerektirir (gerçek risk). **Karar:** "Biçme" kullanıcıya seçenek olarak gösteriliyor, arka planda `maintenanceType: "other"` kaydediliyor — hiçbir migration gerekmedi (testte doğrulandı).
+1. `BulkOperationsScreen` donanım geri tuşunu **hiç desteklemiyordu** — diğer ekranlarla tutarsızlık, `MaintenanceScreen`'in deseniyle düzeltildi.
+2. `useEffect` + boş bağımlılık dizisi deseni **2 gerçek lint uyarısına** yol açtı — kök neden düzeltmesi: `useTreeSelection`'a `initialSelectedIds` parametresi eklendi (lazy initializer), `useEffect` tamamen kaldırıldı.
 
-## Geri Al (Undo)
+## Tamamlanan Özellikler (Madde 1-2, 4-5, 8, 10)
 
-Mimari olarak uygun bulundu — mevcut soft-delete deseni (`deactivateMany()`) yeterli.
+Arama kutusu, büyük dokunma hedefleri, Son Kullanılan İşlem (`localPreferences`), Ardışık İşlem Sihirbazı, Undo güvenliği (ayrı onay), navigasyon entegrasyonu.
 
-## Bilinen Riskler (Gerçek Cihazda Doğrulanmalı)
+## Ertelenen Özellikler (Madde 3, 6-7) — Dürüstçe Belgelendi
 
-- `TreeSelectorList` sanallaştırma içermiyor (500 satır tamamen DOM'a render ediliyor).
-- `runInTransaction()`'ın ANR riski gerçek cihazda doğrulanmadı.
-- Test planı hazır (`docs/sprint-10.2-device-performance-test-plan.md`) ama **çalıştırılmadı**.
+- **Filtre sistemi:** Veri modeli desteklemiyor (`Tree`'de sağlık/durum alanı yok) — alternatifler önerildi.
+- **İşlem Şablonları / Favori İşlemler:** Gerçek tasarımlar yapıldı, kapsam disiplini gereği ertelendi.
 
-## Sonraki Adım
+## Bağımsız UX Öz-Denetimi
 
-Sprint 10.3: Navigasyon entegrasyonu + gerçek cihaz performans testlerinin çalıştırılması.
+`docs/sprint-10.3-ux-self-audit.md` — kendi geliştirdiğim ekranı eleştirerek 8 gerçek yavaşlatıcı nokta bulundu, en kritiği Undo butonunun görsel ayrışmaması.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
 | Modül 1-5 | ✅ FROZEN |
-| Sprint 6-10.1 | ✅ Onaylandı |
+| Sprint 6-10.2 | ✅ Onaylandı |
 | Modül 7 — Hasat | ✅ Onaylandı |
 | Modül 8 — Dashboard | ✅ Onaylandı |
 | Modül 9 — Fotoğraf Analizi (ilk akış) | ✅ Onaylandı |
-| Modül 10 — Saha Operasyonları (UI) | 🟡 Bu teslimat |
+| Modül 10 — Saha Operasyonları (TAM İŞLEVSEL) | 🟡 Bu teslimat |
