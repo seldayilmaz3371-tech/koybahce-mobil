@@ -128,3 +128,48 @@ describe("TreeSelectorList", () => {
     expect(onModeChange).toHaveBeenCalledWith("all");
   });
 });
+
+describe("TreeSelectorList — Arama Kutusu (Sprint 10.3)", () => {
+  it("ağaç numarasına göre GERÇEKTEN filtreler", () => {
+    renderWithSelection("select");
+
+    fireEvent.change(screen.getByPlaceholderText("Search by tree number or variety..."), {
+      target: { value: "A-1" },
+    });
+
+    expect(screen.getByText("A-1 · Gemlik")).toBeTruthy();
+    expect(screen.queryByText("A-2 · Ayvalık")).toBeNull();
+  });
+
+  it("çeşit adına göre (büyük/küçük harf duyarsız) GERÇEKTEN filtreler", () => {
+    renderWithSelection("select");
+
+    fireEvent.change(screen.getByPlaceholderText("Search by tree number or variety..."), {
+      target: { value: "ayvalık" },
+    });
+
+    expect(screen.getByText("A-2 · Ayvalık")).toBeTruthy();
+    expect(screen.queryByText("A-1 · Gemlik")).toBeNull();
+  });
+
+  it("eşleşme yoksa 'sonuç yok' mesajı gösterir", () => {
+    renderWithSelection("select");
+
+    fireEvent.change(screen.getByPlaceholderText("Search by tree number or variety..."), {
+      target: { value: "var-olmayan-bir-sey" },
+    });
+
+    expect(screen.getByText("No trees match your search.")).toBeTruthy();
+  });
+
+  it("'Select All', SADECE aramayla eşleşen ağaçları seçer (tüm parseli DEĞİL)", () => {
+    renderWithSelection("select");
+    fireEvent.change(screen.getByPlaceholderText("Search by tree number or variety..."), {
+      target: { value: "A-1" },
+    });
+
+    fireEvent.click(screen.getByText("Select All"));
+
+    expect(screen.getByText("1 trees selected")).toBeTruthy();
+  });
+});

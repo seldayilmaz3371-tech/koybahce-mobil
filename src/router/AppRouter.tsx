@@ -36,6 +36,7 @@ import { PhotoGalleryScreen } from "../modules/photos/PhotoGalleryScreen";
 import { FinanceScreen } from "../modules/finance/FinanceScreen";
 import { MaintenanceScreen } from "../modules/maintenance/MaintenanceScreen";
 import { HarvestScreen } from "../modules/harvest/HarvestScreen";
+import { BulkOperationsScreen } from "../modules/bulkOperations/BulkOperationsScreen";
 import { DashboardScreen } from "../modules/dashboard/DashboardScreen";
 import { SettingsScreen } from "../modules/settings/SettingsScreen";
 import { useTreeForRoute } from "./useTreeForRoute";
@@ -106,6 +107,7 @@ function ParcelsScreenRoute() {
       onViewFinance={(parcel) => navigate(buildPath.parcelFinance(parcel.id))}
       onViewMaintenance={(parcel) => navigate(buildPath.parcelMaintenance(parcel.id))}
       onViewHarvest={(parcel) => navigate(buildPath.parcelHarvest(parcel.id))}
+      onViewBulkOperations={(parcel) => navigate(buildPath.parcelBulkOperations(parcel.id))}
       onViewAiChat={() => navigate(buildPath.aiChat())}
       onViewParcelAiChat={(parcel) => navigate(buildPath.parcelAiChat(parcel.id))}
       onViewSettings={() => navigate(buildPath.settings())}
@@ -192,6 +194,17 @@ function HarvestScreenRoute() {
       onBack={() => navigate(-1)}
     />
   );
+}
+
+function BulkOperationsScreenRoute() {
+  const { parcelId } = useParams<{ parcelId: string }>();
+  const navigate = useNavigate();
+
+  if (!parcelId) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+
+  return <BulkOperationsScreen parcelId={parcelId} onBack={() => navigate(-1)} />;
 }
 
 function ReferenceTreesScreenRoute() {
@@ -445,6 +458,7 @@ export function AppRouter() {
         <Route path={ROUTE_PATTERNS.parcelFinance} element={<FinanceScreenRoute />} />
         <Route path={ROUTE_PATTERNS.parcelMaintenance} element={<MaintenanceScreenRoute />} />
         <Route path={ROUTE_PATTERNS.parcelHarvest} element={<HarvestScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.parcelBulkOperations} element={<BulkOperationsScreenRoute />} />
         <Route path={ROUTE_PATTERNS.parcelAiChat} element={<ParcelAiChatScreenRoute />} />
         <Route path={ROUTE_PATTERNS.referenceTrees} element={<ReferenceTreesScreenRoute />} />
         <Route path={ROUTE_PATTERNS.treeObservations} element={<ObservationScreenRoute />} />

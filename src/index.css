@@ -389,3 +389,32 @@ button {
   animation: ai-chat-spin 0.7s linear infinite;
   flex-shrink: 0;
 }
+
+/* --- Toplu İşlemler — Eldivenle/Güneş Altında Kullanım (Sprint 10.3) ---
+ * Kullanıcının kesin hedefi: "uygulamayı eldivenle, tek elle, güneş
+ * altında, çok hızlı kullanabilmek." Genel `.form-field--checkbox`'a
+ * DOKUNULMADI (diğer formları etkilememesi için) — SADECE Toplu
+ * İşlemler'in ağaç listesine özel, DAHA BÜYÜK dokunma alanı ve DAHA
+ * YÜKSEK kontrast.
+ */
+.bulk-ops__search-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 16px;
+  font-size: 18px;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.bulk-ops__tree-list .bulk-ops__checkbox-row label {
+  min-height: 56px;
+  font-size: 17px;
+  padding: 4px 0;
+}
+
+.bulk-ops__tree-list .bulk-ops__checkbox-row input[type="checkbox"] {
+  width: 28px;
+  height: 28px;
+}

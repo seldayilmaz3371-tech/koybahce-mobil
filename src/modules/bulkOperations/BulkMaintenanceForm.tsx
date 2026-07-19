@@ -1,23 +1,27 @@
 /**
  * BulkMaintenanceForm
  * ======================
- * bkz. Sprint 10.2. "Toplu Sulama"/"Toplu Gübreleme"/"Toplu İlaçlama"/
- * "Toplu Budama"/"Toplu Biçme" — MİMARİ OLARAK TEK form (bkz.
- * `docs/saha-operasyonlari-mimari-analiz.md` Kritik Bulgu 2).
+ * bkz. Sprint 10.2/10.3. "Toplu Sulama"/"Toplu Gübreleme"/"Toplu
+ * İlaçlama"/"Toplu Budama"/"Toplu Biçme" — MİMARİ OLARAK TEK form
+ * (bkz. `docs/saha-operasyonlari-mimari-analiz.md` Kritik Bulgu 2).
  *
- * 🔴 "BİÇME" KARARI (bu form içinde uygulanan): `MaintenanceType`
- * enum'unda "biçme" (mowing) değeri YOK — ne TS'te ne SQLite CHECK
- * kısıtında (gerçek dosyalardan doğrulandı). SQLite'ta bir CHECK
- * kısıtını değiştirmek TABLO YENİDEN OLUŞTURMA gerektirir (gerçek
- * risk, ADR 0005'in "sadece ekleme" migration ilkesiyle doğal olarak
- * ÇATIŞAN bir işlem). Bu sprint için EN DÜŞÜK RİSKLİ çözüm seçildi:
- * "Biçme" kullanıcıya bir seçenek olarak GÖSTERİLİYOR, ama arka planda
- * `maintenanceType: "other"` olarak KAYDEDİLİYOR — hiçbir migration
- * GEREKMEDİ. Gerçek bir "mowing" enum değeri gelecekte istenirse, bu
- * GERÇEK bir ADR + migration (tablo yeniden oluşturma) gerektirir.
+ * 🔴 "BİÇME" KARARI: `MaintenanceType` enum'unda "biçme" (mowing)
+ * değeri YOK. Karar: "Biçme" kullanıcıya seçenek olarak GÖSTERİLİYOR,
+ * arka planda `maintenanceType: "other"` KAYDEDİLİYOR (bkz. Sprint
+ * 10.2 Teknik Raporu).
  *
- * UX HEDEFİ: 50-500 ağacı 30-60 saniyede tamamlama — bu yüzden TEK
- * ekranda (tip seçimi + ağaç seçimi + onay), fazla adım YOK.
+ * Sprint 10.3 EKLENTİLERİ:
+ *   - `initialSelectedTreeIds` — Ardışık İşlem Sihirbazı'ndan
+ *     (BulkOperationsScreen) gelindiyse, ağaç seçimi ÖNCEDEN
+ *     doldurulur (kullanıcı AYNI seçimi TEKRAR yapmak ZORUNDA kalmaz).
+ *   - Başarılı işlem sonrası "son kullanılan işlem türü"
+ *     `localPreferences`'e kaydedilir (SQLite migration GEREKMEDEN —
+ *     hassas olmayan, basit bir UX tercihi).
+ *   - Sonuç ekranında "Aynı Ağaçlara Başka İşlem Uygula" butonu —
+ *     Ardışık İşlem Sihirbazı'nı BAŞLATIR.
+ *   - Undo YENİDEN DEĞERLENDİRİLDİ: kaç kaydın geri alınacağı AÇIKÇA
+ *     gösteriliyor + YANLIŞLIKLA geri almayı önlemek için AYRI bir
+ *     onay adımı eklendi (mevcut `window.confirm` deseniyle tutarlı).
  *
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
@@ -30,12 +34,15 @@ import { SelectField } from "../../shared/components/form/SelectField";
 import { TextAreaField } from "../../shared/components/form/TextAreaField";
 import { maintenanceRepository } from "../maintenance/data/maintenance.repository";
 import { MaintenanceType, MaintenanceStatus, type MaintenanceTypeValue } from "../maintenance/domain/maintenance.types";
+import { localPreferences, LocalPreferenceKey } from "../../native/preferences";
 import type { Tree } from "../trees/domain/tree.types";
 
 interface BulkMaintenanceFormProps {
   parcelId: string;
   trees: Tree[];
   onBack: () => void;
+  initialSelectedTreeIds?: string[];
+  onApplyAnotherOperation?: (treeIds: string[]) => void;
 }
 
 type ResultState = { createdIds: string[]; count: number } | null;
@@ -49,15 +56,29 @@ const MAINTENANCE_TYPE_OPTIONS: { value: MaintenanceTypeValue; labelKey: string 
   { value: MaintenanceType.Other, labelKey: "bulkOperations.mowingLabel" },
 ];
 
-export function BulkMaintenanceForm({ parcelId, trees, onBack }: BulkMaintenanceFormProps) {
+export function BulkMaintenanceForm({
+  parcelId,
+  trees,
+  onBack,
+  initialSelectedTreeIds,
+  onApplyAnotherOperation,
+}: BulkMaintenanceFormProps) {
   const { t } = useTranslation();
   const [maintenanceType, setMaintenanceType] = useState<MaintenanceTypeValue>(MaintenanceType.Irrigation);
   const [notes, setNotes] = useState("");
-  const [selectionMode, setSelectionMode] = useState<TreeSelectionMode>("all");
-  const selection = useTreeSelection();
+  const [selectionMode, setSelectionMode] = useState<TreeSelectionMode>(
+    initialSelectedTreeIds && initialSelectedTreeIds.length > 0 ? "select" : "all"
+  );
+  const selection = useTreeSelection(initialSelectedTreeIds);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<ResultState>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Sadece İLK render'da ("mount") çalışmalı — initialSelectedTreeIds
+  // sonradan değişse bile TEKRAR tetiklenmemeli (kullanıcının manuel
+  // seçimini EZMEMEK için). Bu, `useTreeSelection(initialSelectedTreeIds)`
+  // çağrısına (yukarıda) verilen lazy initializer ile SAĞLANIYOR —
+  // `useEffect` GEREKMİYOR (bkz. `useTreeSelection.ts`'in kendi notu).
 
   const targetTreeIds = selectionMode === "all" ? trees.map((tree) => tree.id) : Array.from(selection.selectedIds);
 
@@ -85,6 +106,13 @@ export function BulkMaintenanceForm({ parcelId, trees, onBack }: BulkMaintenance
         notes: notes.trim() || null,
       });
       setResult({ createdIds: created.map((r) => r.id), count: created.length });
+      // Sprint 10.3 — son kullanılan işlem türünü kaydet (hata olsa
+      // bile ana akışı ETKİLEMEMELİ, bu yüzden ayrı bir try/catch).
+      try {
+        await localPreferences.set(LocalPreferenceKey.LAST_USED_BULK_OPERATION, maintenanceType);
+      } catch {
+        // Sessizce yut — bu SADECE bir UX hızlandırma tercihi, kritik değil.
+      }
     } catch {
       setErrorMessage(t("bulkOperations.applyError"));
     } finally {
@@ -94,6 +122,11 @@ export function BulkMaintenanceForm({ parcelId, trees, onBack }: BulkMaintenance
 
   const handleUndo = async () => {
     if (!result) return;
+    // Sprint 10.3 — Madde 8: YANLIŞLIKLA geri almayı önlemek için AYRI
+    // bir onay adımı, KAÇ kaydın etkileneceği AÇIKÇA belirtilerek.
+    const confirmed = window.confirm(t("bulkOperations.undoConfirmMessage", { count: result.count }));
+    if (!confirmed) return;
+
     setIsSubmitting(true);
     try {
       await maintenanceRepository.deactivateMany(result.createdIds);
@@ -113,7 +146,24 @@ export function BulkMaintenanceForm({ parcelId, trees, onBack }: BulkMaintenance
         <div className="status-card">
           <p className="status-card__value">{t("bulkOperations.resultSummary", { count: result.count })}</p>
         </div>
-        <button type="button" className="lock-screen__button" onClick={handleUndo} disabled={isSubmitting}>
+
+        {onApplyAnotherOperation ? (
+          <button
+            type="button"
+            className="lock-screen__button"
+            onClick={() => onApplyAnotherOperation(targetTreeIds)}
+          >
+            {t("bulkOperations.applyAnotherButton")}
+          </button>
+        ) : null}
+
+        <button
+          type="button"
+          className="lock-screen__button"
+          onClick={handleUndo}
+          disabled={isSubmitting}
+          style={{ marginTop: 8 }}
+        >
           {t("bulkOperations.undoButton")}
         </button>
         <button type="button" className="lock-screen__button" onClick={onBack} style={{ marginTop: 8 }}>

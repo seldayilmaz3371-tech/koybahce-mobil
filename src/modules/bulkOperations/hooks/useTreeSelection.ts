@@ -1,13 +1,20 @@
 /**
  * useTreeSelection Hook
  * ========================
- * bkz. Sprint 10.2. Ağaç seçim state'i (Toplu İşlemler UI'ının ortak
- * çekirdeği — HEM Toplu Gözlem HEM Toplu Bakım tarafından kullanılır,
- * kod tekrarından kaçınma).
+ * bkz. Sprint 10.2/10.3. Ağaç seçim state'i (Toplu İşlemler UI'ının
+ * ortak çekirdeği — HEM Toplu Gözlem HEM Toplu Bakım tarafından
+ * kullanılır, kod tekrarından kaçınma).
  *
  * UX HEDEFİ (kullanıcının kesin talebi): 50-500 ağacı 30-60 saniyede
  * işaretleyip tamamlama. Bu yüzden: `Set` tabanlı O(1) toggle,
  * "Tümünü Seç"/"Seçimi Temizle" TEK tıkla.
+ *
+ * `initialSelectedIds` (Sprint 10.3, Ardışık İşlem Sihirbazı) —
+ * `useState`'in KENDİ başlangıç değeri olarak verildi (lazy initializer),
+ * `useEffect` KULLANILMADI — bu, `oxlint`'in `react-hooks(exhaustive-deps)`
+ * uyarısını GERÇEKTEN önleyen, DAHA DOĞRU bir React deseni (mount
+ * sırasında bir kez uygulanan başlangıç state'i için `useEffect`
+ * GEREKMEZ).
  */
 
 import { useCallback, useMemo, useState } from "react";
@@ -22,8 +29,8 @@ export interface UseTreeSelectionResult {
   isAllSelected: (allTreeIds: string[]) => boolean;
 }
 
-export function useTreeSelection(): UseTreeSelectionResult {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+export function useTreeSelection(initialSelectedIds?: string[]): UseTreeSelectionResult {
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set(initialSelectedIds ?? []));
 
   const isSelected = useCallback((treeId: string) => selectedIds.has(treeId), [selectedIds]);
 
