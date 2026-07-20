@@ -527,3 +527,89 @@ describe("MaintenanceRepository — deactivateMany (Sprint 10.2, Toplu İşlemle
     await expect(maintenanceRepository.deactivateMany([])).resolves.not.toThrow();
   });
 });
+
+describe("MaintenanceRepository — Sulama Başlangıç/Bitiş Saati (Sprint 10.4)", () => {
+  it("create() startTime/endTime'ı GERÇEKTEN kaydeder ve geri okuyabilir", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+
+    const record = await maintenanceRepository.create({
+      parcelId: parcel.id,
+      maintenanceType: MaintenanceType.Irrigation,
+      completedDate: "2026-07-19",
+      startTime: "06:15",
+      endTime: "08:05",
+    });
+
+    expect(record.startTime).toBe("06:15");
+    expect(record.endTime).toBe("08:05");
+
+    const fetched = await maintenanceRepository.getById(record.id);
+    expect(fetched?.startTime).toBe("06:15");
+    expect(fetched?.endTime).toBe("08:05");
+  });
+
+  it("startTime/endTime verilmezse null olarak kaydedilir (Sulama DIŞI türler ETKİLENMEZ)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+
+    const record = await maintenanceRepository.create({
+      parcelId: parcel.id,
+      maintenanceType: MaintenanceType.Pruning,
+    });
+
+    expect(record.startTime).toBeNull();
+    expect(record.endTime).toBeNull();
+  });
+
+  it("GERİYE DÖNÜK UYUMLULUK: Migration ÖNCESİ oluşturulmuş (startTime/endTime OLMAYAN) bir kayıt hâlâ DOĞRU okunur", async () => {
+    // Bu test, eski kayitlarin YENI sema ile NASIL davrandigini simule
+    // ediyor - create() ZATEN yeni semayla calisiyor (ayri bir "eski
+    // sema" executor'i kurmak gereksiz karmasiklik olurdu), ama
+    // startTime/endTime'i HIC VERMEDEN olusturulan bir kaydin GERCEKTEN
+    // null donmesi, "eski kayit" senaryosunun DAVRANISSAL esdegeridir.
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const oldStyleRecord = await maintenanceRepository.create({
+      parcelId: parcel.id,
+      maintenanceType: MaintenanceType.Irrigation,
+      completedDate: "2020-01-01",
+    });
+
+    const fetched = await maintenanceRepository.getById(oldStyleRecord.id);
+
+    expect(fetched).not.toBeNull();
+    expect(fetched?.startTime).toBeNull();
+    expect(fetched?.endTime).toBeNull();
+    expect(fetched?.completedDate).toBe("2020-01-01");
+  });
+
+  it("createMany() TÜM oluşturulan kayıtlara startTime/endTime'ı AYNI şekilde uygular", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const treeA = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-1", variety: "Gemlik" });
+    const treeB = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-2", variety: "Gemlik" });
+
+    const created = await maintenanceRepository.createMany({
+      parcelId: parcel.id,
+      treeIds: [treeA.id, treeB.id],
+      maintenanceType: MaintenanceType.Irrigation,
+      startTime: "06:00",
+      endTime: "07:30",
+    });
+
+    expect(created.every((r) => r.startTime === "06:00" && r.endTime === "07:30")).toBe(true);
+  });
+
+  it("update() ile startTime/endTime GERÇEKTEN değiştirilebilir", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const record = await maintenanceRepository.create({
+      parcelId: parcel.id,
+      maintenanceType: MaintenanceType.Irrigation,
+      startTime: "06:00",
+      endTime: "07:00",
+    });
+
+    await maintenanceRepository.update(record.id, { startTime: "06:30", endTime: "08:00" });
+
+    const updated = await maintenanceRepository.getById(record.id);
+    expect(updated?.startTime).toBe("06:30");
+    expect(updated?.endTime).toBe("08:00");
+  });
+});

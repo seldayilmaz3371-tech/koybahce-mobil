@@ -1,14 +1,18 @@
 /**
  * BulkObservationForm
  * ======================
- * bkz. Sprint 10.2/10.3. "Toplu Gözlem" — `BulkMaintenanceForm` ile
- * AYNI desen (Kural: kod tekrarından kaçın), `TreeSelectorList`/
+ * bkz. Sprint 10.2/10.3/10.4. "Toplu Gözlem" — `BulkMaintenanceForm`
+ * ile AYNI desen (Kural: kod tekrarından kaçın), `TreeSelectorList`/
  * `useTreeSelection` ORTAK bileşenleri paylaşılıyor.
  *
- * Sprint 10.3 eklentileri BulkMaintenanceForm ile BİREBİR AYNI —
- * `initialSelectedTreeIds` (Ardışık İşlem Sihirbazı), son kullanılan
- * işlem türünü kaydetme, "Aynı Ağaçlara Başka İşlem Uygula" butonu,
- * Undo'nun yeniden değerlendirilmiş (sayı-net + ayrı onay) hali.
+ * Sprint 10.4 EKLENTİSİ (Madde 1 — geriye dönük tarih/saat): Gerçek
+ * saha kullanımında işlemler her zaman anında girilmiyor (ör. sabah
+ * yapılan bir gözlem, akşam sisteme kaydediliyor). `observedAt` artık
+ * VARSAYILAN olarak "şimdi" ile doldurulur AMA kullanıcı tarihi/saati
+ * DEĞİŞTİREBİLİR — `DateField`+`TimeField` ikilisi,
+ * `combineDateAndTimeToIso()` ile TEK bir ISO timestamp'e birleşir.
+ * Migration GEREKMEDİ — `observations.observed_at` zaten TEXT, hiçbir
+ * format kısıtı taşımıyor.
  *
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
@@ -19,6 +23,9 @@ import { TreeSelectorList, type TreeSelectionMode } from "./components/TreeSelec
 import { useTreeSelection } from "./hooks/useTreeSelection";
 import { SelectField } from "../../shared/components/form/SelectField";
 import { TextAreaField } from "../../shared/components/form/TextAreaField";
+import { DateField } from "../../shared/components/form/DateField";
+import { TimeField } from "../../shared/components/form/TimeField";
+import { combineDateAndTimeToIso, nowAsDateInputValue, nowAsTimeInputValue } from "../../shared/utils/dateInputConversion";
 import { observationRepository } from "../observations/data/observation.repository";
 import type { ObservationType } from "../observations/domain/observation.types";
 import { localPreferences, LocalPreferenceKey } from "../../native/preferences";
@@ -55,6 +62,9 @@ export function BulkObservationForm({
   const { t } = useTranslation();
   const [observationType, setObservationType] = useState<ObservationType>("general");
   const [note, setNote] = useState("");
+  // Sprint 10.4 — varsayılan "şimdi" (yerel saat), kullanıcı değiştirebilir.
+  const [dateValue, setDateValue] = useState(nowAsDateInputValue);
+  const [timeValue, setTimeValue] = useState(nowAsTimeInputValue);
   const [selectionMode, setSelectionMode] = useState<TreeSelectionMode>(
     initialSelectedTreeIds && initialSelectedTreeIds.length > 0 ? "select" : "all"
   );
@@ -62,10 +72,6 @@ export function BulkObservationForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<ResultState>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Bkz. BulkMaintenanceForm.tsx'teki AYNI gerekçe — useTreeSelection'a
-  // verilen lazy initializer, useEffect GEREKTİRMEDEN "mount'ta bir kez"
-  // davranışını sağlıyor.
 
   const targetTreeIds = selectionMode === "all" ? trees.map((tree) => tree.id) : Array.from(selection.selectedIds);
 
@@ -89,7 +95,7 @@ export function BulkObservationForm({
         treeIds: targetTreeIds,
         observationType,
         note: note.trim() || null,
-        observedAt: new Date().toISOString(),
+        observedAt: combineDateAndTimeToIso(dateValue, timeValue),
       });
       setResult({ createdIds: created.map((o) => o.id), count: created.length });
       try {
@@ -172,6 +178,9 @@ export function BulkObservationForm({
         onChange={setObservationType}
         options={OBSERVATION_TYPE_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
       />
+
+      <DateField id="bulk-observation-date" label={t("bulkOperations.dateLabel")} value={dateValue} onChange={setDateValue} required />
+      <TimeField id="bulk-observation-time" label={t("bulkOperations.timeLabel")} value={timeValue} onChange={setTimeValue} required />
 
       <TextAreaField id="bulk-observation-note" label={t("observation.note")} value={note} onChange={setNote} />
 

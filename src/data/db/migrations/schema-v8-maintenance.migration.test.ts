@@ -51,6 +51,8 @@ describe("Şema Migration — Sürüm 8 (maintenance_records + maintenance_statu
         "status",
         "scheduled_date",
         "completed_date",
+        "start_time", // Sprint 10.4 (Şema Sürüm 12) — additive, bu test GÜNCEL toplam şemayı yansıtır
+        "end_time", // Sprint 10.4 (Şema Sürüm 12)
         "notes",
         "is_active",
         "created_at",

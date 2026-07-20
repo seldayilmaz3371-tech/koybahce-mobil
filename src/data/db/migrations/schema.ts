@@ -71,7 +71,7 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
-export const CURRENT_SCHEMA_VERSION = 11;
+export const CURRENT_SCHEMA_VERSION = 12;
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -357,6 +357,31 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
       `CREATE INDEX IF NOT EXISTS idx_harvest_records_parcel_id ON harvest_records(parcel_id);`,
       `CREATE INDEX IF NOT EXISTS idx_harvest_records_tree_id ON harvest_records(tree_id);`,
       `CREATE INDEX IF NOT EXISTS idx_harvest_records_harvest_date ON harvest_records(harvest_date);`,
+    ],
+  },
+  {
+    toVersion: 12,
+    statements: [
+      // Sprint 10.4 — Sulama Başlangıç/Bitiş Saati. ADR 0005'in
+      // additive migration deseni: NULLABLE sütunlar, mevcut kayıtlar
+      // HİÇ ETKİLENMEZ (her ikisi de NULL kalır). Format: "HH:MM"
+      // (HTML `<input type="time">`'ın native formatı) — TAM bir ISO
+      // timestamp DEĞİL, çünkü gün bilgisi ZATEN `completed_date`'te
+      // var, sadece gün-içi bir zaman aralığı taşınıyor.
+      //
+      // BİLİNÇLİ SADELİK (YAGNI): Toplam süre (ör. "1 Saat 50 Dakika")
+      // AYRI bir sütun olarak SAKLANMIYOR — `start_time`/`end_time`'dan
+      // HER ZAMAN türetilebilir bir değer, ayrı saklamak senkronizasyon
+      // riski taşırdı (biri değişip diğeri unutulursa süre yanlış
+      // kalır). Süre SADECE UI'da canlı hesaplanır.
+      //
+      // Bu sütunlar SADECE "irrigation" türünde UI'da GÖSTERİLİR, ama
+      // veritabanı seviyesinde herhangi bir türde teorik olarak
+      // doldurulabilir — bir CHECK kısıtıyla "sadece irrigation'da"
+      // zorlaması eklenmedi (gereksiz karmaşıklık, UI seviyesinde
+      // zaten kontrol ediliyor).
+      `ALTER TABLE maintenance_records ADD COLUMN start_time TEXT;`,
+      `ALTER TABLE maintenance_records ADD COLUMN end_time TEXT;`,
     ],
   },
 ];

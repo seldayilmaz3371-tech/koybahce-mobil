@@ -33,6 +33,8 @@ interface MaintenanceRecordRow {
   status: string;
   scheduled_date: string | null;
   completed_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
   notes: string | null;
   is_active: number;
   created_at: string;
@@ -50,6 +52,8 @@ function mapRowToMaintenanceRecord(row: MaintenanceRecordRow): MaintenanceRecord
     status: row.status as MaintenanceRecord["status"],
     scheduledDate: row.scheduled_date,
     completedDate: row.completed_date,
+    startTime: row.start_time,
+    endTime: row.end_time,
     notes: row.notes,
     isActive: row.is_active === 1,
     createdAt: row.created_at,
@@ -62,6 +66,8 @@ const UPDATABLE_COLUMN_MAP: Record<keyof MaintenanceRecordUpdateInput, string> =
   status: "status",
   scheduledDate: "scheduled_date",
   completedDate: "completed_date",
+  startTime: "start_time",
+  endTime: "end_time",
   notes: "notes",
 };
 
@@ -143,6 +149,8 @@ class MaintenanceRepository extends BaseRepository implements IMaintenanceReposi
       status: input.status ?? MaintenanceStatus.Completed,
       scheduledDate: input.scheduledDate ?? null,
       completedDate: input.completedDate ?? null,
+      startTime: input.startTime ?? null,
+      endTime: input.endTime ?? null,
       notes: input.notes ?? null,
       isActive: true,
       createdAt: now,
@@ -151,8 +159,8 @@ class MaintenanceRepository extends BaseRepository implements IMaintenanceReposi
 
     await this.execute(
       `INSERT INTO maintenance_records
-         (id, parcel_id, tree_id, maintenance_type, status, scheduled_date, completed_date, notes, is_active, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+         (id, parcel_id, tree_id, maintenance_type, status, scheduled_date, completed_date, start_time, end_time, notes, is_active, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
       [
         record.id,
         record.parcelId,
@@ -161,6 +169,8 @@ class MaintenanceRepository extends BaseRepository implements IMaintenanceReposi
         record.status,
         record.scheduledDate,
         record.completedDate,
+        record.startTime,
+        record.endTime,
         record.notes,
         record.createdAt,
         record.updatedAt,
@@ -190,6 +200,8 @@ class MaintenanceRepository extends BaseRepository implements IMaintenanceReposi
             status: input.status,
             scheduledDate: input.scheduledDate,
             completedDate: input.completedDate,
+            startTime: input.startTime,
+            endTime: input.endTime,
             notes: input.notes,
           })
         );

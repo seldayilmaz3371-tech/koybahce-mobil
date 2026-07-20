@@ -52,6 +52,15 @@ export interface MaintenanceRecord {
   scheduledDate: string | null;
   /** nullable — sadece `status: completed` için doldurulur. */
   completedDate: string | null;
+  /**
+   * bkz. Sprint 10.4. SADECE "irrigation" türünde UI'da gösterilir —
+   * "HH:MM" formatında (native `<input type="time">` formatı, TAM bir
+   * ISO timestamp DEĞİL — gün bilgisi zaten `completedDate`'te var).
+   * Toplam süre AYRI SAKLANMIYOR (bkz. şema Sürüm 12 yorumu) — SADECE
+   * bu iki alandan türetilerek UI'da gösterilir.
+   */
+  startTime: string | null;
+  endTime: string | null;
   notes: string | null;
   isActive: boolean;
   createdAt: string;
@@ -65,6 +74,8 @@ export interface NewMaintenanceRecordInput {
   status?: MaintenanceStatusValue;
   scheduledDate?: string | null;
   completedDate?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
   notes?: string | null;
 }
 
@@ -84,6 +95,8 @@ export interface BulkCreateMaintenanceRecordsInput {
   status?: MaintenanceStatusValue;
   scheduledDate?: string | null;
   completedDate?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
   notes?: string | null;
 }
 

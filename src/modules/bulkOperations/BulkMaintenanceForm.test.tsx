@@ -189,3 +189,109 @@ describe("BulkMaintenanceForm — 'Biçme' Kararı (Sprint 10.2 mimari kararı)"
     expect(records[0].maintenanceType).toBe("other");
   });
 });
+
+describe("BulkMaintenanceForm — Geriye Dönük Tarih/Saat (Sprint 10.4, Madde 1)", () => {
+  it("Tarih/Saat alanları VARSAYILAN olarak DOLU gelir (boş DEĞİL)", async () => {
+    const { parcel, trees } = await createParcelWithTrees(1);
+
+    render(<BulkMaintenanceForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+
+    const dateInput = screen.getByLabelText("Date") as HTMLInputElement;
+    const timeInput = screen.getByLabelText("Time") as HTMLInputElement;
+    expect(dateInput.value).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(timeInput.value).toMatch(/^\d{2}:\d{2}$/);
+  });
+
+  it("kullanıcı tarihi GEÇMİŞE değiştirebilir, kayıt GERÇEKTEN o tarihle oluşturulur", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const { parcel, trees } = await createParcelWithTrees(1);
+
+    render(<BulkMaintenanceForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText("Date"), { target: { value: "2026-07-01" } });
+    fireEvent.change(screen.getByLabelText("Time"), { target: { value: "14:30" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Apply"));
+    });
+
+    await waitFor(() => expect(screen.getByText("1 records created. 0 errors.")).toBeTruthy());
+    const records = await maintenanceRepository.listByParcel(parcel.id);
+    // GERÇEK KANIT: completedDate, KULLANICININ SEÇTİĞİ tarih+saati YANSITMALI (bugünün tarihi DEĞİL).
+    expect(records[0].completedDate).toContain("2026-07-01");
+  });
+
+  it("bu davranış TÜM bakım türlerinde (Gübreleme dahil) ÇALIŞIR — sadece Sulama'ya özel DEĞİL", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const { parcel, trees } = await createParcelWithTrees(1);
+
+    render(<BulkMaintenanceForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText("Type"), { target: { value: "fertilization" } });
+    fireEvent.change(screen.getByLabelText("Date"), { target: { value: "2026-06-15" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Apply"));
+    });
+
+    await waitFor(() => expect(screen.getByText("1 records created. 0 errors.")).toBeTruthy());
+    const records = await maintenanceRepository.listByParcel(parcel.id);
+    expect(records[0].maintenanceType).toBe("fertilization");
+    expect(records[0].completedDate).toContain("2026-06-15");
+  });
+});
+
+describe("BulkMaintenanceForm — Sulama Başlangıç/Bitiş Saati (Sprint 10.4, Madde 2)", () => {
+  it("Başlangıç/Bitiş Saati alanları SADECE Sulama seçiliyken GÖRÜNÜR", async () => {
+    const { parcel, trees } = await createParcelWithTrees(1);
+
+    render(<BulkMaintenanceForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+    // Varsayılan tür Sulama (Irrigation) — alanlar GÖRÜNÜR olmalı.
+    expect(screen.getByLabelText("Start Time")).toBeTruthy();
+    expect(screen.getByLabelText("End Time")).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText("Type"), { target: { value: "pruning" } });
+
+    expect(screen.queryByLabelText("Start Time")).toBeNull();
+    expect(screen.queryByLabelText("End Time")).toBeNull();
+  });
+
+  it("Başlangıç/Bitiş saati girilince, TOPLAM SÜRE kullanıcının kendi örneğiyle BİREBİR AYNI şekilde CANLI hesaplanır (06:15->08:05 = 1 Saat 50 Dakika)", async () => {
+    const { parcel, trees } = await createParcelWithTrees(1);
+
+    render(<BulkMaintenanceForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText("Start Time"), { target: { value: "06:15" } });
+    fireEvent.change(screen.getByLabelText("End Time"), { target: { value: "08:05" } });
+
+    await waitFor(() => expect(screen.getByText("Total Duration: 1h 50m")).toBeTruthy());
+  });
+
+  it("Başlangıç/Bitiş saati GERÇEKTEN veritabanına kaydedilir", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const { parcel, trees } = await createParcelWithTrees(1);
+
+    render(<BulkMaintenanceForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText("Start Time"), { target: { value: "06:15" } });
+    fireEvent.change(screen.getByLabelText("End Time"), { target: { value: "08:05" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Apply"));
+    });
+
+    await waitFor(() => expect(screen.getByText("1 records created. 0 errors.")).toBeTruthy());
+    const records = await maintenanceRepository.listByParcel(parcel.id);
+    expect(records[0].startTime).toBe("06:15");
+    expect(records[0].endTime).toBe("08:05");
+  });
+
+  it("Gübreleme (Sulama DIŞI) türünde startTime/endTime GÖNDERİLMEZ — null olarak kaydedilir", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const { parcel, trees } = await createParcelWithTrees(1);
+
+    render(<BulkMaintenanceForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText("Type"), { target: { value: "fertilization" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Apply"));
+    });
+
+    await waitFor(() => expect(screen.getByText("1 records created. 0 errors.")).toBeTruthy());
+    const records = await maintenanceRepository.listByParcel(parcel.id);
+    expect(records[0].startTime).toBeNull();
+    expect(records[0].endTime).toBeNull();
+  });
+});

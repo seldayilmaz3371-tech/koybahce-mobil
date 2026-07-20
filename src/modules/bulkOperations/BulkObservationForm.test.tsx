@@ -93,3 +93,32 @@ describe("BulkObservationForm", () => {
     });
   });
 });
+
+describe("BulkObservationForm — Geriye Dönük Tarih/Saat (Sprint 10.4, Madde 1)", () => {
+  it("Tarih/Saat alanları VARSAYILAN olarak DOLU gelir", async () => {
+    const { parcel, trees } = await createParcelWithTrees(1);
+
+    render(<BulkObservationForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+
+    const dateInput = screen.getByLabelText("Date") as HTMLInputElement;
+    const timeInput = screen.getByLabelText("Time") as HTMLInputElement;
+    expect(dateInput.value).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(timeInput.value).toMatch(/^\d{2}:\d{2}$/);
+  });
+
+  it("kullanıcı tarihi/saati GEÇMİŞE değiştirebilir, gözlem GERÇEKTEN o tarih+saatle oluşturulur", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const { parcel, trees } = await createParcelWithTrees(1);
+
+    render(<BulkObservationForm parcelId={parcel.id} trees={trees} onBack={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText("Date"), { target: { value: "2026-07-01" } });
+    fireEvent.change(screen.getByLabelText("Time"), { target: { value: "09:45" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Apply"));
+    });
+
+    await waitFor(() => expect(screen.getByText("1 records created. 0 errors.")).toBeTruthy());
+    const observations = (await Promise.all(trees.map((tree) => observationRepository.listByTree(tree.id)))).flat();
+    expect(observations[0].observedAt).toContain("2026-07-01");
+  });
+});
