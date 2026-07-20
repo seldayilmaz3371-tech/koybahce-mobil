@@ -364,6 +364,10 @@ PhotoGalleryScreen'den `PhotoAnalysisScreen`'e navigasyon entegrasyonu (Hasat/Da
 | 10.1 | Repository katmanı + gerçek performans testi | ✅ Tamamlandı |
 | 10.2 | Toplu İşlemler UI (ağaç seçimi, formlar, geri al) | ✅ Tamamlandı |
 | 10.3 | Saha UX iyileştirmeleri + navigasyon + UX öz-denetimi | ✅ Tamamlandı |
+| 10.4 | Geriye dönük tarih/saat (tüm türler) + Sulama Başlangıç/Bitiş Saati (Şema Sürüm 12) | ✅ Tamamlandı |
+
+### Sprint 10.4 Notu (2026-07-19) — Geriye Dönük Tarih/Saat + Sulama Süresi
+Gerçek saha geri bildirimine dayanan iki eklenti: (1) Toplu Gözlem/Bakım'da `observedAt`/`completedDate` artık varsayılan "şimdi" ile dolu ama kullanıcı tarafından düzenlenebilir (migration gerekmedi — mevcut TEXT sütunlar zaten esnekti). (2) Sulama'ya özel Başlangıç/Bitiş Saati + canlı hesaplanan toplam süre (Şema Sürüm 12, `start_time`/`end_time` nullable sütunlar — süre kendisi saklanmıyor, türetilebilir). Detay: `docs/sprint-10.4-technical-report.md`.
 
 ### Sonraki Adım
 UX öz-denetiminin önceliklendirdiği iyileştirmeler (Undo görsel vurgusu öncelikli), İşlem Şablonları/Favoriler (gerçek kullanıcı ihtiyacı kanıtlanırsa), gerçek cihaz performans testleri (kullanıcı tarafından).

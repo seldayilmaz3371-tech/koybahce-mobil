@@ -4,43 +4,44 @@
 |---|---|
 | **Project** | Bahçem Mobile |
 | **Module** | Modül 10 — Saha Operasyonları (Toplu İşlemler) |
-| **Sprint** | 10.3 |
-| **Feature** | Saha UX İyileştirmeleri + Navigasyon + Bağımsız UX Öz-Denetimi |
+| **Sprint** | 10.4 |
+| **Feature** | Geriye Dönük Tarih/Saat + Sulama Başlangıç/Bitiş Saati |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 607/607 başarılı (+11 yeni) — **gerçekten çalıştırıldı** |
-| **Build** | ✅ Başarılı — ana bundle 416.97kB → 429.66kB (+12.69kB, Toplu İşlemler artık navigasyona bağlı) |
-| **Lint** | ✅ 0 uyarı/hata (220 dosya, 103 kural) — **2 gerçek uyarı bulundu ve kökten düzeltildi** |
+| **Test Sonucu** | ✅ 635/635 başarılı (+28 yeni) — **gerçekten çalıştırıldı** |
+| **Build** | ✅ Başarılı — ana bundle 429.66kB → 432.47kB (+2.81kB, makul) |
+| **Lint** | ✅ 0 uyarı/hata (224 dosya, 103 kural) — **gerçekten çalıştırıldı** |
 | **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) — **gerçekten çalıştırıldı** |
-| **Şema Sürümü** | 11 (değişmedi) |
-| **Tarih** | 2026-07-18 |
-| **Git Commit** | `86a877c` |
-| **ADR** | Yeni ADR yazılmadı — mevcut desenlerin (Preferences, soft-delete) genişletmesi |
+| **Şema Sürümü** | **11 → 12** (yeni migration: `maintenance_records.start_time`/`end_time`, nullable, additive) |
+| **Tarih** | 2026-07-19 |
+| **Git Commit** | `e9134ee` |
+| **ADR** | Yeni ADR yazılmadı — ADR 0005'in additive migration deseninin tekrarı |
+
+## Migration Bilgileri
+
+**Şema Sürüm 12** — `ALTER TABLE maintenance_records ADD COLUMN start_time TEXT;` + `ALTER TABLE maintenance_records ADD COLUMN end_time TEXT;`. Nullable, additive — **mevcut kullanıcı verisi hiç etkilenmedi** (4 migration testiyle kanıtlandı, geriye dönük uyumluluk dahil).
+
+## Mimari Değişiklik Özeti
+
+- **Madde 1 (tarih/saat):** Migration gerekmedi. `combineDateAndTimeToIso()`/`nowAsDateInputValue()`/`nowAsTimeInputValue()`/`isoToTimeInputValue()` yardımcıları `dateInputConversion.ts`'e eklendi. Yeni `TimeField` bileşeni (`DateField` deseninde).
+- **Madde 2 (Sulama süresi):** `calculateDuration()` — süre veritabanına kaydedilmiyor, sadece UI'da canlı hesaplanıyor (YAGNI).
 
 ## Gerçek Bulgular
 
-1. `BulkOperationsScreen` donanım geri tuşunu **hiç desteklemiyordu** — diğer ekranlarla tutarsızlık, `MaintenanceScreen`'in deseniyle düzeltildi.
-2. `useEffect` + boş bağımlılık dizisi deseni **2 gerçek lint uyarısına** yol açtı — kök neden düzeltmesi: `useTreeSelection`'a `initialSelectedIds` parametresi eklendi (lazy initializer), `useEffect` tamamen kaldırıldı.
+1. **İki gerçek hata** kod yazarken (testten önce) bulunup düzeltildi — biri saat dilimi kayması riski taşıyordu, diğeri kullanıcının isteğini (saat bilgisi) karşılamıyordu.
+2. **Sprint 5.4'ün belgelediği bir kural** (migration testlerindeki "CURRENT_SCHEMA_VERSION" testinin sadece en güncel dosyada yaşaması) uygulanarak 2 test dosyası güncellendi — regresyon değil, bilinen bir bakım işi.
 
-## Tamamlanan Özellikler (Madde 1-2, 4-5, 8, 10)
+## Dosya Değişiklikleri (Özet)
 
-Arama kutusu, büyük dokunma hedefleri, Son Kullanılan İşlem (`localPreferences`), Ardışık İşlem Sihirbazı, Undo güvenliği (ayrı onay), navigasyon entegrasyonu.
-
-## Ertelenen Özellikler (Madde 3, 6-7) — Dürüstçe Belgelendi
-
-- **Filtre sistemi:** Veri modeli desteklemiyor (`Tree`'de sağlık/durum alanı yok) — alternatifler önerildi.
-- **İşlem Şablonları / Favori İşlemler:** Gerçek tasarımlar yapıldı, kapsam disiplini gereği ertelendi.
-
-## Bağımsız UX Öz-Denetimi
-
-`docs/sprint-10.3-ux-self-audit.md` — kendi geliştirdiğim ekranı eleştirerek 8 gerçek yavaşlatıcı nokta bulundu, en kritiği Undo butonunun görsel ayrışmaması.
+**Yeni:** `TimeField.tsx`, `durationCalculation.ts` (+test), `schema-v12-irrigation-time.migration.test.ts`.
+**Değiştirilen:** `schema.ts` (Sürüm 12), `maintenance.types.ts`, `maintenance.repository.ts` (+test), `dateInputConversion.ts` (+test), `BulkObservationForm.tsx` (+test), `BulkMaintenanceForm.tsx` (+test), `schema-v8-maintenance.migration.test.ts`, `schema-v11-harvest.migration.test.ts`, `MaintenanceRecordForm.test.tsx`, i18n dosyaları.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
 | Modül 1-5 | ✅ FROZEN |
-| Sprint 6-10.2 | ✅ Onaylandı |
+| Sprint 6-10.3 | ✅ Onaylandı |
 | Modül 7 — Hasat | ✅ Onaylandı |
 | Modül 8 — Dashboard | ✅ Onaylandı |
 | Modül 9 — Fotoğraf Analizi (ilk akış) | ✅ Onaylandı |
-| Modül 10 — Saha Operasyonları (TAM İŞLEVSEL) | 🟡 Bu teslimat |
+| Modül 10 — Saha Operasyonları (Sprint 10.4 dahil) | 🟡 Bu teslimat |
