@@ -326,7 +326,7 @@ PhotoGalleryScreen'den `PhotoAnalysisScreen`'e navigasyon entegrasyonu (Hasat/Da
 
 ## Modül 10 — Saha Operasyonları (Toplu İşlemler)
 
-**Durum: ✅ TAM İŞLEVSEL — Kullanıcı Tarafından Erişilebilir** (Sprint 10.3, 2026-07-18) — Product Owner kararıyla yeni en yüksek öncelik
+**Durum: ✅ TAM İŞLEVSEL — Kullanıcı Tarafından Erişilebilir** (Sprint 10.4, 2026-07-19) — Product Owner kararıyla yeni en yüksek öncelik
 
 | Alan | Durum |
 |---|---|
@@ -350,6 +350,8 @@ PhotoGalleryScreen'den `PhotoAnalysisScreen`'e navigasyon entegrasyonu (Hasat/Da
 3. "Biçme" enum değeri yok, `other` ile temsil ediliyor.
 4. Geri Al (Undo) mevcut soft-delete deseniyle mümkün, yeni mekanizma gerekmedi.
 5. "Son Kullanılan İşlem" için `@capacitor/preferences` (mevcut, ADR 0011) kullanıldı — SQLite migration gerekmedi.
+6. (Sprint 10.4) Geriye dönük tarih/saat için migration GEREKMEDİ — `observedAt`/`completedDate` sütunları zaten esnek TEXT.
+7. (Sprint 10.4) Sulama süresi için migration GEREKTİ (Şema Sürüm 12, `start_time`/`end_time`) — ama süre KENDİSİ saklanmıyor, türetilebilir bir değer.
 
 ### Bağımsız UX Öz-Denetimi (Sprint 10.3)
 `docs/sprint-10.3-ux-self-audit.md` — 8 gerçek yavaşlatıcı nokta bulundu (en kritiği: Undo butonunun görsel olarak yeterince ayrışmaması). Hiçbiri bu sprintte düzeltilmedi, sonraki sprint için önceliklendirildi.
