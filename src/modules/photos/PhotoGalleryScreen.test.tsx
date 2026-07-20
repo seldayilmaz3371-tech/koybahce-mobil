@@ -89,6 +89,13 @@ beforeEach(() => {
     saved: false,
     type: "photo",
   });
+  // bkz. Sprint 10.5 — jsdom'un `window.scrollTo`'yu implemente
+  // ETMEMESİ (GERÇEK bir davranış sorunu DEĞİL, sadece jsdom'un test
+  // ortamı sınırlaması) konsolu "Not implemented" uyarılarıyla
+  // kirletiyordu. Genel bir stub, TÜM testler için varsayılan güvenli
+  // davranış sağlıyor — scroll koruma testinin KENDİSİ bunu KENDİ
+  // spy'ıyla override ediyor (aşağıda).
+  vi.spyOn(window, "scrollTo").mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -294,5 +301,60 @@ describe("PhotoGalleryScreen — Error Code Standard (Sprint 4.3.1)", () => {
 
     await waitFor(() => expect(screen.getByText("Something went wrong. Please try again.")).toBeTruthy());
     expect(screen.queryByText(/SQLITE_CONSTRAINT/)).toBeNull();
+  });
+});
+
+describe("PhotoGalleryScreen — 'AI ile Analiz Et' Girişi (Sprint 10.5)", () => {
+  it("onAnalyze SAĞLANMIŞSA, HER fotoğraf satırında 'Analyze with AI' butonu GÖRÜNÜR", async () => {
+    const observationId = await createTestChain();
+    await photoRepository.create({ observationId, filePath: "/data/photos/1.jpg" });
+    await photoRepository.create({ observationId, filePath: "/data/photos/2.jpg" });
+
+    render(<PhotoGalleryScreen observationId={observationId} onBack={() => {}} onAnalyze={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getAllByText("Analyze with AI")).toHaveLength(2));
+  });
+
+  it("onAnalyze SAĞLANMAZSA (opsiyonel prop), buton HİÇ GÖRÜNMEZ — mevcut davranış BOZULMAZ", async () => {
+    const observationId = await createTestChain();
+    await photoRepository.create({ observationId, filePath: "/data/photos/1.jpg" });
+
+    render(<PhotoGalleryScreen observationId={observationId} onBack={() => {}} />);
+
+    await waitFor(() => expect(screen.getByText("Delete Photo")).toBeTruthy());
+    expect(screen.queryByText("Analyze with AI")).toBeNull();
+  });
+
+  it("butona tıklamak onAnalyze'ı DOĞRU fotoğraf nesnesiyle çağırır", async () => {
+    const observationId = await createTestChain();
+    const photo = await photoRepository.create({ observationId, filePath: "/data/photos/1.jpg" });
+    const onAnalyze = vi.fn();
+
+    render(<PhotoGalleryScreen observationId={observationId} onBack={() => {}} onAnalyze={onAnalyze} />);
+    await waitFor(() => expect(screen.getByText("Analyze with AI")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Analyze with AI"));
+
+    expect(onAnalyze).toHaveBeenCalledWith(expect.objectContaining({ id: photo.id }));
+  });
+});
+
+describe("PhotoGalleryScreen — Scroll Pozisyonu Koruması (Sprint 10.5, Madde 2)", () => {
+  it("component YENİDEN monte edildiğinde (navigasyon simülasyonu), ÖNCEKİ scroll pozisyonuna GERİ DÖNER", async () => {
+    const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    Object.defineProperty(window, "scrollY", { value: 350, writable: true, configurable: true });
+    const observationId = await createTestChain();
+    await photoRepository.create({ observationId, filePath: "/data/photos/1.jpg" });
+
+    const { unmount } = render(<PhotoGalleryScreen observationId={observationId} onBack={() => {}} />);
+    await waitFor(() => expect(screen.getByText("Delete Photo")).toBeTruthy());
+    // Unmount OLURKEN, cleanup fonksiyonu MEVCUT scrollY'yi (350) KAYDETMELİ.
+    unmount();
+
+    // YENİDEN monte et — bu, "PhotoAnalysisScreen'den GERİ dönüş" senaryosunun SİMÜLASYONU.
+    render(<PhotoGalleryScreen observationId={observationId} onBack={() => {}} />);
+    await waitFor(() => expect(screen.getByText("Delete Photo")).toBeTruthy());
+
+    expect(scrollToSpy).toHaveBeenCalledWith(0, 350);
   });
 });

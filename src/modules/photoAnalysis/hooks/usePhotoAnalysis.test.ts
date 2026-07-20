@@ -122,3 +122,34 @@ describe("usePhotoAnalysis", () => {
     expect(result.current.resultText).toBeNull();
   });
 });
+
+describe("usePhotoAnalysis — Eşzamanlı Çağrı Önleme (Sprint 10.5, Madde 3)", () => {
+  it("aynı fotoğraf için art arda analyze() çağrılırsa, provider.analyzeImage SADECE BİR KEZ çağrılır", async () => {
+    await enableAiWithInternet();
+    const analyzeImageMock = vi.fn().mockResolvedValue("cevap");
+    providerRegistry.register({ providerName: "gemini", sendMessage: vi.fn(), analyzeImage: analyzeImageMock });
+
+    const { result } = renderHook(() => usePhotoAnalysis());
+    // İKİ çağrıyı ART ARDA (await OLMADAN) tetikle — GERÇEK "aynı anda
+    // birden fazla tıklama" senaryosunun simülasyonu.
+    const firstCall = result.current.analyze("file:///fake/photo.jpg");
+    const secondCall = result.current.analyze("file:///fake/photo.jpg");
+    await Promise.all([firstCall, secondCall]);
+
+    expect(analyzeImageMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("bir analiz TAMAMLANDIKTAN SONRA, YENİDEN analyze() çağrılabilir (kilit KALICI değil)", async () => {
+    await enableAiWithInternet();
+    const analyzeImageMock = vi.fn().mockResolvedValue("cevap");
+    providerRegistry.register({ providerName: "gemini", sendMessage: vi.fn(), analyzeImage: analyzeImageMock });
+
+    const { result } = renderHook(() => usePhotoAnalysis());
+    await result.current.analyze("file:///fake/photo.jpg");
+    await waitFor(() => expect(result.current.status).toBe("ready"));
+
+    await result.current.analyze("file:///fake/photo.jpg");
+
+    expect(analyzeImageMock).toHaveBeenCalledTimes(2);
+  });
+});

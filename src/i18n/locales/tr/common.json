@@ -229,6 +229,7 @@
     "previewTitle": "Önizleme",
     "discardButton": "Vazgeç",
     "deleteButton": "Fotoğrafı Sil",
+    "analyzeButton": "AI ile Analiz Et",
     "deleteConfirm": "Bu fotoğraf silinsin mi? Listelerinizden kaldırılacak.",
     "backButton": "Gözleme Dön",
     "captureError": "Kamera veya galeriye erişilemedi. Lütfen cihaz ayarlarından uygulama izinlerini kontrol edin."

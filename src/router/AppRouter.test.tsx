@@ -23,6 +23,7 @@ import { SCHEMA_MIGRATIONS } from "../data/db/migrations/schema";
 import { parcelRepository } from "../modules/parcels/data/parcel.repository";
 import { treeRepository } from "../modules/trees/data/tree.repository";
 import { observationRepository } from "../modules/observations/data/observation.repository";
+import { photoRepository } from "../modules/photos/data/photo.repository";
 import { maintenanceRepository } from "../modules/maintenance/data/maintenance.repository";
 import { harvestRepository } from "../modules/harvest/data/harvest.repository";
 import { AppRouter } from "./AppRouter";
@@ -611,6 +612,54 @@ describe("AppRouter — Toplu İşlemler Navigasyonu (Sprint 10.3, GERÇEK navig
     await waitFor(() => expect(screen.getByText("Bulk Observation")).toBeTruthy());
 
     act(() => backButtonListeners[backButtonListeners.length - 1]());
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+});
+
+describe("AppRouter — Fotoğraf Analizi Navigasyonu (Sprint 10.5, GERÇEK navigasyon)", () => {
+  it("Fotoğraflar → 'Analyze with AI' DOĞRU photo-bağlamlı rotaya gider", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const tree = await treeRepository.create({ parcelId: parcel.id, treeNumber: "A-1", variety: "Gemlik" });
+    const observation = await observationRepository.create({
+      parcelId: parcel.id,
+      treeId: tree.id,
+      observationType: "general",
+      observedAt: "2026-01-01T00:00:00.000Z",
+    });
+    const photo = await photoRepository.create({ observationId: observation.id, filePath: "/data/photos/1.jpg" });
+    window.location.hash = `#/observations/${observation.id}/photos`;
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Analyze with AI")).toBeTruthy());
+    fireEvent.click(screen.getByText("Analyze with AI"));
+
+    await waitFor(() => expect(screen.getByText("AI Photo Analysis")).toBeTruthy());
+    expect(window.location.hash).toBe(`#/photos/${photo.id}/analysis`);
+  });
+
+  it("Fotoğraf Analizi → 'Back' butonu Fotoğraflara döner", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const observation = await observationRepository.create({
+      parcelId: parcel.id,
+      observationType: "general",
+      observedAt: "2026-01-01T00:00:00.000Z",
+    });
+    const photo = await photoRepository.create({ observationId: observation.id, filePath: "/data/photos/1.jpg" });
+    window.location.hash = `#/photos/${photo.id}/analysis`;
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("AI Photo Analysis")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Back"));
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+
+  it("var olmayan bir photoId ile Fotoğraf Analizi rotası Parsellere yönlendirir", async () => {
+    window.location.hash = "#/photos/var-olmayan-id/analysis";
+
+    render(<AppRouter />);
 
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
   });

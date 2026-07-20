@@ -229,6 +229,7 @@
     "previewTitle": "Preview",
     "discardButton": "Discard",
     "deleteButton": "Delete Photo",
+    "analyzeButton": "Analyze with AI",
     "deleteConfirm": "Delete this photo? It will be removed from your lists.",
     "backButton": "Back to Observation",
     "captureError": "Could not access the camera or gallery. Please check app permissions in your device settings."

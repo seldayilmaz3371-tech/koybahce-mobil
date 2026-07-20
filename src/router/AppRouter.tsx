@@ -26,13 +26,17 @@
  * için (dış link yok), her zaman "geldiğimiz yere" doğru döner.
  */
 
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { HashRouter, Navigate, Route, Routes, useNavigate, useParams } from "react-router";
 import { ParcelsScreen } from "../modules/parcels/ParcelsScreen";
 import { TreesScreen } from "../modules/trees/TreesScreen";
 import { ObservationScreen } from "../modules/observations/ObservationScreen";
 import { PhotoGalleryScreen } from "../modules/photos/PhotoGalleryScreen";
+import { PhotoAnalysisScreen } from "../modules/photoAnalysis/PhotoAnalysisScreen";
+import { photoRepository } from "../modules/photos/data/photo.repository";
+import type { Photo } from "../modules/photos/domain/photo.types";
+import { useBackButtonFallback } from "./BackButtonHandler";
 import { FinanceScreen } from "../modules/finance/FinanceScreen";
 import { MaintenanceScreen } from "../modules/maintenance/MaintenanceScreen";
 import { HarvestScreen } from "../modules/harvest/HarvestScreen";
@@ -446,7 +450,70 @@ function PhotoGalleryScreenRoute() {
     return <Navigate to={buildPath.parcels()} replace />;
   }
 
-  return <PhotoGalleryScreen observationId={observationId} onBack={() => navigate(-1)} />;
+  return (
+    <PhotoGalleryScreen
+      observationId={observationId}
+      onBack={() => navigate(-1)}
+      onAnalyze={(photo) => navigate(buildPath.photoAnalysis(photo.id))}
+    />
+  );
+}
+
+/**
+ * PhotoAnalysisScreenRoute
+ * ===========================
+ * bkz. Sprint 10.5. `PhotoAnalysisScreen`'in `photo: Photo` (TAM
+ * nesne) prop gereksinimini karşılamak için, `photoId`'den GERÇEK
+ * fotoğrafı asenkron olarak yükler.
+ *
+ * KULLANICI KARARI (2026-07-20): `useTreeForRoute`'un KODU BİREBİR
+ * KOPYALANMADI — SADECE davranış deseni (loading/null/hazır 3 durumu,
+ * `cancelled` flag'iyle race condition koruması, `useBackButtonFallback`
+ * ile "loading" sırasında geri tuşu desteği) TAKLİT EDİLDİ. Photo
+ * modülü, Tree modülüne HİÇBİR ŞEKİLDE bağımlı değil — `photoRepository`
+ * DOĞRUDAN kullanılıyor, `useTreeForRoute`'tan hiçbir import YOK.
+ *
+ * Bu, GENEL bir "usePhotoForRoute" hook'u olarak SOYUTLANMADI — Photo
+ * için bu İLK kullanım (Engineering Protocol Bölüm 21'in "3. tekrar
+ * eşiği" ilkesi, Sprint 10.5 mimari analizinde gerekçelendirildi).
+ */
+function PhotoAnalysisScreenRoute() {
+  const { photoId } = useParams<{ photoId: string }>();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [photo, setPhoto] = useState<Photo | null | "loading">("loading");
+
+  useEffect(() => {
+    if (!photoId) return;
+    let cancelled = false;
+    setPhoto("loading");
+    photoRepository.getById(photoId).then((result) => {
+      if (!cancelled) setPhoto(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [photoId]);
+
+  useBackButtonFallback(photo === "loading", () => navigate(-1));
+
+  if (!photoId) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+
+  if (photo === "loading") {
+    return (
+      <main className="status-screen">
+        <p className="status-card__value">{t("common.loading")}</p>
+      </main>
+    );
+  }
+
+  if (photo === null) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+
+  return <PhotoAnalysisScreen photo={photo} onBack={() => navigate(-1)} />;
 }
 
 export function AppRouter() {
@@ -466,6 +533,7 @@ export function AppRouter() {
         <Route path={ROUTE_PATTERNS.treeHarvest} element={<TreeHarvestScreenRoute />} />
         <Route path={ROUTE_PATTERNS.treeAiChat} element={<TreeAiChatScreenRoute />} />
         <Route path={ROUTE_PATTERNS.observationPhotos} element={<PhotoGalleryScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.photoAnalysis} element={<PhotoAnalysisScreenRoute />} />
         <Route path={ROUTE_PATTERNS.aiChat} element={<AiChatScreenRoute />} />
         <Route path={ROUTE_PATTERNS.settings} element={<SettingsScreenRoute />} />
         <Route path={ROUTE_PATTERNS.dashboard} element={<DashboardScreenRoute />} />

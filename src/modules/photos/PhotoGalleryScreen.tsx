@@ -32,9 +32,26 @@ type GalleryView = { mode: "list" } | { mode: "preview"; webPath: string; source
 interface PhotoGalleryScreenProps {
   observationId: string;
   onBack: () => void;
+  /** bkz. Sprint 10.5. Kullanıcı bir fotoğrafı AI ile analiz etmek istediğinde çağrılır. */
+  onAnalyze?: (photo: Photo) => void;
 }
 
-export function PhotoGalleryScreen({ observationId, onBack }: PhotoGalleryScreenProps) {
+/**
+ * bkz. Sprint 10.5, Madde 2. `PhotoAnalysisScreen`'e gidip GERİ
+ * DÖNÜLDÜĞÜNDE, liste BAŞA DÖNMEMELİ. `HashRouter` kullanıldığı için
+ * (React Router'ın `<ScrollRestoration>` özelliği SADECE
+ * `RouterProvider` ile çalışır, `HashRouter` ile ÇALIŞMAZ), MANUEL bir
+ * çözüm gerekti. Modül seviyesinde (component'in DIŞINDA) TUTULAN bu
+ * `Map`, component'in KENDİ state'i DEĞİL — bu BİLİNÇLİ bir tercih:
+ * `PhotoGalleryScreen` her navigasyonda TAMAMEN unmount/remount
+ * OLUYOR, bu yüzden pozisyon component DIŞINDA, modül seviyesinde
+ * hayatta kalmalı. `sessionStorage`/veritabanı KULLANILMADI (Kural:
+ * "Repository katmanını değiştirme" — bu, SADECE geçici bir UI
+ * durumu, KALICI bir veri DEĞİL).
+ */
+const scrollPositionByObservationId = new Map<string, number>();
+
+export function PhotoGalleryScreen({ observationId, onBack, onAnalyze }: PhotoGalleryScreenProps) {
   const { t } = useTranslation();
   const { photos, status, errorCode, refetch, deactivatePhoto } = usePhotos(observationId);
   const [view, setView] = useState<GalleryView>({ mode: "list" });
@@ -60,6 +77,23 @@ export function PhotoGalleryScreen({ observationId, onBack }: PhotoGalleryScreen
       }
     });
   }, [view, onBack]);
+
+  // bkz. Sprint 10.5, Madde 2. Fotoğraflar YÜKLENDİKTEN SONRA (status
+  // "ready"), varsa kayıtlı scroll pozisyonuna GERİ DÖN. `unmount`
+  // olurken (component her navigasyonda unmount olduğu için) MEVCUT
+  // pozisyonu KAYDET — hem "Analiz Et" ile gitme hem geri tuşu/buton
+  // ile çıkma dahil, HER unmount senaryosunda çalışır.
+  useEffect(() => {
+    if (status === "ready") {
+      const savedPosition = scrollPositionByObservationId.get(observationId);
+      if (savedPosition !== undefined) {
+        window.scrollTo(0, savedPosition);
+      }
+    }
+    return () => {
+      scrollPositionByObservationId.set(observationId, window.scrollY);
+    };
+  }, [observationId, status]);
 
   const handleCapture = async (source: PhotoSource) => {
     setCaptureError(null);
@@ -171,7 +205,7 @@ export function PhotoGalleryScreen({ observationId, onBack }: PhotoGalleryScreen
           {photos.length > 0 ? (
             <ul className="parcel-list">
               {photos.map((photo) => (
-                <PhotoListItem key={photo.id} photo={photo} onDelete={deactivatePhoto} />
+                <PhotoListItem key={photo.id} photo={photo} onDelete={deactivatePhoto} onAnalyze={onAnalyze} />
               ))}
             </ul>
           ) : null}
@@ -181,7 +215,15 @@ export function PhotoGalleryScreen({ observationId, onBack }: PhotoGalleryScreen
   );
 }
 
-function PhotoListItem({ photo, onDelete }: { photo: Photo; onDelete: (id: string) => Promise<void> }) {
+function PhotoListItem({
+  photo,
+  onDelete,
+  onAnalyze,
+}: {
+  photo: Photo;
+  onDelete: (id: string) => Promise<void>;
+  onAnalyze?: (photo: Photo) => void;
+}) {
   const { t } = useTranslation();
 
   const handleDelete = async () => {
@@ -199,6 +241,16 @@ function PhotoListItem({ photo, onDelete }: { photo: Photo; onDelete: (id: strin
           loading="lazy"
           style={{ width: "100%", maxHeight: 200, objectFit: "cover", borderRadius: 8 }}
         />
+        {onAnalyze ? (
+          <button
+            type="button"
+            className="lock-screen__button"
+            style={{ border: "2px solid var(--color-primary)" }}
+            onClick={() => onAnalyze(photo)}
+          >
+            {t("photo.analyzeButton")}
+          </button>
+        ) : null}
         <button
           type="button"
           className="lock-screen__button lock-screen__button--danger"

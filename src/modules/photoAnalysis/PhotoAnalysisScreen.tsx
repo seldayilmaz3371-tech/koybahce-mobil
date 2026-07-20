@@ -1,19 +1,31 @@
 /**
  * PhotoAnalysisScreen
  * ======================
- * bkz. Sprint 9.2. "İlk çalışan akış" — teşhis/tedavi önerisi/
+ * bkz. Sprint 9.2/10.5. "İlk çalışan akış" — teşhis/tedavi önerisi/
  * karşılaştırmalı analiz YOK (Öncelik 8-10). Sonuç KALICI OLARAK
  * SAKLANMIYOR (bkz. `usePhotoAnalysis`'in necessity analizi).
  *
- * NAVİGASYON: Bu ekran henüz hiçbir rotaya bağlı DEĞİL (diğer
- * modüllerin — Hasat/AI/Dashboard — aşamalı yaklaşımıyla tutarlı).
+ * NAVİGASYON: Sprint 10.5'te `PhotoAnalysisScreenRoute` ile rotaya
+ * bağlandı (bkz. `AppRouter.tsx`).
+ *
+ * Sprint 10.5 EKLENTİSİ: Donanım geri tuşu desteği eklendi — GERÇEK
+ * BULGU (bu sprintte bulundu): bu ekran, diğer TÜM ekranların
+ * (Hasat/Bakım/Toplu İşlemler) aksine, hiç donanım geri tuşu
+ * dinleyicisi kaydetmiyordu. "Analiz devam ederken geri tuşuna
+ * basılması" senaryosu (kullanıcının Sprint 10.5 test talebi)
+ * incelenirken ortaya çıktı — analiz sırasında geri tuşuna basmak
+ * hiçbir şey yapmıyordu (çökme yoktu ama kullanıcı sıkışabilirdi).
+ * Diğer ekranların KANITLANMIŞ deseniyle (established pattern)
+ * düzeltildi.
  *
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
 
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { usePhotoAnalysis } from "./hooks/usePhotoAnalysis";
 import { toDisplaySrc } from "../../native/displaySrc";
+import { addBackButtonListener } from "../../native/appBackButton";
 import type { Photo } from "../photos/domain/photo.types";
 
 interface PhotoAnalysisScreenProps {
@@ -26,6 +38,10 @@ export function PhotoAnalysisScreen({ photo, onBack }: PhotoAnalysisScreenProps)
   const { status, resultText, errorCode, analyze } = usePhotoAnalysis();
 
   const isAnalyzing = status === "analyzing";
+
+  useEffect(() => {
+    return addBackButtonListener(onBack);
+  }, [onBack]);
 
   return (
     <main className="status-screen">

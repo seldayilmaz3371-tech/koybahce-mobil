@@ -14,7 +14,7 @@
  * başlandığında, gerçek bir ADR ile değerlendirilmelidir.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { readFileAsBase64 } from "../../../native/filesystem";
 import { getActiveAiProvider } from "../../ai/session/getActiveAiProvider";
 import { buildPhotoAnalysisSystemPrompt } from "../photoAnalysisPrompt";
@@ -53,8 +53,20 @@ export function usePhotoAnalysis(): UsePhotoAnalysisResult {
   const [status, setStatus] = useState<PhotoAnalysisStatus>("idle");
   const [resultText, setResultText] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<ErrorCodeValue | null>(null);
+  // bkz. Sprint 10.5, Madde 3. `PhotoGalleryScreen`'in `isSavingRef`
+  // deseninin AYNI gerekçesiyle: React `status` state'i ASENKRON/
+  // batch'li güncellendiği için, aynı senkron JS turunda art arda
+  // gelen İKİ `analyze()` çağrısı, ikisi de `status`'un HÂLÂ "idle"
+  // olduğu ESKİ bir closure görebilir — bu, eşzamanlı İKİ Gemini
+  // çağrısına yol açabilirdi. `useRef` SENKRON güncellendiği için bu
+  // yarış durumunu GERÇEKTEN engelliyor. Bu, bir CACHE DEĞİL — sadece
+  // "aynı anda birden fazla çağrı OLMASIN" koruması (kullanıcının
+  // AÇIK talebi, Sprint 10.5).
+  const isAnalyzingRef = useRef(false);
 
   const analyze = useCallback(async (filePath: string) => {
+    if (isAnalyzingRef.current) return;
+    isAnalyzingRef.current = true;
     setStatus("analyzing");
     setErrorCode(null);
     setResultText(null);
@@ -71,6 +83,8 @@ export function usePhotoAnalysis(): UsePhotoAnalysisResult {
     } catch (error) {
       setErrorCode(mapAiError(error));
       setStatus("error");
+    } finally {
+      isAnalyzingRef.current = false;
     }
   }, []);
 
