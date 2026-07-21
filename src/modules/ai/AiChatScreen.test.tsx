@@ -257,3 +257,24 @@ describe("AiChatScreen — Mobil UX (Sprint 7.3)", () => {
     expect((screen.getByText("Send") as HTMLButtonElement).disabled).toBe(true);
   });
 });
+
+describe("AiChatScreen — Teşhis Bilgisi Butonu (Sprint 10.7, AI Diagnostic Build)", () => {
+  it("debugMode VERİLMEZSE (varsayılan), Teşhis Bilgisi butonu HİÇ görünmez", async () => {
+    render(<AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("AI Settings")).toBeTruthy());
+
+    expect(screen.queryByText("AI Diagnostic Info")).toBeNull();
+  });
+
+  it("debugMode=true VE onViewDiagnostics VERİLİRSE, buton GERÇEKTEN görünür ve TIKLANINCA çağrılır", async () => {
+    const onViewDiagnostics = vi.fn();
+    render(
+      <AiChatScreen onBack={vi.fn()} onViewSettings={vi.fn()} debugMode={true} onViewDiagnostics={onViewDiagnostics} />
+    );
+    await waitFor(() => expect(screen.getByText("AI Diagnostic Info")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("AI Diagnostic Info"));
+
+    expect(onViewDiagnostics).toHaveBeenCalledTimes(1);
+  });
+});

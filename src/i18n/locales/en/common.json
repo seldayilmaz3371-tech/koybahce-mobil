@@ -25,11 +25,16 @@
     "screenTitle": "AI Settings",
     "isEnabledLabel": "Enable AI features",
     "internetPermissionLabel": "Allow AI to use the internet",
+    "debugModeLabel": "Show technical diagnostic info for AI requests (Diagnostic Mode)",
     "apiKeyLabel": "Gemini API Key",
     "apiKeyConfigured": "API key is configured.",
     "saveApiKeyButton": "Save",
     "removeApiKeyButton": "Remove Key",
     "removeApiKeyConfirm": "Remove your Gemini API key? AI features will stop working until you add a new one."
+  },
+  "aiDiagnostic": {
+    "screenTitle": "AI Diagnostic Info",
+    "openButton": "AI Diagnostic Info"
   },
   "aiChat": {
     "screenTitle": "AI Assistant",

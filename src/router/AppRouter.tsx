@@ -35,6 +35,7 @@ import { ObservationScreen } from "../modules/observations/ObservationScreen";
 import { PhotoGalleryScreen } from "../modules/photos/PhotoGalleryScreen";
 import { PhotoAnalysisScreen } from "../modules/photoAnalysis/PhotoAnalysisScreen";
 import { photoRepository } from "../modules/photos/data/photo.repository";
+import { useAiSettings } from "../modules/ai/hooks/useAiSettings";
 import type { Photo } from "../modules/photos/domain/photo.types";
 import { useBackButtonFallback } from "./BackButtonHandler";
 import { FinanceScreen } from "../modules/finance/FinanceScreen";
@@ -65,6 +66,10 @@ const AiChatScreenLazy = lazy(() =>
 );
 const AiSettingsScreenLazy = lazy(() =>
   import("../modules/ai/AiSettingsScreen").then((m) => ({ default: m.AiSettingsScreen }))
+);
+/** bkz. Sprint 10.7 (AI Diagnostic Build) — AYNI lazy-loading deseni, ana bundle'a dahil olmasın diye. */
+const AiDiagnosticScreenLazy = lazy(() =>
+  import("../modules/ai/AiDiagnosticScreen").then((m) => ({ default: m.AiDiagnosticScreen }))
 );
 
 /**
@@ -375,11 +380,14 @@ function AiSettingsScreenRoute() {
 function AiChatScreenRoute() {
   const navigate = useNavigate();
   useAiBootstrap();
+  const { settings } = useAiSettings();
   return (
     <Suspense fallback={<AiLoadingFallback />}>
       <AiChatScreenLazy
         onBack={() => navigate(-1)}
         onViewSettings={() => navigate(buildPath.aiSettings())}
+        debugMode={settings?.debugMode}
+        onViewDiagnostics={() => navigate(buildPath.aiDiagnostics())}
       />
     </Suspense>
   );
@@ -390,6 +398,7 @@ function ParcelAiChatScreenRoute() {
   const { parcelId } = useParams<{ parcelId: string }>();
   const navigate = useNavigate();
   useAiBootstrap();
+  const { settings } = useAiSettings();
 
   if (!parcelId) {
     return <Navigate to={buildPath.parcels()} replace />;
@@ -401,6 +410,8 @@ function ParcelAiChatScreenRoute() {
         screenContext={{ parcelId }}
         onBack={() => navigate(-1)}
         onViewSettings={() => navigate(buildPath.aiSettings())}
+        debugMode={settings?.debugMode}
+        onViewDiagnostics={() => navigate(buildPath.aiDiagnostics())}
       />
     </Suspense>
   );
@@ -416,6 +427,7 @@ function TreeAiChatScreenRoute() {
   const { t } = useTranslation();
   const tree = useTreeForRoute(treeId);
   useAiBootstrap();
+  const { settings } = useAiSettings();
 
   if (!treeId) {
     return <Navigate to={buildPath.parcels()} replace />;
@@ -437,6 +449,8 @@ function TreeAiChatScreenRoute() {
         screenContext={{ parcelId: tree.parcelId, treeId: tree.id }}
         onBack={() => navigate(-1)}
         onViewSettings={() => navigate(buildPath.aiSettings())}
+        debugMode={settings?.debugMode}
+        onViewDiagnostics={() => navigate(buildPath.aiDiagnostics())}
       />
     </Suspense>
   );
@@ -482,6 +496,7 @@ function PhotoAnalysisScreenRoute() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [photo, setPhoto] = useState<Photo | null | "loading">("loading");
+  const { settings } = useAiSettings();
 
   useEffect(() => {
     if (!photoId) return;
@@ -513,7 +528,38 @@ function PhotoAnalysisScreenRoute() {
     return <Navigate to={buildPath.parcels()} replace />;
   }
 
-  return <PhotoAnalysisScreen photo={photo} onBack={() => navigate(-1)} />;
+  return (
+    <PhotoAnalysisScreen
+      photo={photo}
+      onBack={() => navigate(-1)}
+      debugMode={settings?.debugMode}
+      onViewDiagnostics={() => navigate(buildPath.aiDiagnostics())}
+    />
+  );
+}
+
+/**
+ * `/ai/diagnostics` — AI Diagnostic Build (Sprint 10.7). Route
+ * seviyesinde EK bir koruma: `settings.debugMode` false/yüklenmemişse
+ * Ana Ekrana yönlendirir — `AiDiagnosticScreen`'in KENDİ `null` render
+ * korumasıyla BİRLİKTE iki katmanlı güvenlik (defense in depth).
+ */
+function AiDiagnosticScreenRoute() {
+  const navigate = useNavigate();
+  const { settings, status } = useAiSettings();
+
+  if (status === "loading" || status === "idle") {
+    return null;
+  }
+  if (!settings?.debugMode) {
+    return <Navigate to={buildPath.parcels()} replace />;
+  }
+
+  return (
+    <Suspense fallback={<AiLoadingFallback />}>
+      <AiDiagnosticScreenLazy onBack={() => navigate(-1)} />
+    </Suspense>
+  );
 }
 
 export function AppRouter() {
@@ -538,6 +584,7 @@ export function AppRouter() {
         <Route path={ROUTE_PATTERNS.settings} element={<SettingsScreenRoute />} />
         <Route path={ROUTE_PATTERNS.dashboard} element={<DashboardScreenRoute />} />
         <Route path={ROUTE_PATTERNS.aiSettings} element={<AiSettingsScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.aiDiagnostics} element={<AiDiagnosticScreenRoute />} />
         <Route path="*" element={<Navigate to={buildPath.parcels()} replace />} />
       </Routes>
     </HashRouter>

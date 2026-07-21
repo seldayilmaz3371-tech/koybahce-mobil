@@ -31,9 +31,12 @@ import type { Photo } from "../photos/domain/photo.types";
 interface PhotoAnalysisScreenProps {
   photo: Photo;
   onBack: () => void;
+  /** bkz. Sprint 10.7 (AI Diagnostic Build). SADECE bu true iken "AI Teşhis Bilgisi" butonu görünür — Release kullanıcıları bunu hiç görmez. */
+  debugMode?: boolean;
+  onViewDiagnostics?: () => void;
 }
 
-export function PhotoAnalysisScreen({ photo, onBack }: PhotoAnalysisScreenProps) {
+export function PhotoAnalysisScreen({ photo, onBack, debugMode, onViewDiagnostics }: PhotoAnalysisScreenProps) {
   const { t } = useTranslation();
   const { status, resultText, errorCode, analyze } = usePhotoAnalysis();
 
@@ -91,6 +94,17 @@ export function PhotoAnalysisScreen({ photo, onBack }: PhotoAnalysisScreenProps)
             {resultText}
           </p>
         </div>
+      ) : null}
+
+      {debugMode && onViewDiagnostics ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          onClick={onViewDiagnostics}
+          style={{ marginTop: 8, border: "2px dashed var(--color-primary)" }}
+        >
+          {t("aiDiagnostic.openButton")}
+        </button>
       ) : null}
 
       <button type="button" className="lock-screen__button" onClick={onBack} style={{ marginTop: 8 }}>

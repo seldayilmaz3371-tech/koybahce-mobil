@@ -24,6 +24,7 @@ import { parcelRepository } from "../modules/parcels/data/parcel.repository";
 import { treeRepository } from "../modules/trees/data/tree.repository";
 import { observationRepository } from "../modules/observations/data/observation.repository";
 import { photoRepository } from "../modules/photos/data/photo.repository";
+import { aiSettingsRepository } from "../modules/ai/data/aiSettings.repository";
 import { maintenanceRepository } from "../modules/maintenance/data/maintenance.repository";
 import { harvestRepository } from "../modules/harvest/data/harvest.repository";
 import { AppRouter } from "./AppRouter";
@@ -662,5 +663,40 @@ describe("AppRouter — Fotoğraf Analizi Navigasyonu (Sprint 10.5, GERÇEK navi
     render(<AppRouter />);
 
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+});
+
+describe("AppRouter — AI Diagnostic Build Navigasyonu (Sprint 10.7)", () => {
+  it("debugMode KAPALIYKEN, /ai/diagnostics rotasına DOĞRUDAN girmeye çalışmak Parsellere yönlendirir (route seviyesi koruma)", async () => {
+    await aiSettingsRepository.getOrCreate(); // varsayılan debugMode: false
+    window.location.hash = "#/ai/diagnostics";
+
+    render(<AppRouter />);
+
+    await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
+  });
+
+  it("debugMode AÇIKKEN, AI Sohbet ekranından 'AI Diagnostic Info' butonuna basmak GERÇEK navigasyonla Teşhis ekranını açar", async () => {
+    await aiSettingsRepository.getOrCreate();
+    await aiSettingsRepository.update({ debugMode: true });
+    window.location.hash = "#/ai/chat";
+
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("AI Diagnostic Info")).toBeTruthy());
+    fireEvent.click(screen.getByText("AI Diagnostic Info"));
+
+    await waitFor(() => expect(screen.getByText("Provider:")).toBeTruthy());
+    expect(window.location.hash).toBe("#/ai/diagnostics");
+  });
+
+  it("debugMode AÇIKKEN, /ai/diagnostics rotasına DOĞRUDAN girmek Teşhis ekranını GERÇEKTEN açar", async () => {
+    await aiSettingsRepository.getOrCreate();
+    await aiSettingsRepository.update({ debugMode: true });
+    window.location.hash = "#/ai/diagnostics";
+
+    render(<AppRouter />);
+
+    await waitFor(() => expect(screen.getByText("AI Diagnostic Info")).toBeTruthy());
+    expect(screen.getByText("Provider:")).toBeTruthy();
   });
 });

@@ -12,6 +12,7 @@ import { aiSessionService } from "../session/AiSessionService";
 import type { AiMessage } from "../domain/ai.types";
 import type { ScreenContext } from "../context/IContextEngine.interface";
 import { mapAiError } from "../../../core/errors/mapAiError";
+import { aiDiagnostics } from "../diagnostics/aiDiagnostics";
 import type { ErrorCodeValue } from "../../../core/errors/errorCodes";
 
 type UseAiChatStatus = "idle" | "loading" | "ready" | "sending" | "error";
@@ -65,6 +66,7 @@ export function useAiChat(screenContext?: ScreenContext): UseAiChatResult {
         const updated = await aiConversationRepository.listMessages(conversationId);
         setMessages(updated);
         setStatus("ready");
+        aiDiagnostics.recordStage("ui_updated");
       } catch (error) {
         setErrorCode(mapAiError(error));
         setStatus("error");

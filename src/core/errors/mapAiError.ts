@@ -27,8 +27,28 @@
  */
 
 import { ErrorCode, type ErrorCodeValue } from "./errorCodes";
+import { aiDiagnostics } from "../../modules/ai/diagnostics/aiDiagnostics";
 
+/**
+ * bkz. Sprint 10.7, Madde 10 — "mapAiError gerçekten hangi hatayı
+ * hangi koda dönüştürüyor, bunu logla." BİLİNÇLİ KARAR: Bu fonksiyonun
+ * İÇ MANTIĞINA (aşağıdaki `if` zincirine) HİÇBİR DÜZELTME
+ * YAPILMADI — kullanıcının açık talimatı "rastgele düzeltme yapma,
+ * önce teşhis altyapısını tamamla" idi. `mapAiError()` şu an
+ * `message.includes('"code":XXX')` biçiminde kontroller yapıyor —
+ * kök neden raporunda bunun gerçek `ApiError` formatıyla (ayrı
+ * `status` alanı) uyuşmadığı KANITLANMIŞTI. Bu fonksiyon o hatalı
+ * (ya da doğru — hangi durumda olduğu HENÜZ gerçek cihazda
+ * kesinleşmedi) davranışı AYNEN koruyor, SADECE sonucunu (hangi kod
+ * seçildiğini) `aiDiagnostics`'e kaydederek gözlemlenebilir kılıyor.
+ */
 export function mapAiError(error: unknown): ErrorCodeValue {
+  const code = classifyAiError(error);
+  aiDiagnostics.recordMappedErrorCode(code);
+  return code;
+}
+
+function classifyAiError(error: unknown): ErrorCodeValue {
   const message = error instanceof Error ? error.message : String(error);
 
   // bkz. Sprint 10.6, Öncelik 2 — "Debug sırasında gerçek hata logları

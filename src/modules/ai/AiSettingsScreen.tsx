@@ -4,10 +4,20 @@
  * bkz. ADR 0024, AI Master Architecture Bölüm 15. Şema (ve domain
  * tipi) TÜM alanları taşıyor (Karar — "henüz kullanılmayacak alanlar
  * olsa bile mimari buna uygun olmalıdır"), ama bu ekran BUGÜN sadece
- * 3'ünü gösteriyor: AI Aktif/Pasif, İnternet İzni, API Anahtarı
- * (Sprint 6 Kod Öncesi Analiz Raporu'nda önerilip kullanıcı tarafından
- * onaylandı — "kademeli UI"). `responseLanguage`/`maxContextItems`/
- * `maxMessages`/`debugMode` alanları için form kontrolü YOK.
+ * 4'ünü gösteriyor: AI Aktif/Pasif, İnternet İzni, API Anahtarı,
+ * Teşhis Modu (Sprint 10.7'de eklendi — bkz. aşağıdaki not).
+ * `responseLanguage`/`maxContextItems`/`maxMessages` alanları için
+ * hâlâ form kontrolü YOK.
+ *
+ * Sprint 10.7 (AI Diagnostic Build) EKLENTİSİ: `debugMode` alanı
+ * ŞEMADA zaten vardı (Sprint 6'dan beri) ama hiç UI kontrolü yoktu —
+ * bu, YENİ bir migration/veri modeli DEĞİL, mevcut alanı UI'a açmak.
+ * Bu toggle açıkken, AI Sohbet/Fotoğraf Analizi ekranlarında bir
+ * "Teşhis Bilgisi" butonu görünür (bkz. `AiDiagnosticScreen`) —
+ * Release kullanıcıları bu toggle'ı görse de kapalıyken hiçbir
+ * teşhis ekranına erişemez (varsayılan değer `false` — Şema Sürüm
+ * 10'un migration'ı, mevcut kullanıcılar için zaten `debugMode:
+ * false` ile geliyor).
  *
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
@@ -82,6 +92,15 @@ export function AiSettingsScreen({ onBack }: AiSettingsScreenProps) {
           onChange={(e) => updateSettings({ internetPermission: e.target.checked })}
         />
         {" " + t("aiSettings.internetPermissionLabel")}
+      </label>
+
+      <label className="status-card">
+        <input
+          type="checkbox"
+          checked={settings.debugMode}
+          onChange={(e) => updateSettings({ debugMode: e.target.checked })}
+        />
+        {" " + t("aiSettings.debugModeLabel")}
       </label>
 
       <div className="status-card">

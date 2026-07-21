@@ -25,11 +25,16 @@
     "screenTitle": "AI Ayarları",
     "isEnabledLabel": "AI özelliklerini etkinleştir",
     "internetPermissionLabel": "AI'nin interneti kullanmasına izin ver",
+    "debugModeLabel": "AI istekleri için teknik teşhis bilgisi göster (Teşhis Modu)",
     "apiKeyLabel": "Gemini API Anahtarı",
     "apiKeyConfigured": "API anahtarı yapılandırıldı.",
     "saveApiKeyButton": "Kaydet",
     "removeApiKeyButton": "Anahtarı Kaldır",
     "removeApiKeyConfirm": "Gemini API anahtarınız kaldırılsın mı? Yeni bir anahtar ekleyene kadar AI özellikleri çalışmaz."
+  },
+  "aiDiagnostic": {
+    "screenTitle": "AI Teşhis Bilgisi",
+    "openButton": "AI Teşhis Bilgisi"
   },
   "aiChat": {
     "screenTitle": "AI Asistan",

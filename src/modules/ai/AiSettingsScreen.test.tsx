@@ -17,6 +17,7 @@ import {
 import { createTestDatabaseExecutor } from "../../data/db/testDatabaseExecutor";
 import { SCHEMA_MIGRATIONS } from "../../data/db/migrations/schema";
 import { secureStorage } from "../../native/secureStorage";
+import { aiSettingsRepository } from "./data/aiSettings.repository";
 import { AiSettingsScreen } from "./AiSettingsScreen";
 
 vi.mock("../../native/secureStorage", () => ({
@@ -123,5 +124,27 @@ describe("AiSettingsScreen", () => {
     fireEvent.click(screen.getByText("Back"));
 
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("AiSettingsScreen — Teşhis Modu Toggle (Sprint 10.7, AI Diagnostic Build)", () => {
+  it("debugMode toggle'ı GERÇEKTEN görünür ve VARSAYILAN olarak kapalı (mevcut kullanıcılar etkilenmez)", async () => {
+    render(<AiSettingsScreen onBack={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText(/Diagnostic Mode/)).toBeTruthy());
+
+    const checkbox = screen.getByLabelText(/Diagnostic Mode/) as HTMLInputElement;
+    expect(checkbox.checked).toBe(false);
+  });
+
+  it("toggle'a tıklamak, GERÇEKTEN aiSettingsRepository.update({debugMode: true}) çağırır", async () => {
+    render(<AiSettingsScreen onBack={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText(/Diagnostic Mode/)).toBeTruthy());
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText(/Diagnostic Mode/));
+    });
+
+    const settings = await aiSettingsRepository.getOrCreate();
+    expect(settings.debugMode).toBe(true);
   });
 });

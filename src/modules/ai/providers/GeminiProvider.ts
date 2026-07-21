@@ -22,6 +22,7 @@
 
 import { GoogleGenAI, type Content, type Part, type Tool } from "@google/genai";
 import { secureStorage, SecureStorageKey } from "../../../native/secureStorage";
+import { aiDiagnostics } from "../diagnostics/aiDiagnostics";
 import type {
   AIMessage,
   AIProvider,
@@ -37,6 +38,22 @@ const GEMINI_MODEL = "gemini-2.5-flash";
 /** Web projesindeki `MAX_GEMINI_RETRY_ATTEMPTS`/`GEMINI_RETRY_BASE_DELAY_MS` ile BİREBİR aynı değerler. */
 const MAX_RETRY_ATTEMPTS = 2;
 const RETRY_BASE_DELAY_MS = 1000;
+
+/**
+ * bkz. Sprint 10.7 (AI Diagnostic Build) — GERÇEK BULGU: SDK çağrısında
+ * daha önce HİÇBİR timeout mekanizması YOKTU — bir istek sunucudan
+ * yanıt gelene kadar (veya bağlantı düşük seviyede kesilene kadar)
+ * SINIRSIZ süre bekliyordu. Bu, Fotoğraf Analizi'nin "sonsuz bekleme"
+ * belirtisinin güçlü kanıtlanmış nedeniydi (bkz. kök neden raporu).
+ * `HttpOptions.timeout` (resmi `@google/genai` tip tanımlarından
+ * doğrulandı — ms cinsinden, SDK'nın KENDİ native mekanizması) burada
+ * kullanılıyor. 45 saniye — normal bir mobil ağ isteği için cömert,
+ * ama "sonsuz" değil; bu değer TEŞHİS amaçlı seçildi (bir isteğin
+ * GERÇEKTEN "asılı kaldığını" ölçülebilir kılmak için) — kalıcı bir
+ * kullanıcı deneyimi kararı DEĞİL, ayrı bir sprintte yeniden
+ * değerlendirilebilir.
+ */
+const REQUEST_TIMEOUT_MS = 45_000;
 
 /** Web projesinin `isRetryableGeminiError`'ından BİREBİR taşındı. */
 function isRetryableGeminiError(error: unknown): boolean {
@@ -58,6 +75,9 @@ async function callGeminiWithRetry<T>(operation: () => Promise<T>): Promise<T> {
       if (isLastAttempt || !isRetryableGeminiError(error)) {
         throw error;
       }
+      // bkz. Sprint 10.7, Madde "Retry Count" — GERÇEK yeniden deneme
+      // sayısı artık gözlemlenebilir (Diagnostic ekranında gösterilir).
+      aiDiagnostics.recordRetry();
       const delayMs = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
@@ -133,6 +153,12 @@ class GeminiProvider implements AIProvider {
 
   private async getApiKey(): Promise<string> {
     const apiKey = await secureStorage.get(SecureStorageKey.GEMINI_API_KEY);
+    // bkz. Sprint 10.7, Madde 1 — "API Key başarıyla okunuyor mu?
+    // (Boş, null veya geçerli)" — GERÇEKTEN gözlemlenebilir hale
+    // getirildi. Not: "configured" SADECE bir değerin VAR OLDUĞUNU
+    // gösterir, Gemini'nin bu anahtarı GEÇERLİ sayıp saymadığını
+    // GÖSTERMEZ (bu, ancak gerçek bir API çağrısı sonrası bilinebilir).
+    aiDiagnostics.recordApiKeyStatus(apiKey ? "configured" : "empty");
     if (!apiKey) {
       // Ham teknik hata — UI katmanı (Error Code Standard) bunu
       // çevrilmiş bir mesaja eşler, burada Türkçe/İngilizce metin
@@ -150,28 +176,43 @@ class GeminiProvider implements AIProvider {
       pendingToolResults?: AIToolResult[];
     } = {}
   ): Promise<AIProviderResponse> {
-    const apiKey = await this.getApiKey();
-    const client = new GoogleGenAI({ apiKey });
+    aiDiagnostics.startNewRequest();
+    aiDiagnostics.recordProvider(this.providerName);
+    try {
+      const apiKey = await this.getApiKey();
+      const client = new GoogleGenAI({ apiKey });
+      aiDiagnostics.recordStage("request_prepared");
 
-    const response = await callGeminiWithRetry(() =>
-      client.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: buildContents(messages, options.pendingToolResults),
-        config: {
-          systemInstruction: options.systemInstruction,
-          tools: buildTools(options.tools),
-        },
-      })
-    );
+      aiDiagnostics.recordStage("request_sent");
+      const response = await callGeminiWithRetry(() => {
+        aiDiagnostics.recordStage("awaiting_response");
+        return client.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: buildContents(messages, options.pendingToolResults),
+          config: {
+            systemInstruction: options.systemInstruction,
+            tools: buildTools(options.tools),
+            httpOptions: { timeout: REQUEST_TIMEOUT_MS },
+          },
+        });
+      });
+      aiDiagnostics.recordStage("response_received");
 
-    const toolCalls: AIToolCallRequest[] = (response.functionCalls ?? [])
-      .filter((fc) => fc.name)
-      .map((fc) => ({ toolName: fc.name as string, arguments: fc.args ?? {} }));
+      const toolCalls: AIToolCallRequest[] = (response.functionCalls ?? [])
+        .filter((fc) => fc.name)
+        .map((fc) => ({ toolName: fc.name as string, arguments: fc.args ?? {} }));
 
-    return {
-      text: response.text ?? null,
-      toolCalls,
-    };
+      aiDiagnostics.recordStage("parsed");
+      aiDiagnostics.finishRequest();
+      return {
+        text: response.text ?? null,
+        toolCalls,
+      };
+    } catch (error) {
+      aiDiagnostics.recordRawError(error);
+      aiDiagnostics.finishRequest();
+      throw error;
+    }
   }
 
   async analyzeImage(
@@ -180,31 +221,53 @@ class GeminiProvider implements AIProvider {
     prompt: string,
     systemInstruction?: string
   ): Promise<string> {
-    const apiKey = await this.getApiKey();
-    const client = new GoogleGenAI({ apiKey });
+    aiDiagnostics.startNewRequest();
+    aiDiagnostics.recordProvider(this.providerName);
+    // bkz. Sprint 10.7, Madde 8 — "Fotoğraf boyutu / Base64 boyutu."
+    // `imageBase64.length` karakter sayısı = byte sayısı (base64
+    // ASCII karakterlerden oluşur, UTF-16 çift-byte riski YOK).
+    // Orijinal dosya boyutu, base64'ün ~%75'i (4 karakter -> 3 byte).
+    const base64SizeBytes = imageBase64.length;
+    const estimatedFileSizeBytes = Math.round(base64SizeBytes * 0.75);
+    aiDiagnostics.recordPhotoSizes(estimatedFileSizeBytes, base64SizeBytes);
 
-    const response = await callGeminiWithRetry(() =>
-      client.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: [
-          {
-            role: "user",
-            parts: [{ inlineData: { data: imageBase64, mimeType } }, { text: prompt }],
-          },
-        ],
-        config: { systemInstruction },
-      })
-    );
+    try {
+      const apiKey = await this.getApiKey();
+      const client = new GoogleGenAI({ apiKey });
+      aiDiagnostics.recordStage("request_prepared");
 
-    // Fotoğraf Analizi'nde tool calling YOK (Sprint 9.2 kapsamı
-    // dışında) — sadece metin bekleniyor. `response.text` boşsa
-    // (nadir, ör. güvenlik filtresi engeli) AÇIK bir hata fırlatılır
-    // — UI katmanı bunu çevrilmiş bir mesaja eşler, "sessizce boş
-    // sonuç" GÖSTERİLMEZ.
-    if (!response.text) {
-      throw new Error("AI_PHOTO_ANALYSIS_EMPTY_RESPONSE");
+      aiDiagnostics.recordStage("request_sent");
+      const response = await callGeminiWithRetry(() => {
+        aiDiagnostics.recordStage("awaiting_response");
+        return client.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: [
+            {
+              role: "user",
+              parts: [{ inlineData: { data: imageBase64, mimeType } }, { text: prompt }],
+            },
+          ],
+          config: { systemInstruction, httpOptions: { timeout: REQUEST_TIMEOUT_MS } },
+        });
+      });
+      aiDiagnostics.recordStage("response_received");
+
+      // Fotoğraf Analizi'nde tool calling YOK (Sprint 9.2 kapsamı
+      // dışında) — sadece metin bekleniyor. `response.text` boşsa
+      // (nadir, ör. güvenlik filtresi engeli) AÇIK bir hata fırlatılır
+      // — UI katmanı bunu çevrilmiş bir mesaja eşler, "sessizce boş
+      // sonuç" GÖSTERİLMEZ.
+      if (!response.text) {
+        throw new Error("AI_PHOTO_ANALYSIS_EMPTY_RESPONSE");
+      }
+      aiDiagnostics.recordStage("parsed");
+      aiDiagnostics.finishRequest();
+      return response.text;
+    } catch (error) {
+      aiDiagnostics.recordRawError(error);
+      aiDiagnostics.finishRequest();
+      throw error;
     }
-    return response.text;
   }
 }
 

@@ -19,6 +19,7 @@ import { readFileAsBase64 } from "../../../native/filesystem";
 import { getActiveAiProvider } from "../../ai/session/getActiveAiProvider";
 import { buildPhotoAnalysisSystemPrompt } from "../photoAnalysisPrompt";
 import { mapAiError } from "../../../core/errors/mapAiError";
+import { aiDiagnostics } from "../../ai/diagnostics/aiDiagnostics";
 import type { ErrorCodeValue } from "../../../core/errors/errorCodes";
 
 type PhotoAnalysisStatus = "idle" | "analyzing" | "ready" | "error";
@@ -80,6 +81,11 @@ export function usePhotoAnalysis(): UsePhotoAnalysisResult {
 
       setResultText(text);
       setStatus("ready");
+      // bkz. Sprint 10.7, Madde 7 — "UI'ya aktarıldı" zincirin SON
+      // halkası. `GeminiProvider` kendi içinde "parsed"e kadar
+      // kaydediyor — bu satır, React state'inin GERÇEKTEN
+      // güncellendiği (kullanıcının SONUCU GÖRDÜĞÜ) anı işaretliyor.
+      aiDiagnostics.recordStage("ui_updated");
     } catch (error) {
       setErrorCode(mapAiError(error));
       setStatus("error");

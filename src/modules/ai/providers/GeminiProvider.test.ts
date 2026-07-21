@@ -255,3 +255,93 @@ describe("GeminiProvider — analyzeImage (Sprint 9.2)", () => {
     expect(generateContentMock).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("GeminiProvider — Diagnostic Entegrasyonu (Sprint 10.7, AI Diagnostic Build)", () => {
+  it("sendMessage() BAŞARILI olduğunda, aiDiagnostics GERÇEKTEN provider/apiKeyStatus/stage kaydeder", async () => {
+    const { aiDiagnostics } = await import("../diagnostics/aiDiagnostics");
+    aiDiagnostics.reset();
+    generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await geminiProvider.sendMessage([{ role: "user", content: "soru" }]);
+
+    const snapshot = aiDiagnostics.getSnapshot();
+    expect(snapshot.providerName).toBe("gemini");
+    expect(snapshot.apiKeyStatus).toBe("configured");
+    expect(snapshot.stage).toBe("parsed");
+    expect(snapshot.durationMs).not.toBeNull();
+  });
+
+  it("API anahtarı BOŞSA, aiDiagnostics GERÇEKTEN 'empty' kaydeder (Madde 1 — Boş/null/geçerli)", async () => {
+    const { aiDiagnostics } = await import("../diagnostics/aiDiagnostics");
+    aiDiagnostics.reset();
+    vi.mocked(secureStorage.get).mockResolvedValue(null);
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await expect(geminiProvider.sendMessage([{ role: "user", content: "soru" }])).rejects.toThrow();
+
+    expect(aiDiagnostics.getSnapshot().apiKeyStatus).toBe("empty");
+  });
+
+  it("sendMessage() BAŞARISIZ olduğunda, aiDiagnostics GERÇEK ApiError alanlarını (message/status) kaydeder", async () => {
+    const { aiDiagnostics } = await import("../diagnostics/aiDiagnostics");
+    aiDiagnostics.reset();
+    class FakeApiError extends Error {
+      status: number;
+      constructor(message: string, status: number) {
+        super(message);
+        this.name = "ApiError";
+        this.status = status;
+      }
+    }
+    generateContentMock.mockRejectedValue(new FakeApiError("API key not valid.", 400));
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await expect(geminiProvider.sendMessage([{ role: "user", content: "soru" }])).rejects.toThrow();
+
+    const snapshot = aiDiagnostics.getSnapshot();
+    expect(snapshot.rawError?.message).toBe("API key not valid.");
+    expect(snapshot.rawError?.status).toBe(400);
+    expect(snapshot.httpStatusCode).toBe(400);
+  });
+
+  it("analyzeImage() GERÇEK fotoğraf/base64 boyutlarını kaydeder (Madde 8)", async () => {
+    const { aiDiagnostics } = await import("../diagnostics/aiDiagnostics");
+    aiDiagnostics.reset();
+    generateContentMock.mockResolvedValue({ text: "gözlem", functionCalls: undefined });
+    const { geminiProvider } = await import("./GeminiProvider");
+    const fakeBase64 = "A".repeat(1000); // 1000 karakter = 1000 byte (base64 ASCII)
+
+    await geminiProvider.analyzeImage(fakeBase64, "image/jpeg", "soru");
+
+    const snapshot = aiDiagnostics.getSnapshot();
+    expect(snapshot.photo?.base64SizeBytes).toBe(1000);
+    expect(snapshot.photo?.fileSizeBytes).toBe(750); // ~%75 (base64 şişme oranının tersi)
+  });
+
+  it("sendMessage(), GERÇEKTEN httpOptions.timeout parametresini SDK'ya GEÇİRİR (Sprint 10.7'nin gerçek timeout düzeltmesi)", async () => {
+    generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await geminiProvider.sendMessage([{ role: "user", content: "soru" }]);
+
+    const sentConfig = generateContentMock.mock.calls[0][0].config;
+    expect(sentConfig.httpOptions).toEqual({ timeout: 45_000 });
+  });
+
+  it("retry GERÇEKLEŞTİĞİNDE, aiDiagnostics retryCount'u GERÇEKTEN artırır", async () => {
+    const { aiDiagnostics } = await import("../diagnostics/aiDiagnostics");
+    aiDiagnostics.reset();
+    let callCount = 0;
+    generateContentMock.mockImplementation(async () => {
+      callCount++;
+      if (callCount === 1) throw new Error("geçici ağ hatası");
+      return { text: "cevap", functionCalls: undefined };
+    });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await geminiProvider.sendMessage([{ role: "user", content: "soru" }]);
+
+    expect(aiDiagnostics.getSnapshot().retryCount).toBe(1);
+  });
+});

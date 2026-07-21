@@ -24,12 +24,15 @@ interface AiChatScreenProps {
   screenContext?: ScreenContext;
   onBack: () => void;
   onViewSettings: () => void;
+  /** bkz. Sprint 10.7 (AI Diagnostic Build). SADECE bu true iken "AI Teşhis Bilgisi" butonu görünür — Release kullanıcıları bunu hiç görmez. */
+  debugMode?: boolean;
+  onViewDiagnostics?: () => void;
 }
 
 /** CSS'teki `.ai-chat__textarea`'nın `max-height`'iyle BİREBİR eşleşmeli (~10 satır). */
 const TEXTAREA_MAX_HEIGHT_PX = 240;
 
-export function AiChatScreen({ screenContext, onBack, onViewSettings }: AiChatScreenProps) {
+export function AiChatScreen({ screenContext, onBack, onViewSettings, debugMode, onViewDiagnostics }: AiChatScreenProps) {
   const { t } = useTranslation();
   const { messages, status, errorCode, sendMessage } = useAiChat(screenContext);
   const [inputValue, setInputValue] = useState("");
@@ -139,6 +142,17 @@ export function AiChatScreen({ screenContext, onBack, onViewSettings }: AiChatSc
       <button type="button" className="lock-screen__button" onClick={onViewSettings} style={{ marginTop: 8 }}>
         {t("aiChat.settingsLinkLabel")}
       </button>
+
+      {debugMode && onViewDiagnostics ? (
+        <button
+          type="button"
+          className="lock-screen__button"
+          onClick={onViewDiagnostics}
+          style={{ marginTop: 8, border: "2px dashed var(--color-primary)" }}
+        >
+          {t("aiDiagnostic.openButton")}
+        </button>
+      ) : null}
 
       <button type="button" className="lock-screen__button" onClick={onBack} style={{ marginTop: 8 }}>
         {t("common.back")}

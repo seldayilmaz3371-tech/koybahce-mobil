@@ -169,3 +169,34 @@ describe("PhotoAnalysisScreen — Sprint 10.5, Madde 7 (Kullanıcı Talep Ettiğ
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("PhotoAnalysisScreen — Teşhis Bilgisi Butonu (Sprint 10.7, AI Diagnostic Build)", () => {
+  it("debugMode VERİLMEZSE (varsayılan), Teşhis Bilgisi butonu HİÇ görünmez", async () => {
+    render(<PhotoAnalysisScreen photo={fakePhoto} onBack={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("Analyze with AI")).toBeTruthy());
+
+    expect(screen.queryByText("AI Diagnostic Info")).toBeNull();
+  });
+
+  it("debugMode=true İKEN, buton 'Analiz Ediliyor' (sonsuz bekleme) DURUMUNDA BİLE erişilebilir kalır", async () => {
+    await aiSettingsRepository.getOrCreate();
+    await aiSettingsRepository.update({ isEnabled: true, internetPermission: true });
+    providerRegistry.register({
+      providerName: "gemini",
+      sendMessage: vi.fn(),
+      analyzeImage: vi.fn(() => new Promise<string>(() => {})), // asla resolve olmaz
+    });
+    const onViewDiagnostics = vi.fn();
+
+    render(
+      <PhotoAnalysisScreen photo={fakePhoto} onBack={vi.fn()} debugMode={true} onViewDiagnostics={onViewDiagnostics} />
+    );
+    await waitFor(() => expect(screen.getByText("Analyze with AI")).toBeTruthy());
+    fireEvent.click(screen.getByText("Analyze with AI"));
+    await waitFor(() => expect(screen.getByText("Analyzing...")).toBeTruthy());
+
+    expect(screen.getByText("AI Diagnostic Info")).toBeTruthy();
+    fireEvent.click(screen.getByText("AI Diagnostic Info"));
+    expect(onViewDiagnostics).toHaveBeenCalledTimes(1);
+  });
+});
