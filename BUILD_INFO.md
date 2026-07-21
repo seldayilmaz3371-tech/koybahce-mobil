@@ -3,56 +3,41 @@
 | Alan | Değer |
 |---|---|
 | **Project** | Bahçem Mobile |
-| **Module** | Modül 6 — AI Altyapısı + Modül 9 — Fotoğraf Analizi |
-| **Sprint** | 10.6 — AI Production Ready |
-| **Feature** | Tool-Calling Kök Neden Düzeltmesi + Hata Görünürlüğü + Hasat Aracı + Prompt Kalitesi |
+| **Module** | Modül 6 — AI Altyapısı |
+| **Sprint** | 10.7 — AI Diagnostic Build |
+| **Feature** | Kesin teknik teşhis altyapısı (yeni AI özelliği DEĞİL) |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 681/681 başarılı (+22 yeni) — **gerçekten çalıştırıldı** |
-| **Build** | ✅ **BUILD SUCCESSFUL** — gerçekten çalıştırıldı |
-| **Lint** | ✅ 0 uyarı/hata (226 dosya, 103 kural) — **gerçekten çalıştırıldı** |
-| **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) — **gerçekten çalıştırıldı** |
-| **TypeScript Build** | ✅ `tsc -b` temiz |
-| **🔴 Gerçek Cihaz Doğrulaması** | ❌ **YAPILAMADI** — bu ortamda Android SDK/fiziksel cihaz yok (kalıcı ortam kısıtı, önceki sprintlerde de kayıtlı). Tool-calling düzeltmesi kod seviyesinde kesin kanıtlı, gerçek cihaz onayı kullanıcının kendi ortamında yapılmalı. |
-| **Şema Sürümü** | 12 (değişmedi — bu sprint hiçbir migration içermiyor) |
+| **Test Sonucu** | ✅ 713/713 başarılı (+32 yeni) — **gerçekten çalıştırıldı** |
+| **Build** | ✅ **BUILD SUCCESSFUL** — `AiDiagnosticScreen` ayrı lazy chunk (4.17kB) |
+| **Lint** | ✅ 0 uyarı/hata (230 dosya, 103 kural) |
+| **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) |
+| **Şema Sürümü** | 12 (değişmedi — `debugMode` alanı Sprint 6'dan beri şemada vardı) |
 | **Tarih** | 2026-07-21 |
-| **Git Commit** | `d4ad39f` |
-| **ADR** | Yeni ADR yazılmadı — mevcut provider-agnostik mimarinin (ADR 0024) doğru uygulanması |
+| **Git Commit** | `66eeecb` |
+| **ADR** | Yeni ADR yazılmadı — gözlemlenebilirlik katmanı, yeni mimari kategori değil |
 
-## En Kritik Düzeltme
+## Artık Gerçek Cihazda Görülebilecek Bilgiler
 
-**Kesin kanıtlı kök neden bulundu ve düzeltildi:** `AiSessionService`'in tool-calling akışı, Gemini API'nin resmi sözleşmesini ihlal ediyordu (modelin function-call yanıtı history'ye hiç eklenmiyordu) — resmi Google dokümantasyonu + güncel bağımsız bir hata raporuyla (LiteLLM GitHub Issue #26755) kanıtlandı. Provider-agnostik bir çözümle düzeltildi, gerçek testle kanıtlandı.
+Provider, API Key durumu (empty/configured), İstek Aşaması (10 durum: idle→...→ui_updated/error/timeout), HTTP Status Code, Ham `ApiError` alanları (message/status/name/stack), `mapAiError()`'ın seçtiği kod, İstek Süresi (ms), Retry Sayısı, Timeout Durumu, Fotoğraf/Base64 Boyutu.
 
-## Yapılan Geliştirmeler (Özet)
+## Gerçek Bulgular (Bulunup Düzeltildi)
 
-1. Tool-calling kök neden düzeltmesi (kesin kanıtlı)
-2. 7 yeni ayırt edici hata kodu (AI_006-AI_012) + debug loglama
-3. Hasat AI aracı eklendi (`queryHarvestSummary`)
-4. Fotoğraf Analizi prompt kalitesi iyileştirildi (güvenlik sınırları korunarak)
-5. 2 alt yapının zaten hazır olduğu bulundu (Çoklu Provider, RAG hook noktası) — hiç kod gerekmedi
+1. Diagnostic modülünün kendi `startNewRequest()` çağrısı unutulmuştu — testle yakalanıp düzeltildi.
+2. `GeminiProvider`'da hiç timeout yoktu — SDK'nın resmi `httpOptions.timeout` (45sn) eklendi.
 
-## Değişen/Eklenen Dosyalar
+## Görünürlük Garantisi
 
-| Dosya | Değişiklik |
-|---|---|
-| `src/modules/ai/providers/AIProvider.interface.ts` | `AIMessage.toolCalls` eklendi |
-| `src/modules/ai/providers/GeminiProvider.ts` | `buildContents()` düzeltildi |
-| `src/modules/ai/session/AiSessionService.ts` | 2. round-trip'e model'in tool-call yanıtı ekleniyor |
-| `src/core/errors/errorCodes.ts` | 7 yeni AI hata kodu |
-| `src/core/errors/mapAiError.ts` | Gerçek Gemini hata türlerini ayırt ediyor, debug loglama |
-| `src/modules/ai/tools/harvest.tool.ts` | **Yeni dosya** — Hasat AI aracı |
-| `src/modules/ai/tools/registerReadOnlyTools.ts` | Hasat aracı kaydı |
-| `src/modules/photoAnalysis/photoAnalysisPrompt.ts` | Gözlem rehberliği eklendi |
-| `src/modules/photoAnalysis/photoAnalysisPrompt.test.ts` | **Yeni dosya** — önceden hiç yoktu |
-| i18n dosyaları (EN/TR) | 13 yeni çeviri |
+`debugMode` varsayılan **kapalı**. İki katmanlı koruma: (1) `AiDiagnosticScreen` kendi içinde `null` render eder, (2) route seviyesinde `debugMode` kontrolü var. Release kullanıcıları hiçbir teknik bilgi görmez.
+
+## Kapsam Dışı (Bilinçli)
+
+`mapAiError()`'ın kendi sınıflandırma mantığı **değiştirilmedi** — kullanıcının "rastgele düzeltme yapma" talimatı gereği, gerçek cihaz verisi görülene kadar ertelendi.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
 | Modül 1-5 | ✅ FROZEN |
-| Sprint 6-10.5 | ✅ Onaylandı |
-| Modül 6 — AI Altyapısı (Production Ready geliştirmeleri) | 🟡 Bu teslimat |
-| Modül 7 — Hasat | ✅ Onaylandı (AI aracı eklendi, Hasat modülünün kendisi değişmedi) |
-| Modül 8 — Dashboard | ✅ Onaylandı |
-| Modül 9 — Fotoğraf Analizi (prompt kalitesi iyileştirildi) | 🟡 Bu teslimat |
-| Modül 10 — Saha Operasyonları | ✅ Onaylandı |
+| Sprint 6-10.6 | ✅ Onaylandı |
+| Modül 7-10 | ✅ Onaylandı |
+| Modül 6 — AI (Diagnostic Build) | 🟡 Bu teslimat — gerçek cihaz doğrulaması bekliyor |

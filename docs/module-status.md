@@ -191,13 +191,13 @@ Modül 5 **kalıcı olarak donduruldu**. Sadece kritik güvenlik açığı/üret
 
 ## Modül 6 — AI Altyapısı
 
-**Durum: 🟡 KOD+NAVİGASYON+MOBİL UX+PRODUCTION KALİTESİ TAMAMLANDI, GERÇEK CİHAZDA KISMEN DOĞRULANDI — Production Ready DEĞİL** (kullanıcı kararı, güncellendi 2026-07-21)
+**Durum: 🟡 KOD+NAVİGASYON+MOBİL UX+PRODUCTION KALİTESİ+DIAGNOSTIC ALTYAPISI TAMAMLANDI, GERÇEK CİHAZDA KISMEN DOĞRULANDI — Production Ready DEĞİL** (kullanıcı kararı, güncellendi 2026-07-21)
 
 | Alan | Durum |
 |---|---|
 | Kodlama | ✅ Tamamlandı |
 | Mimari | ✅ Tamamlandı (ADR 0024) |
-| Testler | ✅ Tamamlandı (681/681 — proje geneli, Sprint 10.6 itibarıyla) |
+| Testler | ✅ Tamamlandı (713/713 — proje geneli, Sprint 10.7 itibarıyla) |
 | Dokümantasyon | ✅ Tamamlandı (ADR 0024/0025/0026, BUILD_INFO.md, APK Test Planı) |
 | Navigasyon Entegrasyonu | ✅ Tamamlandı (Sprint 7.1) |
 | Bundle Optimizasyonu | ✅ Tamamlandı (Sprint 7.1 — ana bundle 744kB→396kB, ölçüldü) |
@@ -205,18 +205,19 @@ Modül 5 **kalıcı olarak donduruldu**. Sadece kritik güvenlik açığı/üret
 | AI Davranış Doğrulaması (kod seviyesi) | ✅ Tamamlandı (Sprint 7.3) |
 | Beta Versiyon Numaraları | ✅ Uygulandı (Sprint 7.4 — `0.1.0-beta.1`) |
 | Gerçek Cihaz İlk Doğrulama | ✅ Tamamlandı (Sprint 7.2 onayında) |
-| **Tool-Calling Kök Neden Düzeltmesi** | ✅ **Tamamlandı (Sprint 10.6)** — AI X-Ray denetiminde kesin kanıtla bulunan Gemini API sözleşme ihlali düzeltildi |
-| **Hata Görünürlüğü (Production Seviyesi)** | ✅ **Tamamlandı (Sprint 10.6)** — 7 yeni ayırt edici hata kodu |
-| Gerçek Cihaz TAM Doğrulama (zorunlu test seti) | 🔴 **Bekleniyor** — özellikle Sprint 10.6'nın tool-calling düzeltmesinin gerçek cihazda doğrulanması artık öncelikli |
+| Tool-Calling Kök Neden Düzeltmesi | ✅ Tamamlandı (Sprint 10.6) — AI X-Ray denetiminde kesin kanıtla bulunan Gemini API sözleşme ihlali düzeltildi |
+| Hata Görünürlüğü (Production Seviyesi) | ✅ Tamamlandı (Sprint 10.6) — 12 ayırt edici hata kodu |
+| **AI Diagnostic Build (Teşhis Altyapısı)** | ✅ **Tamamlandı (Sprint 10.7)** — gerçek cihazda hataları kesin teknik kanıtla teşhis etme altyapısı, gerçek cihaz doğrulaması BEKLİYOR |
+| Gerçek Cihaz TAM Doğrulama (zorunlu test seti) | 🔴 **Bekleniyor** — Sprint 10.7'nin Diagnostic Build'i, tam olarak bu doğrulamayı KESİNLEŞTİRMEK için hazırlandı |
 | **İmzalama (Keystore)** | 🟡 **Mimari belgelendi (ADR 0026, Sprint 7.5) — gerçek keystore kullanıcının kendi ortamında oluşturulmayı bekliyor, Beta Release'in TEK kritik engeli** |
 | APK Testi (imzalı, dağıtılabilir) | 🔴 Bekleniyor |
-| Production Ready | 🔴 **Henüz değil** — kod kalitesi Sprint 10.6 ile önemli ölçüde arttı, ama gerçek cihaz doğrulaması ve imzalama hâlâ bekliyor |
+| Production Ready | 🔴 **Henüz değil** — kod kalitesi ve gözlemlenebilirlik önemli ölçüde arttı, ama gerçek cihaz doğrulaması ve imzalama hâlâ bekliyor |
 
 ### Kapsam
-AI Ayarları (güvenli varsayılanlar) + Provider Registry (Gemini, çoklu provider desteğine hazır) + Tool Registry (6 salt-okunur araç — Sprint 10.6'da Hasat eklendi) + Context Engine (anahtar kelime tabanlı, RAG'a hazır arayüz) + Konuşma Depolama + Salt-Okunur Sohbet + Fotoğraf Analizi. Sesli Asistan/RAG implementasyonu/Conversation Memory implementasyonu/Bitki-Hastalık tanıma/Yazma Araçları **bilinçli olarak kapsam dışı**.
+AI Ayarları (güvenli varsayılanlar + Teşhis Modu toggle'ı, Sprint 10.7) + Provider Registry (Gemini, çoklu provider desteğine hazır) + Tool Registry (6 salt-okunur araç) + Context Engine (anahtar kelime tabanlı, RAG'a hazır arayüz) + Konuşma Depolama + Salt-Okunur Sohbet + Fotoğraf Analizi + **AI Diagnostic Build** (Sprint 10.7 — merkezi teşhis kaydedici + Diagnostic ekranı, sadece Teşhis Modu açıkken erişilebilir). Sesli Asistan/RAG implementasyonu/Conversation Memory implementasyonu/Bitki-Hastalık tanıma/Yazma Araçları **bilinçli olarak kapsam dışı**.
 
-### Sprint 10.6 Notu (2026-07-21) — AI Production Ready
-`docs/ai-modulu-teknik-denetim-raporu.md` (AI X-Ray) denetiminin bulduğu kesin kanıtlı tool-calling hatası düzeltildi ve test edildi. Hata yönetimi production seviyesine çıkarıldı (7 yeni kod). Hasat AI aracı eklendi. Fotoğraf Analizi prompt kalitesi, güvenlik sınırları korunarak iyileştirildi. İki gelecek alt yapısının (Çoklu Provider, RAG hook noktası) zaten hazır olduğu bulundu. Detay: `docs/sprint-10.6-ai-production-ready-technical-report.md`.
+### Sprint 10.7 Notu (2026-07-21) — AI Diagnostic Build
+Kullanıcının gerçek cihaz test sonuçları (AI Sohbet'te her soruda genel hata, Fotoğraf Analizi'nde sonsuz bekleme), Sprint 10.6'nın "Production Ready" iddiasını doğrulayamadı. Bu sprint **yeni bir AI özelliği değil** — mevcut davranışı (doğru ya da hatalı) kesin teknik kanıtla gözlemlenebilir kılan bir teşhis altyapısı. `mapAiError()`'ın kendi (muhtemelen hatalı) sınıflandırma mantığına **bilinçli olarak dokunulmadı** — gerçek cihaz verisi görülene kadar erteledi. Gerçek bir timeout eksikliği bulunup düzeltildi (SDK'nın resmi `httpOptions.timeout` mekanizması, 45sn). Detay: `docs/sprint-10.7-ai-diagnostic-build-technical-report.md`.
 
 ### Sprint Geçmişi
 | Sprint | İçerik | Durum |
@@ -228,9 +229,10 @@ AI Ayarları (güvenli varsayılanlar) + Provider Registry (Gemini, çoklu provi
 | 7.4 | Beta versiyon altyapısı | ✅ Onaylandı |
 | 7.5 | Release Signing mimarisi belgeleri | ✅ Onaylandı |
 | 10.6 | AI Production Ready — Tool-calling düzeltmesi + hata görünürlüğü + Hasat aracı + prompt kalitesi | ✅ Tamamlandı |
+| 10.7 | AI Diagnostic Build — kesin teknik teşhis altyapısı (gerçek cihaz doğrulaması bekliyor) | ✅ Tamamlandı |
 
 ### Sonraki Adım
-Gerçek cihazda tool-calling düzeltmesinin doğrulanması (en yüksek öncelik) → İmzalama (kullanıcının kendi ortamında) → Gerçek Cihaz TAM doğrulaması → Production Ready kararı.
+Kullanıcının kendi cihazında Teşhis Modu'nu açıp gerçek hataları yeniden üretmesi → elde edilen gerçek `Error Code`/`stage`/`httpStatusCode` verisiyle kesin düzeltmenin planlanması → İmzalama → Gerçek Cihaz TAM doğrulaması → Production Ready kararı.
 
 ### Dondurma Kuralı
 Henüz uygulanmıyor — modül aktif geliştirme/doğrulama aşamasında.
