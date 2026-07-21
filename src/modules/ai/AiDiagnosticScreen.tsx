@@ -26,13 +26,25 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { aiDiagnostics, type AiDiagnosticSnapshot } from "./diagnostics/aiDiagnostics";
-import { useAiSettings } from "./hooks/useAiSettings";
 
 /** bkz. `node_modules/@google/genai/package.json` — gerçek sürümle doğrulandı. */
 const SDK_VERSION = "@google/genai 2.12.0";
 
+/**
+ * bkz. Sprint 10.8, GERÇEK BULGU: `snapshot.rawError.stack` bazen
+ * 15-20+ satır, her satırı 100+ karakter olan (minified bundle'dan
+ * kaynaklanan) çok uzun bir metin oluyordu — bu, ekranın geri kalanını
+ * (Provider/HTTP/Error Code gibi ASIL önemli alanları) aşağı itip
+ * "arayüz okunmuyor" izlenimine yol açan gerçek bir nedendi. Stack
+ * trace en sona zaten konumlandırılmıştı ama SINIRSIZ uzunlukta
+ * gösteriliyordu. Şimdi ilk 6 satırla sınırlandırılıyor.
+ */
+const MAX_STACK_LINES = 6;
+
 interface AiDiagnosticScreenProps {
   onBack: () => void;
+  /** bkz. Sprint 10.8 — artık route wrapper'dan geliyor, ekran KENDİ ayrı bir `useAiSettings()` çağrısı yapmıyor (gereksiz çift yükleme kaldırıldı). */
+  debugMode: boolean;
 }
 
 function formatStage(stage: AiDiagnosticSnapshot["stage"]): string {
@@ -51,9 +63,16 @@ function formatStage(stage: AiDiagnosticSnapshot["stage"]): string {
   return labels[stage];
 }
 
-export function AiDiagnosticScreen({ onBack }: AiDiagnosticScreenProps) {
+function truncateStack(stack: string): { text: string; truncated: boolean } {
+  const lines = stack.split("\n");
+  if (lines.length <= MAX_STACK_LINES) {
+    return { text: stack, truncated: false };
+  }
+  return { text: lines.slice(0, MAX_STACK_LINES).join("\n"), truncated: true };
+}
+
+export function AiDiagnosticScreen({ onBack, debugMode }: AiDiagnosticScreenProps) {
   const { t } = useTranslation();
-  const { settings } = useAiSettings();
   const [snapshot, setSnapshot] = useState<AiDiagnosticSnapshot>(() => aiDiagnostics.getSnapshot());
 
   // bkz. Sprint 10.7 — istek DEVAM EDERKEN bu ekrana bakılabilmesi
@@ -67,18 +86,15 @@ export function AiDiagnosticScreen({ onBack }: AiDiagnosticScreenProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // bkz. dosya başlığı — GÖRÜNÜRLÜK KURALI. `settings` henüz
-  // yüklenmemişse (ilk render) geçici olarak `null` döner — bu,
-  // "debugMode kapalı" ile KARIŞTIRILMAMALI, sadece kısa bir yükleme
-  // anı (useAiSettings zaten kendi "loading" durumunu yönetiyor,
-  // burada AYRICA bir yükleniyor ekranı GÖSTERMİYORUZ çünkü bu ekran
-  // zaten arka planda, kullanıcı bunu SEZMEZ).
-  if (!settings || !settings.debugMode) {
+  // bkz. dosya başlığı — GÖRÜNÜRLÜK KURALI.
+  if (!debugMode) {
     return null;
   }
 
+  const stackInfo = snapshot.rawError?.stack ? truncateStack(snapshot.rawError.stack) : null;
+
   return (
-    <main className="status-screen">
+    <main className="status-screen" style={{ maxWidth: "100%", overflowX: "hidden" }}>
       <h1 className="status-screen__title">{t("aiDiagnostic.screenTitle")}</h1>
 
       <div className="status-card">
@@ -93,7 +109,9 @@ export function AiDiagnosticScreen({ onBack }: AiDiagnosticScreenProps) {
 
       <div className="status-card">
         <p className="status-card__label">Stage:</p>
-        <p className="status-card__value">{formatStage(snapshot.stage)}</p>
+        <p className="status-card__value" style={{ fontSize: 14 }}>
+          {formatStage(snapshot.stage)}
+        </p>
       </div>
 
       <div className="status-card">
@@ -113,7 +131,9 @@ export function AiDiagnosticScreen({ onBack }: AiDiagnosticScreenProps) {
 
       <div className="status-card">
         <p className="status-card__label">Error Message (ham):</p>
-        <p className="status-card__value">{snapshot.rawError?.message ?? "—"}</p>
+        <p className="status-card__value" style={{ fontSize: 14, overflowWrap: "anywhere" }}>
+          {snapshot.rawError?.message ?? "—"}
+        </p>
       </div>
 
       {snapshot.rawError ? (
@@ -141,7 +161,7 @@ export function AiDiagnosticScreen({ onBack }: AiDiagnosticScreenProps) {
       {snapshot.photo ? (
         <div className="status-card">
           <p className="status-card__label">Fotoğraf Boyutu:</p>
-          <p className="status-card__value">
+          <p className="status-card__value" style={{ fontSize: 14 }}>
             {snapshot.photo.fileSizeBytes !== null
               ? `~${(snapshot.photo.fileSizeBytes / 1024 / 1024).toFixed(2)} MB (dosya) / ${(
                   (snapshot.photo.base64SizeBytes ?? 0) /
@@ -153,11 +173,20 @@ export function AiDiagnosticScreen({ onBack }: AiDiagnosticScreenProps) {
         </div>
       ) : null}
 
-      {snapshot.rawError?.stack ? (
-        <div className="status-card">
-          <p className="status-card__label">Stack:</p>
-          <pre style={{ fontSize: 11, whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
-            {snapshot.rawError.stack}
+      {stackInfo ? (
+        <div className="status-card" style={{ overflow: "hidden" }}>
+          <p className="status-card__label">Stack{stackInfo.truncated ? ` (ilk ${MAX_STACK_LINES} satır)` : ""}:</p>
+          <pre
+            style={{
+              fontSize: 11,
+              whiteSpace: "pre-wrap",
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
+              maxWidth: "100%",
+              margin: 0,
+            }}
+          >
+            {stackInfo.text}
           </pre>
         </div>
       ) : null}

@@ -557,7 +557,7 @@ function AiDiagnosticScreenRoute() {
 
   return (
     <Suspense fallback={<AiLoadingFallback />}>
-      <AiDiagnosticScreenLazy onBack={() => navigate(-1)} />
+      <AiDiagnosticScreenLazy onBack={() => navigate(-1)} debugMode={settings.debugMode} />
     </Suspense>
   );
 }

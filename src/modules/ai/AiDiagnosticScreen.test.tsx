@@ -2,34 +2,23 @@
 /**
  * AiDiagnosticScreen Testleri
  * ==============================
- * bkz. Sprint 10.7 (AI Diagnostic Build). En kritik senaryo: bu
+ * bkz. Sprint 10.7/10.8 (AI Diagnostic Build). En kritik senaryo: bu
  * ekranın debugMode kapalıyken GERÇEKTEN hiçbir şey göstermediği —
  * "Release sürümünde bu bilgiler görünmesin" gereksiniminin GERÇEK
  * testle kanıtı.
+ *
+ * Sprint 10.8 GÜNCELLEMESİ: `debugMode` artık bir PROP (route
+ * wrapper'dan geliyor) — ekran KENDİ ayrı bir `useAiSettings()` çağrısı
+ * YAPMIYOR (gereksiz çift yükleme/flicker riski GİDERİLDİ).
  */
 
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import en from "../../i18n/locales/en/common.json";
-import {
-  setDatabaseExecutorProviderForTesting,
-  resetDatabaseExecutorProviderForTesting,
-} from "../../data/repositories/base.repository";
-import { createTestDatabaseExecutor } from "../../data/db/testDatabaseExecutor";
-import { SCHEMA_MIGRATIONS } from "../../data/db/migrations/schema";
-import { secureStorage } from "../../native/secureStorage";
-import { aiSettingsRepository } from "./data/aiSettings.repository";
 import { aiDiagnostics } from "./diagnostics/aiDiagnostics";
 import { AiDiagnosticScreen } from "./AiDiagnosticScreen";
-
-vi.mock("../../native/secureStorage", () => ({
-  secureStorage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
-  SecureStorageKey: { GEMINI_API_KEY: "gemini_api_key" },
-}));
-
-const ALL_SCHEMA_STATEMENTS = SCHEMA_MIGRATIONS.flatMap((m) => m.statements);
 
 beforeAll(async () => {
   await i18n.use(initReactI18next).init({
@@ -40,35 +29,21 @@ beforeAll(async () => {
   });
 });
 
-beforeEach(async () => {
-  const executor = createTestDatabaseExecutor(ALL_SCHEMA_STATEMENTS);
-  setDatabaseExecutorProviderForTesting(async () => executor);
-  vi.mocked(secureStorage.get).mockResolvedValue(null);
-  aiDiagnostics.reset();
-});
-
 afterEach(() => {
   cleanup();
-  resetDatabaseExecutorProviderForTesting();
+  aiDiagnostics.reset();
   vi.restoreAllMocks();
 });
 
 describe("AiDiagnosticScreen — Görünürlük Kuralı (Sprint 10.7, KULLANICININ AÇIK TALEBİ)", () => {
-  it("debugMode KAPALIYSA (varsayılan), ekran GERÇEKTEN hiçbir şey göstermez (null render)", async () => {
-    await aiSettingsRepository.getOrCreate(); // varsayılan debugMode: false
+  it("debugMode=false İSE, ekran GERÇEKTEN hiçbir şey göstermez (null render)", () => {
+    const { container } = render(<AiDiagnosticScreen onBack={vi.fn()} debugMode={false} />);
 
-    const { container } = render(<AiDiagnosticScreen onBack={vi.fn()} />);
-
-    // Bir süre bekleyip (useAiSettings'in kendi yüklenmesi tamamlansın), YİNE DE hiçbir içerik OLMAMALI.
-    await new Promise((resolve) => setTimeout(resolve, 50));
     expect(container.textContent).toBe("");
   });
 
-  it("debugMode AÇIKSA, ekran GERÇEKTEN teşhis bilgilerini gösterir", async () => {
-    await aiSettingsRepository.getOrCreate();
-    await aiSettingsRepository.update({ debugMode: true });
-
-    render(<AiDiagnosticScreen onBack={vi.fn()} />);
+  it("debugMode=true İSE, ekran GERÇEKTEN teşhis bilgilerini gösterir", async () => {
+    render(<AiDiagnosticScreen onBack={vi.fn()} debugMode={true} />);
 
     await waitFor(() => expect(screen.getByText("AI Diagnostic Info")).toBeTruthy());
     expect(screen.getByText("Provider:")).toBeTruthy();
@@ -78,17 +53,15 @@ describe("AiDiagnosticScreen — Görünürlük Kuralı (Sprint 10.7, KULLANICIN
   });
 });
 
-describe("AiDiagnosticScreen — Gerçek Veri Gösterimi (Sprint 10.7)", () => {
+describe("AiDiagnosticScreen — Gerçek Veri Gösterimi (Sprint 10.7/10.8)", () => {
   it("aiDiagnostics'e kaydedilen GERÇEK veriler, ekranda GERÇEKTEN görünür", async () => {
-    await aiSettingsRepository.getOrCreate();
-    await aiSettingsRepository.update({ debugMode: true });
     aiDiagnostics.recordProvider("gemini");
     aiDiagnostics.recordApiKeyStatus("configured");
     aiDiagnostics.recordMappedErrorCode("AI_006");
     aiDiagnostics.recordRetry();
     aiDiagnostics.recordRetry();
 
-    render(<AiDiagnosticScreen onBack={vi.fn()} />);
+    render(<AiDiagnosticScreen onBack={vi.fn()} debugMode={true} />);
 
     await waitFor(() => expect(screen.getByText("gemini")).toBeTruthy());
     expect(screen.getByText("configured")).toBeTruthy();
@@ -97,15 +70,55 @@ describe("AiDiagnosticScreen — Gerçek Veri Gösterimi (Sprint 10.7)", () => {
   });
 
   it("'Back' butonuna basmak onBack'i çağırır", async () => {
-    await aiSettingsRepository.getOrCreate();
-    await aiSettingsRepository.update({ debugMode: true });
     const onBack = vi.fn();
 
-    render(<AiDiagnosticScreen onBack={onBack} />);
+    render(<AiDiagnosticScreen onBack={onBack} debugMode={true} />);
     await waitFor(() => expect(screen.getByText("Back")).toBeTruthy());
 
     screen.getByText("Back").click();
 
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("AiDiagnosticScreen — Stack Trace Taşma Koruması (Sprint 10.8, GERÇEK BULGU DÜZELTMESİ)", () => {
+  it("çok uzun (6 satırdan fazla) bir stack trace GERÇEKTEN kısaltılır, ekranın geri kalanını EZMEZ", async () => {
+    class FakeApiError extends Error {
+      status: number;
+      constructor() {
+        super("test hatası");
+        this.name = "ApiError";
+        this.status = 500;
+        this.stack = Array.from({ length: 20 }, (_, i) => `satır ${i}`).join("\n");
+      }
+    }
+    aiDiagnostics.recordRawError(new FakeApiError());
+
+    render(<AiDiagnosticScreen onBack={vi.fn()} debugMode={true} />);
+
+    await waitFor(() => expect(screen.getByText(/ilk 6 satır/)).toBeTruthy());
+    expect(screen.getByText("satır 0", { exact: false })).toBeTruthy();
+    expect(screen.queryByText("satır 19", { exact: false })).toBeNull();
+    // Stack ne kadar uzun olursa olsun, ASIL önemli alanlar HER ZAMAN görünür kalmalı.
+    expect(screen.getByText("Provider:")).toBeTruthy();
+    expect(screen.getByText("Back")).toBeTruthy();
+  });
+
+  it("6 satır VEYA daha kısa bir stack trace, HİÇ kısaltma notu OLMADAN tam gösterilir", async () => {
+    class FakeApiError extends Error {
+      status: number;
+      constructor() {
+        super("test hatası");
+        this.name = "ApiError";
+        this.status = 500;
+        this.stack = "satır 1\nsatır 2\nsatır 3";
+      }
+    }
+    aiDiagnostics.recordRawError(new FakeApiError());
+
+    render(<AiDiagnosticScreen onBack={vi.fn()} debugMode={true} />);
+
+    await waitFor(() => expect(screen.getByText("Stack:")).toBeTruthy());
+    expect(screen.queryByText(/ilk 6 satır/)).toBeNull();
   });
 });

@@ -32,8 +32,39 @@ import type {
   AIToolResult,
 } from "./AIProvider.interface";
 
-/** bkz. Bölüm 15 (AI Ayarları) — "AI sağlayıcı/model seçimi: Gemini (varsayılan)". Model seçimi bugün kullanıcıya sunulmuyor. */
-const GEMINI_MODEL = "gemini-2.5-flash";
+/**
+ * bkz. Bölüm 15 (AI Ayarları) — "AI sağlayıcı/model seçimi: Gemini (varsayılan)". Model seçimi bugün kullanıcıya sunulmuyor.
+ *
+ * bkz. Sprint 10.8. GERÇEK BULGU (Sprint 10.7'nin Diagnostic Build'i
+ * kullanıcının cihazında henüz okunamadığı için, bu değişiklik
+ * "kesin kök neden düzeltmesi" OLARAK SUNULMUYOR — dürüstçe
+ * belirtilmesi gerekiyor):
+ *
+ * `gemini-2.5-flash` sabit model adı, resmi Google dokümantasyonunda
+ * (ai.google.dev/gemini-api/docs/models, bu sprintte gerçekten
+ * kontrol edildi) BUGÜN İTİBARIYLA hâlâ aktif model listesinde
+ * görünüyor — "shut down" olarak işaretli DEĞİL. Ama GÜNCEL,
+ * bağımsız bir Google AI Developer Forum raporu (bu sprintte
+ * gerçekten arandı), bazı kullanıcıların BEKLENENDEN ÖNCE, bildirim
+ * olmadan "This model models/gemini-2.5-flash is no longer
+ * available" hatası aldığını gösteriyor.
+ *
+ * Google'ın KENDİ resmi dokümantasyonu, "latest" alias'ının TAM
+ * OLARAK bu tür deprecation sürprizlerine karşı tasarlandığını
+ * açıklıyor: "Points to the latest release for a specific model
+ * variation... For breaking changes, a 2-week notice will be
+ * provided through email before the version behind latest is
+ * changed." `gemini-flash-latest`, BUGÜN Gemini 3.5 Flash GA
+ * sürümüne işaret ediyor (resmi changelog'da doğrulandı).
+ *
+ * Bu, KANITLANMIŞ bir kök neden düzeltmesi değil — GERÇEK cihaz
+ * teşhis verisi (Sprint 10.7'nin Diagnostic ekranı, bu sprintte
+ * ayrıca düzeltildi) görülmeden kesinleştirilemez. Ama bu, Google'ın
+ * kendi resmi tavsiyesine dayanan, düşük riskli bir dayanıklılık
+ * iyileştirmesi — sabit bir model adının gelecekte de bugünküyle
+ * aynı sorunu yaratma riskini ortadan kaldırıyor.
+ */
+const GEMINI_MODEL = "gemini-flash-latest";
 
 /** Web projesindeki `MAX_GEMINI_RETRY_ATTEMPTS`/`GEMINI_RETRY_BASE_DELAY_MS` ile BİREBİR aynı değerler. */
 const MAX_RETRY_ATTEMPTS = 2;
