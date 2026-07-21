@@ -14,6 +14,7 @@
     "AI_009": "AI couldn't process this request. Please try again or rephrase your question.",
     "AI_010": "Could not connect to AI — please check your internet connection.",
     "AI_011": "The AI request took too long and timed out. Please try again.",
+    "AI_012": "AI tried to use a tool that isn't available. Please try rephrasing your question.",
     "SYS_001": "Something went wrong. Please try again."
   },
   "settings": {

@@ -56,6 +56,9 @@ export function mapAiError(error: unknown): ErrorCodeValue {
   if (message.includes("AI_PHOTO_ANALYSIS_EMPTY_RESPONSE")) {
     return ErrorCode.AI_005;
   }
+  if (message.includes("AI_TOOL_NOT_FOUND")) {
+    return ErrorCode.AI_012;
+  }
   if (message.includes('"code":401') || message.includes('"code":403')) {
     return ErrorCode.AI_006;
   }

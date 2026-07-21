@@ -60,4 +60,8 @@ describe("mapAiError — Sprint 10.6 (Gerçek Gemini Hata Kodlarının Ayrışt�
   it("Timeout (AbortError) -> AI_011", () => {
     expect(mapAiError(new Error("AbortError: request timeout"))).toBe(ErrorCode.AI_011);
   });
+
+  it("AI_TOOL_NOT_FOUND (model var olmayan bir araç istedi) -> AI_012", () => {
+    expect(mapAiError(new Error("AI_TOOL_NOT_FOUND: hayaliArac"))).toBe(ErrorCode.AI_012);
+  });
 });

@@ -18,11 +18,13 @@ import { treeRepository } from "../../trees/data/tree.repository";
 import { observationRepository } from "../../observations/data/observation.repository";
 import { maintenanceRepository } from "../../maintenance/data/maintenance.repository";
 import { financeRepository } from "../../finance/data/finance.repository";
+import { harvestRepository } from "../../harvest/data/harvest.repository";
 import { parcelTool } from "./parcel.tool";
 import { treeTool } from "./tree.tool";
 import { observationTool } from "./observation.tool";
 import { maintenanceTool } from "./maintenance.tool";
 import { financeTool } from "./finance.tool";
+import { harvestTool } from "./harvest.tool";
 
 const ALL_SCHEMA_STATEMENTS = SCHEMA_MIGRATIONS.flatMap((m) => m.statements);
 
@@ -135,6 +137,31 @@ describe("financeTool", () => {
 
   it("parcelId verilmezse AÇIK bir hata mesajı döner", async () => {
     const result = await financeTool.execute({});
+    expect(result).toEqual({ error: "parcelId gerekli." });
+  });
+});
+
+describe("harvestTool (Sprint 10.6 — GERÇEK BULGU: AI daha önce Hasat verisine hiç erişemiyordu)", () => {
+  it("ham kayıt DEĞİL, TOPLAM hasat miktarı (kg) özeti döner", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await harvestRepository.create({ parcelId: parcel.id, harvestDate: "2026-09-01", quantityKg: 120 });
+    await harvestRepository.create({ parcelId: parcel.id, harvestDate: "2026-09-15", quantityKg: 80 });
+
+    const result = await harvestTool.execute({ parcelId: parcel.id });
+
+    expect(result).toEqual({ recordCount: 2, totalQuantityKg: 200 });
+  });
+
+  it("hiç hasat kaydı yoksa sıfır özet döner (hata FIRLATMAZ)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+
+    const result = await harvestTool.execute({ parcelId: parcel.id });
+
+    expect(result).toEqual({ recordCount: 0, totalQuantityKg: 0 });
+  });
+
+  it("parcelId verilmezse AÇIK bir hata mesajı döner", async () => {
+    const result = await harvestTool.execute({});
     expect(result).toEqual({ error: "parcelId gerekli." });
   });
 });

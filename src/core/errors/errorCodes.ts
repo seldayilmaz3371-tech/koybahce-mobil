@@ -44,6 +44,12 @@ export const ErrorCode = {
   AI_009: "AI_009", // Gemini geçersiz istek olarak reddetti (400 — ör. hatalı prompt/parametre yapısı)
   AI_010: "AI_010", // Ağ bağlantısı kurulamadı (fetch/network hatası — JS'in standart hata biçimleri)
   AI_011: "AI_011", // İstek zaman aşımına uğradı
+  // bkz. Sprint 10.6, Öncelik 3 (Stabilite İncelemesi). GERÇEK BULGU:
+  // `ToolRegistry.invoke()`'ın fırlattığı `AI_TOOL_NOT_FOUND` (model
+  // var olmayan bir araç adı üretirse — nadir ama teorik olarak
+  // mümkün, "hallucination") daha önce mapAiError()'da hiç
+  // eşlenmemişti, genel SYS_001'e düşüyordu.
+  AI_012: "AI_012", // AI, var olmayan bir araç çağırmaya çalıştı (iç tutarsızlık)
 
   SYS_001: "SYS_001", // Beklenmeyen/sınıflandırılamayan hata
 } as const;

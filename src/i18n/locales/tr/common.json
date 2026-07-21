@@ -14,6 +14,7 @@
     "AI_009": "AI bu isteği işleyemedi. Lütfen tekrar deneyin veya sorunuzu farklı ifade edin.",
     "AI_010": "AI'ye bağlanılamadı — lütfen internet bağlantınızı kontrol edin.",
     "AI_011": "AI isteği çok uzun sürdü ve zaman aşımına uğradı. Lütfen tekrar deneyin.",
+    "AI_012": "AI, mevcut olmayan bir araç kullanmaya çalıştı. Lütfen sorunuzu farklı ifade edin.",
     "SYS_001": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
   },
   "settings": {

@@ -12,6 +12,7 @@ import { treeTool } from "./tree.tool";
 import { observationTool } from "./observation.tool";
 import { maintenanceTool } from "./maintenance.tool";
 import { financeTool } from "./finance.tool";
+import { harvestTool } from "./harvest.tool";
 
 export function registerReadOnlyTools(): void {
   toolRegistry.register(parcelTool);
@@ -19,4 +20,5 @@ export function registerReadOnlyTools(): void {
   toolRegistry.register(observationTool);
   toolRegistry.register(maintenanceTool);
   toolRegistry.register(financeTool);
+  toolRegistry.register(harvestTool);
 }
