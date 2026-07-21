@@ -29,6 +29,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { SelectField } from "../../shared/components/form/SelectField";
 import { DateField } from "../../shared/components/form/DateField";
+import { TimeField } from "../../shared/components/form/TimeField";
 import { TextAreaField } from "../../shared/components/form/TextAreaField";
 import { FormError } from "../../shared/components/form/FormError";
 import { dateInputValueToIso, isoToDateInputValue } from "../../shared/utils/dateInputConversion";
@@ -76,12 +77,22 @@ export function MaintenanceRecordForm({
   const [completedDateInput, setCompletedDateInput] = useState(
     initialValue?.completedDate ? isoToDateInputValue(initialValue.completedDate) : ""
   );
+  // bkz. Sprint 10.4 Düzeltme Paketi. `startTime`/`endTime` — SADECE
+  // Sulama'da (`isIrrigation`) gösterilir. `BulkMaintenanceForm`'un
+  // AYNI deseni (Kural: kod tekrarından kaçın) — "HH:MM" formatında
+  // DOĞRUDAN string, `combineDateAndTimeToIso` GEREKMİYOR (bu form
+  // için `startTime`/`endTime`, `completedDate`'ten TAMAMEN BAĞIMSIZ
+  // ayrı sütunlar — bkz. Şema Sürüm 12).
+  const [startTimeInput, setStartTimeInput] = useState(initialValue?.startTime ?? "");
+  const [endTimeInput, setEndTimeInput] = useState(initialValue?.endTime ?? "");
   const [notes, setNotes] = useState(initialValue?.notes ?? "");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // bkz. FinanceRecordForm.tsx — aynı gerçek bulgu (Sprint 3.7,
   // backlog #15), aynı düzeltme, baştan uygulandı.
   const isSubmittingRef = useRef(false);
+
+  const isIrrigation = maintenanceType === MaintenanceType.Irrigation;
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -98,6 +109,8 @@ export function MaintenanceRecordForm({
         status,
         scheduledDate: scheduledDateInput ? dateInputValueToIso(scheduledDateInput) : null,
         completedDate: completedDateInput ? dateInputValueToIso(completedDateInput) : null,
+        startTime: isIrrigation && startTimeInput ? startTimeInput : null,
+        endTime: isIrrigation && endTimeInput ? endTimeInput : null,
         notes: notes.trim() || null,
       });
     } finally {
@@ -158,6 +171,23 @@ export function MaintenanceRecordForm({
         value={completedDateInput}
         onChange={setCompletedDateInput}
       />
+
+      {isIrrigation ? (
+        <>
+          <TimeField
+            id="maintenance-start-time"
+            label={t("bulkOperations.irrigationStartTimeLabel")}
+            value={startTimeInput}
+            onChange={setStartTimeInput}
+          />
+          <TimeField
+            id="maintenance-end-time"
+            label={t("bulkOperations.irrigationEndTimeLabel")}
+            value={endTimeInput}
+            onChange={setEndTimeInput}
+          />
+        </>
+      ) : null}
 
       <TextAreaField id="maintenance-notes" label={t("common.notes")} value={notes} onChange={setNotes} />
 

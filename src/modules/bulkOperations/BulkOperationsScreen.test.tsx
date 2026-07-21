@@ -79,3 +79,26 @@ describe("BulkOperationsScreen", () => {
     expect(screen.getByText("Bulk Maintenance Record")).toBeTruthy();
   });
 });
+
+describe("BulkOperationsScreen — Menü→Form Tür Aktarımı (Sprint 10.4 Düzeltme Paketi)", () => {
+  it.each([
+    ["Irrigation", "irrigation"],
+    ["Fertilization", "fertilization"],
+    ["Pesticide", "pesticide"],
+    ["Pruning", "pruning"],
+    ["Mowing", "other"],
+  ])(
+    "menüde '%s'e tıklamak, formu GERÇEKTEN '%s' türü seçili olarak açar (önceden HER ZAMAN 'irrigation' açılıyordu)",
+    async (buttonLabel, expectedValue) => {
+      const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+
+      render(<BulkOperationsScreen parcelId={parcel.id} onBack={vi.fn()} />);
+      await waitFor(() => expect(screen.getByText(buttonLabel)).toBeTruthy());
+      fireEvent.click(screen.getByText(buttonLabel));
+
+      await waitFor(() => expect(screen.getByText("Bulk Maintenance Record")).toBeTruthy());
+      const select = screen.getByLabelText("Type") as HTMLSelectElement;
+      expect(select.value).toBe(expectedValue);
+    }
+  );
+});

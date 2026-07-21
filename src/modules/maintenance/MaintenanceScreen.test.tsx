@@ -167,3 +167,54 @@ describe("MaintenanceScreen — Error Code Standard (Sprint 5.2, kurulu standart
     expect(screen.queryByText(/line 42/)).toBeNull();
   });
 });
+
+describe("MaintenanceScreen — Sulama Başlangıç/Bitiş Saati Gösterimi (Sprint 10.4 Düzeltme Paketi)", () => {
+  it("Sulama kaydının startTime/endTime'ı DOLUYSA, kart üzerinde saat aralığı GERÇEKTEN gösterilir", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await maintenanceRepository.create({
+      parcelId: parcel.id,
+      maintenanceType: "irrigation",
+      completedDate: "2026-07-19",
+      startTime: "06:15",
+      endTime: "08:05",
+    });
+
+    render(
+      <MaintenanceScreen scope={{ mode: "parcel", parcelId: parcel.id }} parcelId={parcel.id} onBack={() => {}} />
+    );
+
+    await waitFor(() => expect(screen.getByText(/06:15–08:05/)).toBeTruthy());
+  });
+
+  it("startTime/endTime BOŞSA (eski/diğer kayıtlar), saat aralığı HİÇ gösterilmez — GERİYE DÖNÜK UYUMLULUK", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await maintenanceRepository.create({
+      parcelId: parcel.id,
+      maintenanceType: "irrigation",
+      completedDate: "2026-07-19",
+    });
+
+    render(
+      <MaintenanceScreen scope={{ mode: "parcel", parcelId: parcel.id }} parcelId={parcel.id} onBack={() => {}} />
+    );
+
+    await waitFor(() => expect(screen.getByText("Irrigation")).toBeTruthy());
+    expect(screen.queryByText(/–/)).toBeNull();
+  });
+
+  it("Budama (Sulama DIŞI) kaydında saat aralığı ASLA gösterilmez — DİĞER türlerde GÖRSEL değişiklik YOK", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await maintenanceRepository.create({
+      parcelId: parcel.id,
+      maintenanceType: "pruning",
+      completedDate: "2026-07-19",
+    });
+
+    render(
+      <MaintenanceScreen scope={{ mode: "parcel", parcelId: parcel.id }} parcelId={parcel.id} onBack={() => {}} />
+    );
+
+    await waitFor(() => expect(screen.getByText("Pruning")).toBeTruthy());
+    expect(screen.queryByText(/–/)).toBeNull();
+  });
+});

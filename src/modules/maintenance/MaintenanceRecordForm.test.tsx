@@ -207,3 +207,77 @@ describe("MaintenanceRecordForm", () => {
     expect(screen.queryByText("Delete Record")).toBeNull();
   });
 });
+
+describe("MaintenanceRecordForm — Sulama Başlangıç/Bitiş Saati (Sprint 10.4 Düzeltme Paketi)", () => {
+  it("varsayılan tür Sulama OLDUĞU İÇİN, saat alanları OLUŞTURMA modunda GÖRÜNÜR", () => {
+    render(<MaintenanceRecordForm parcelId={PARCEL_ID} onSubmit={vi.fn()} onCancel={() => {}} />);
+
+    expect(screen.getByLabelText("Start Time")).toBeTruthy();
+    expect(screen.getByLabelText("End Time")).toBeTruthy();
+  });
+
+  it("Sulama DIŞI bir tür SEÇİLDİĞİNDE, saat alanları GERÇEKTEN kaybolur", () => {
+    render(<MaintenanceRecordForm parcelId={PARCEL_ID} onSubmit={vi.fn()} onCancel={() => {}} />);
+
+    fireEvent.change(screen.getByLabelText("Type"), { target: { value: "pruning" } });
+
+    expect(screen.queryByLabelText("Start Time")).toBeNull();
+    expect(screen.queryByLabelText("End Time")).toBeNull();
+  });
+
+  it("düzenleme modunda, MEVCUT bir Sulama kaydının saatleri GERÇEKTEN alanlara YÜKLENİR", () => {
+    const existing: MaintenanceRecord = {
+      id: "mr-2",
+      parcelId: PARCEL_ID,
+      treeId: null,
+      maintenanceType: "irrigation",
+      status: "completed",
+      scheduledDate: null,
+      completedDate: "2026-07-19T00:00:00.000Z",
+      startTime: "06:15",
+      endTime: "08:05",
+      notes: null,
+      isActive: true,
+      createdAt: "2026-07-19T00:00:00.000Z",
+      updatedAt: "2026-07-19T00:00:00.000Z",
+    };
+
+    render(
+      <MaintenanceRecordForm parcelId={PARCEL_ID} initialValue={existing} onSubmit={vi.fn()} onCancel={() => {}} />
+    );
+
+    expect((screen.getByLabelText("Start Time") as HTMLInputElement).value).toBe("06:15");
+    expect((screen.getByLabelText("End Time") as HTMLInputElement).value).toBe("08:05");
+  });
+
+  it("Sulama kaydı kaydedilirken, GİRİLEN saatler GERÇEKTEN onSubmit'e iletilir", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(<MaintenanceRecordForm parcelId={PARCEL_ID} onSubmit={onSubmit} onCancel={() => {}} />);
+
+    fireEvent.change(screen.getByLabelText("Start Time"), { target: { value: "06:15" } });
+    fireEvent.change(screen.getByLabelText("End Time"), { target: { value: "08:05" } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ startTime: "06:15", endTime: "08:05" }));
+  });
+
+  it("Sulama DIŞI bir tür kaydedilirken, startTime/endTime GERÇEKTEN null olarak gönderilir (alanlar ekranda OLSA BİLE görmezden gelinir)", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(<MaintenanceRecordForm parcelId={PARCEL_ID} onSubmit={onSubmit} onCancel={() => {}} />);
+
+    fireEvent.change(screen.getByLabelText("Start Time"), { target: { value: "06:15" } });
+    fireEvent.change(screen.getByLabelText("End Time"), { target: { value: "08:05" } });
+    // Kullanıcı SONRADAN türü değiştirirse (saatleri GİRDİKTEN sonra) — alanlar KAYBOLUR,
+    // GERİYE dönük olarak GİRİLEN değerler GÖNDERİLMEMELİ.
+    fireEvent.change(screen.getByLabelText("Type"), { target: { value: "fertilization" } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ startTime: null, endTime: null }));
+  });
+});

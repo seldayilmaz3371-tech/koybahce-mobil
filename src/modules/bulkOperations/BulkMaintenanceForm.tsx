@@ -48,6 +48,8 @@ interface BulkMaintenanceFormProps {
   onBack: () => void;
   initialSelectedTreeIds?: string[];
   onApplyAnotherOperation?: (treeIds: string[]) => void;
+  /** bkz. Sprint 10.4 Düzeltme Paketi. `BulkOperationsScreen`'in menüsünden HANGİ bakım türüne tıklandığını iletir — VERİLMEZSE `Irrigation` varsayılanı korunur (mevcut davranış). */
+  initialMaintenanceType?: MaintenanceTypeValue;
 }
 
 type ResultState = { createdIds: string[]; count: number } | null;
@@ -67,9 +69,12 @@ export function BulkMaintenanceForm({
   onBack,
   initialSelectedTreeIds,
   onApplyAnotherOperation,
+  initialMaintenanceType,
 }: BulkMaintenanceFormProps) {
   const { t } = useTranslation();
-  const [maintenanceType, setMaintenanceType] = useState<MaintenanceTypeValue>(MaintenanceType.Irrigation);
+  const [maintenanceType, setMaintenanceType] = useState<MaintenanceTypeValue>(
+    initialMaintenanceType ?? MaintenanceType.Irrigation
+  );
   const [notes, setNotes] = useState("");
   // Sprint 10.4, Madde 1 — varsayılan "şimdi" (yerel saat), kullanıcı değiştirebilir.
   const [dateValue, setDateValue] = useState(nowAsDateInputValue);
