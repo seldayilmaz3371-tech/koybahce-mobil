@@ -366,6 +366,7 @@ Session cache (gerçek kullanıcı ihtiyacı kanıtlanırsa), kalıcı saklama (
 ### Bilinen Riskler (Gerçek Cihazda Doğrulanmalı)
 - `TreeSelectorList` sanallaştırma içermiyor.
 - `runInTransaction()`'ın ANR riski doğrulanmadı.
+- "Biçme" olarak oluşturulan kayıtlar, Liste/Detay ekranlarında "Other" (Diğer) olarak görünüyor — bilinçli olarak ertelendi, ayrı bir sprintte değerlendirilecek.
 
 ### Sprint Geçmişi
 | Sprint | İçerik | Durum |
@@ -373,6 +374,11 @@ Session cache (gerçek kullanıcı ihtiyacı kanıtlanırsa), kalıcı saklama (
 | 10.1 | Repository katmanı + gerçek performans testi | ✅ Tamamlandı |
 | 10.2 | Toplu İşlemler UI (ağaç seçimi, formlar, geri al) | ✅ Tamamlandı |
 | 10.3 | Saha UX iyileştirmeleri + navigasyon + UX öz-denetimi | ✅ Tamamlandı |
+| 10.4 | Geriye dönük tarih/saat + Sulama Başlangıç/Bitiş Saati | ✅ Tamamlandı |
+| 10.4 Düzeltme Paketi | `initialMaintenanceType` entegrasyonu + Liste/Detay saat gösterimi | ✅ Tamamlandı |
+
+### Sprint 10.4 Düzeltme Paketi Notu (2026-07-21) — Kök Neden Bulundu ve Düzeltildi
+Sprint 10.4'ün kodu gerçekten mevcuttu ama `BulkOperationsScreen`'in menü seçimi (`initialType`), `BulkMaintenanceForm`'a hiç iletilmiyordu — kullanıcı hangi bakım türüne tıklarsa tıklasın, form her zaman "Sulama" seçili açılıyordu. Kesin kanıtla bulunup düzeltildi (5 senaryonun tamamı gerçek testle kanıtlandı). Ayrıca, kaydedilen Sulama saatlerinin Liste (`MaintenanceRecordCard`) ve Detay (`MaintenanceRecordForm`) ekranlarında hiç gösterilmediği tespit edilip düzeltildi — gerçek risk değerlendirmesi sonucu (migration gerekmedi, yeni abstraction gerekmedi) uygulandı. "Biçme→Other" görüntüleme sorunu **bilinçli olarak bu sprintte ele alınmadı** — ayrı bir sprintte değerlendirilecek. Detay: `docs/sprint-10.4-duzeltme-paketi-technical-report.md`.
 | 10.4 | Geriye dönük tarih/saat (tüm türler) + Sulama Başlangıç/Bitiş Saati (Şema Sürüm 12) | ✅ Tamamlandı |
 
 ### Sprint 10.4 Notu (2026-07-19) — Geriye Dönük Tarih/Saat + Sulama Süresi
