@@ -3,54 +3,56 @@
 | Alan | Değer |
 |---|---|
 | **Project** | Bahçem Mobile |
-| **Module** | Modül 10 — Saha Operasyonları (Toplu İşlemler) + Modül 5 (Bakım Yönetimi) |
-| **Sprint** | 10.4 Düzeltme Paketi |
-| **Feature** | `initialMaintenanceType` Entegrasyonu + Sulama Saati Görüntüleme (Liste + Detay) |
+| **Module** | Modül 6 — AI Altyapısı + Modül 9 — Fotoğraf Analizi |
+| **Sprint** | 10.6 — AI Production Ready |
+| **Feature** | Tool-Calling Kök Neden Düzeltmesi + Hata Görünürlüğü + Hasat Aracı + Prompt Kalitesi |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 659/659 başarılı (+13 yeni) — **gerçekten çalıştırıldı** |
-| **Build** | ✅ Başarılı — **gerçekten çalıştırıldı** |
-| **Lint** | ✅ 0 uyarı/hata (224 dosya, 103 kural) — **gerçekten çalıştırıldı** |
+| **Test Sonucu** | ✅ 681/681 başarılı (+22 yeni) — **gerçekten çalıştırıldı** |
+| **Build** | ✅ **BUILD SUCCESSFUL** — gerçekten çalıştırıldı |
+| **Lint** | ✅ 0 uyarı/hata (226 dosya, 103 kural) — **gerçekten çalıştırıldı** |
 | **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) — **gerçekten çalıştırıldı** |
-| **TypeScript Build** | ✅ `tsc -b` temiz — **gerçekten çalıştırıldı** |
-| **🔴 Android APK Oluşturma** | ❌ **YAPILAMADI** — bu ortamın network erişim kısıtları (önceki sprintte `services.gradle.org`'a erişimin `HTTP 403` ile reddedildiği doğrulanmıştı) hâlâ geçerli. Bu turda tekrar denenmedi (aynı sonuç kesin, gereksiz tekrar) — dürüstçe "yapılamadı" olarak işaretleniyor. |
-| **🔴 Gerçek Cihaz Doğrulaması** | ❌ **YAPILAMADI** — bu ortamda fiziksel bir Android cihaz/emülatör yok. |
-| **Şema Sürümü** | 12 (değişmedi — bu düzeltme paketi hiçbir migration içermiyor) |
+| **TypeScript Build** | ✅ `tsc -b` temiz |
+| **🔴 Gerçek Cihaz Doğrulaması** | ❌ **YAPILAMADI** — bu ortamda Android SDK/fiziksel cihaz yok (kalıcı ortam kısıtı, önceki sprintlerde de kayıtlı). Tool-calling düzeltmesi kod seviyesinde kesin kanıtlı, gerçek cihaz onayı kullanıcının kendi ortamında yapılmalı. |
+| **Şema Sürümü** | 12 (değişmedi — bu sprint hiçbir migration içermiyor) |
 | **Tarih** | 2026-07-21 |
-| **Git Commit** | `dd66e67` |
-| **ADR** | Yeni ADR yazılmadı — mevcut desenlerin (lazy initializer, `isIrrigation` koşulu, `TimeField`) tekrarı |
+| **Git Commit** | `d4ad39f` |
+| **ADR** | Yeni ADR yazılmadı — mevcut provider-agnostik mimarinin (ADR 0024) doğru uygulanması |
 
-## Sprint 10.4 Düzeltme Paketi — Yapılan İşler
+## En Kritik Düzeltme
 
-| İş | Zorunlu/İsteğe Bağlı | Durum |
-|---|---|---|
-| `initialMaintenanceType` entegrasyonu | ZORUNLU | ✅ Tamamlandı — 5 senaryonun tamamı gerçek testle kanıtlandı |
-| `MaintenanceRecordCard` Sulama saati gösterimi | ZORUNLU | ✅ Tamamlandı — koşullu, diğer türlerde görsel değişiklik yok |
-| `MaintenanceRecordForm` Sulama saati düzenleme | ZORUNLU (risk değerlendirmesi sonucu uygulandı) | ✅ Tamamlandı — düşük risk doğrulandı, migration/yeni abstraction gerekmedi |
-| "Biçme→Other" görüntüleme düzeltmesi | İSTEĞE BAĞLI | ❌ **Bilinçli olarak dokunulmadı** — kullanıcının açık talimatı, ayrı bir sprintte değerlendirilecek |
+**Kesin kanıtlı kök neden bulundu ve düzeltildi:** `AiSessionService`'in tool-calling akışı, Gemini API'nin resmi sözleşmesini ihlal ediyordu (modelin function-call yanıtı history'ye hiç eklenmiyordu) — resmi Google dokümantasyonu + güncel bağımsız bir hata raporuyla (LiteLLM GitHub Issue #26755) kanıtlandı. Provider-agnostik bir çözümle düzeltildi, gerçek testle kanıtlandı.
 
-## Kök Neden (Kanıtlanmış)
+## Yapılan Geliştirmeler (Özet)
 
-`BulkOperationsScreen`'in menü seçimi (`initialType`), `BulkMaintenanceForm`'a hiç iletilmiyordu — form her zaman "Sulama" (Irrigation) varsayılanıyla açılıyordu, kullanıcı hangi türe tıklarsa tıklasın. Bu, Sprint 10.4'ün kodunun var olduğu ama kullanıcıya "beklenen şekilde görünmemesinin" tam kanıtlanmış nedeniydi.
+1. Tool-calling kök neden düzeltmesi (kesin kanıtlı)
+2. 7 yeni ayırt edici hata kodu (AI_006-AI_012) + debug loglama
+3. Hasat AI aracı eklendi (`queryHarvestSummary`)
+4. Fotoğraf Analizi prompt kalitesi iyileştirildi (güvenlik sınırları korunarak)
+5. 2 alt yapının zaten hazır olduğu bulundu (Çoklu Provider, RAG hook noktası) — hiç kod gerekmedi
 
-## Değişen Dosyalar
+## Değişen/Eklenen Dosyalar
 
-| Dosya | Değişiklik Özeti |
+| Dosya | Değişiklik |
 |---|---|
-| `src/modules/bulkOperations/BulkMaintenanceForm.tsx` | `initialMaintenanceType` prop'u eklendi, `maintenanceType` state'i lazy initializer ile başlatılıyor |
-| `src/modules/bulkOperations/BulkOperationsScreen.tsx` | `view.initialType`, `BulkMaintenanceForm`'a gerçekten iletiliyor |
-| `src/modules/maintenance/components/MaintenanceRecordCard.tsx` | `startTime`/`endTime` doluysa, saat aralığı `metaText`'e koşullu olarak ekleniyor |
-| `src/modules/maintenance/MaintenanceRecordForm.tsx` | `TimeField` ile Sulama saati görüntüleme + düzenleme eklendi (`isIrrigation` koşuluyla) |
-| `src/modules/bulkOperations/BulkOperationsScreen.test.tsx` | 5 senaryonun tamamını kanıtlayan parametrized test |
-| `src/modules/maintenance/MaintenanceScreen.test.tsx` | Liste saat gösterimi + diğer türlerde gizlilik testleri |
-| `src/modules/maintenance/MaintenanceRecordForm.test.tsx` | Detay saat görüntüleme/düzenleme/kaydetme testleri |
+| `src/modules/ai/providers/AIProvider.interface.ts` | `AIMessage.toolCalls` eklendi |
+| `src/modules/ai/providers/GeminiProvider.ts` | `buildContents()` düzeltildi |
+| `src/modules/ai/session/AiSessionService.ts` | 2. round-trip'e model'in tool-call yanıtı ekleniyor |
+| `src/core/errors/errorCodes.ts` | 7 yeni AI hata kodu |
+| `src/core/errors/mapAiError.ts` | Gerçek Gemini hata türlerini ayırt ediyor, debug loglama |
+| `src/modules/ai/tools/harvest.tool.ts` | **Yeni dosya** — Hasat AI aracı |
+| `src/modules/ai/tools/registerReadOnlyTools.ts` | Hasat aracı kaydı |
+| `src/modules/photoAnalysis/photoAnalysisPrompt.ts` | Gözlem rehberliği eklendi |
+| `src/modules/photoAnalysis/photoAnalysisPrompt.test.ts` | **Yeni dosya** — önceden hiç yoktu |
+| i18n dosyaları (EN/TR) | 13 yeni çeviri |
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
-| Modül 1-5 | ✅ FROZEN (Bakım Yönetimi'nin `MaintenanceRecordForm`'u bu pakette genişletildi — dondurma kuralının "kritik hata düzeltmesi" istisnası kapsamında) |
+| Modül 1-5 | ✅ FROZEN |
 | Sprint 6-10.5 | ✅ Onaylandı |
-| Modül 7 — Hasat | ✅ Onaylandı |
+| Modül 6 — AI Altyapısı (Production Ready geliştirmeleri) | 🟡 Bu teslimat |
+| Modül 7 — Hasat | ✅ Onaylandı (AI aracı eklendi, Hasat modülünün kendisi değişmedi) |
 | Modül 8 — Dashboard | ✅ Onaylandı |
-| Modül 9 — Fotoğraf Analizi | ✅ Onaylandı |
-| Modül 10 — Saha Operasyonları (Düzeltme Paketi) | 🟡 Bu teslimat |
+| Modül 9 — Fotoğraf Analizi (prompt kalitesi iyileştirildi) | 🟡 Bu teslimat |
+| Modül 10 — Saha Operasyonları | ✅ Onaylandı |
