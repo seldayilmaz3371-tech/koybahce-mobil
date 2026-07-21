@@ -8,6 +8,12 @@
     "AI_003": "AI sağlayıcısı şu an kullanılamıyor.",
     "AI_004": "Lütfen AI Ayarları'ndan Gemini API anahtarınızı girin.",
     "AI_005": "AI bu fotoğrafı şu anda analiz edemedi. Lütfen tekrar deneyin.",
+    "AI_006": "Gemini API anahtarınız reddedildi. Lütfen AI Ayarları'ndan kontrol edin.",
+    "AI_007": "Gemini kotanız tükendi. Lütfen Google AI hesabınızı kontrol edin veya daha sonra tekrar deneyin.",
+    "AI_008": "Şu anda çok fazla istek var. Lütfen biraz bekleyip tekrar deneyin.",
+    "AI_009": "AI bu isteği işleyemedi. Lütfen tekrar deneyin veya sorunuzu farklı ifade edin.",
+    "AI_010": "AI'ye bağlanılamadı — lütfen internet bağlantınızı kontrol edin.",
+    "AI_011": "AI isteği çok uzun sürdü ve zaman aşımına uğradı. Lütfen tekrar deneyin.",
     "SYS_001": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
   },
   "settings": {

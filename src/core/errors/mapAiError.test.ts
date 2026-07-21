@@ -27,3 +27,37 @@ describe("mapAiError", () => {
     expect(mapAiError(new Error("hiç bilinmeyen bir hata"))).toBe(ErrorCode.SYS_001);
   });
 });
+
+describe("mapAiError — Sprint 10.6 (Gerçek Gemini Hata Kodlarının Ayrıştırılması)", () => {
+  it("401 (kimlik doğrulama) -> AI_006", () => {
+    expect(mapAiError(new Error('{"error":{"code":401,"message":"API key not valid"}}'))).toBe(ErrorCode.AI_006);
+  });
+
+  it("403 (yetki reddi) -> AI_006 (401 ile AYNI kod — ikisi de kimlik doğrulama sorunu)", () => {
+    expect(mapAiError(new Error('{"error":{"code":403,"message":"Permission denied"}}'))).toBe(ErrorCode.AI_006);
+  });
+
+  it("RESOURCE_EXHAUSTED (kota tükenmesi) -> AI_007", () => {
+    expect(mapAiError(new Error('{"error":{"status":"RESOURCE_EXHAUSTED"}}'))).toBe(ErrorCode.AI_007);
+  });
+
+  it("RESOURCE_EXHAUSTED, 429 durum koduyla BİRLİKTE gelse bile AI_007'ye düşer (AI_008'e DEĞİL) — sıralama testi", () => {
+    expect(mapAiError(new Error('{"error":{"code":429,"status":"RESOURCE_EXHAUSTED"}}'))).toBe(ErrorCode.AI_007);
+  });
+
+  it("SADECE 429 (RESOURCE_EXHAUSTED OLMADAN) -> AI_008 (geçici rate limit)", () => {
+    expect(mapAiError(new Error('{"error":{"code":429,"message":"Too many requests"}}'))).toBe(ErrorCode.AI_008);
+  });
+
+  it("400 (geçersiz istek) -> AI_009", () => {
+    expect(mapAiError(new Error('{"error":{"code":400,"message":"Invalid argument"}}'))).toBe(ErrorCode.AI_009);
+  });
+
+  it("Ağ hatası (tarayıcının GERÇEK standart hata mesajı) -> AI_010", () => {
+    expect(mapAiError(new TypeError("Failed to fetch"))).toBe(ErrorCode.AI_010);
+  });
+
+  it("Timeout (AbortError) -> AI_011", () => {
+    expect(mapAiError(new Error("AbortError: request timeout"))).toBe(ErrorCode.AI_011);
+  });
+});

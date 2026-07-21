@@ -143,6 +143,20 @@ describe("AiSessionService — Tool-Calling Round-Trip (GERÇEK 2 Aşamalı Akı
     // 2. çağrının pendingToolResults'ı DOĞRU sonucu taşıyor mu?
     const secondCallOptions = sendMessage.mock.calls[1][1] as { pendingToolResults?: unknown };
     expect(secondCallOptions.pendingToolResults).toEqual([{ toolName: "testQueryTool", result: { count: 7 } }]);
+
+    // 🔴 GERÇEK BUG DÜZELTMESİNİN testi (AI X-Ray denetiminde bulundu,
+    // Gemini'nin resmi sözleşmesiyle kanıtlandı — bkz. AIMessage.toolCalls
+    // belgesi): 2. çağrıya giden `messages` dizisinin SON elemanı,
+    // MODELİN kendi function-call talebini (role: "model",
+    // toolCalls dolu) İÇERMELİ — ÖNCEDEN bu mesaj HİÇ gönderilmiyordu.
+    const secondCallMessages = sendMessage.mock.calls[1][0] as Array<{
+      role: string;
+      content: string;
+      toolCalls?: unknown;
+    }>;
+    const lastMessage = secondCallMessages[secondCallMessages.length - 1];
+    expect(lastMessage.role).toBe("model");
+    expect(lastMessage.toolCalls).toEqual([{ toolName: "testQueryTool", arguments: {} }]);
   });
 
   it("debugMode=true iken tool sonuçları 'tool' rolüyle DB'ye de kaydedilir", async () => {

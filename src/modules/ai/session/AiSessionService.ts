@@ -102,7 +102,21 @@ class AiSessionService {
         });
       }
 
-      response = await provider.sendMessage(providerMessages, {
+      // 🔴 GERÇEK BUG DÜZELTMESİ (AI X-Ray denetiminde bulundu,
+      // kanıtlandı — bkz. `AIMessage.toolCalls`'ın belgesi ve
+      // `GeminiProvider.buildContents()`'in güncellenmiş yorumu).
+      // ÖNCEDEN, 2. round-trip'e SADECE `pendingToolResults`
+      // gönderiliyordu — modelin KENDİ function-call talebi (bu ilk
+      // `response`) history'ye HİÇ eklenmiyordu. Gemini'nin resmi
+      // sözleşmesi, bir `functionResponse`'un HEMEN ÖNCESİNDE eşleşen
+      // `functionCall`'ı içeren bir "model" turu OLMASINI ZORUNLU
+      // KILIYOR — bu satır olmadan Gemini 400 Bad Request döndürüyordu.
+      const messagesWithModelToolCall: AIMessage[] = [
+        ...providerMessages,
+        { role: "model", content: response.text ?? "", toolCalls: response.toolCalls },
+      ];
+
+      response = await provider.sendMessage(messagesWithModelToolCall, {
         systemInstruction,
         tools: toolDefinitions,
         pendingToolResults: toolResults,

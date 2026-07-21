@@ -32,6 +32,18 @@ export const ErrorCode = {
   AI_003: "AI_003", // Sağlayıcı kayıtlı değil (iç tutarsızlık)
   AI_004: "AI_004", // API anahtarı yapılandırılmamış
   AI_005: "AI_005", // Fotoğraf analizi boş yanıt döndü (ör. güvenlik filtresi)
+  // bkz. Sprint 10.6 (Production Ready — Öncelik 2, AI X-Ray denetimi
+  // sonucu). ÖNCEDEN bu hataların HEPSİ tek bir SYS_001'e düşüyordu —
+  // hem kullanıcı hem geliştirici için teşhis imkansızdı. Marker'lar
+  // GERÇEKTEN `GeminiProvider.ts`'in KENDİ `isRetryableGeminiError()`
+  // fonksiyonunda ZATEN kullanılan, doğrulanmış Gemini hata
+  // biçimleridir (`"code":401` vb.) — varsayım değildir.
+  AI_006: "AI_006", // Gemini API anahtarı geçersiz/reddedildi (401/403 — kimlik doğrulama)
+  AI_007: "AI_007", // Gemini kotası tükendi (RESOURCE_EXHAUSTED)
+  AI_008: "AI_008", // Gemini istek hızı sınırı aşıldı (429 — geçici, kota tükenmesinden (AI_007) farklı)
+  AI_009: "AI_009", // Gemini geçersiz istek olarak reddetti (400 — ör. hatalı prompt/parametre yapısı)
+  AI_010: "AI_010", // Ağ bağlantısı kurulamadı (fetch/network hatası — JS'in standart hata biçimleri)
+  AI_011: "AI_011", // İstek zaman aşımına uğradı
 
   SYS_001: "SYS_001", // Beklenmeyen/sınıflandırılamayan hata
 } as const;

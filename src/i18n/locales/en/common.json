@@ -8,6 +8,12 @@
     "AI_003": "AI provider is not available right now.",
     "AI_004": "Please add your Gemini API key in AI Settings.",
     "AI_005": "AI couldn't analyze this photo right now. Please try again.",
+    "AI_006": "Your Gemini API key was rejected. Please check it in AI Settings.",
+    "AI_007": "Your Gemini quota has been used up. Please check your Google AI account or try again later.",
+    "AI_008": "Too many requests right now. Please wait a moment and try again.",
+    "AI_009": "AI couldn't process this request. Please try again or rephrase your question.",
+    "AI_010": "Could not connect to AI — please check your internet connection.",
+    "AI_011": "The AI request took too long and timed out. Please try again.",
     "SYS_001": "Something went wrong. Please try again."
   },
   "settings": {

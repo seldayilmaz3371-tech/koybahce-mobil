@@ -33,6 +33,21 @@ export type AIMessageRole = "user" | "model" | "tool";
 export interface AIMessage {
   role: AIMessageRole;
   content: string;
+  /**
+   * bkz. Sprint 10.6 (Production Ready — Tool-Calling Düzeltmesi).
+   * SADECE `role: "model"` mesajlarında, o mesaj bir ARAÇ ÇAĞRISI
+   * TALEP ETTİYSE dolu olur. GERÇEK BULGU (AI X-Ray denetiminde
+   * bulundu, kanıtlandı): Gemini API'nin resmi sözleşmesi, bir
+   * `functionResponse`'un HEMEN ÖNCESİNDE, EŞLEŞEN `functionCall`'ı
+   * İÇEREN bir "model" turu OLMASINI ZORUNLU KILIYOR (resmi
+   * dokümantasyon örneği + güncel bir 3. parti hata raporuyla
+   * doğrulandı — aksi halde Gemini 400 Bad Request döner). Bu alan,
+   * `AiSessionService`'in modelin İLK yanıtını (tool çağrısı
+   * talebini) history'ye GERİ EKLEYEBİLMESİ için var — provider-
+   * AGNOSTİK (Gemini'ye özgü bir tip burada SIZDIRILMIYOR, her
+   * provider kendi `buildContents()`'inde bunu kendi formatına çevirir).
+   */
+  toolCalls?: AIToolCallRequest[];
 }
 
 export interface AIProviderResponse {

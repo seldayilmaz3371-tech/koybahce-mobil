@@ -115,6 +115,30 @@ describe("GeminiProvider — sendMessage", () => {
     });
   });
 
+  it("🔴 GERÇEK BUG DÜZELTMESİ: role='model' + toolCalls içeren bir mesaj, GERÇEKTEN functionCall Part'ına çevrilir (AI X-Ray denetiminde bulundu, Gemini'nin resmi sözleşmesiyle kanıtlandı)", async () => {
+    generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await geminiProvider.sendMessage(
+      [
+        { role: "user", content: "soru" },
+        { role: "model", content: "", toolCalls: [{ toolName: "queryParcelData", arguments: { limit: 5 } }] },
+      ],
+      { pendingToolResults: [{ toolName: "queryParcelData", result: { count: 3 } }] }
+    );
+
+    const sentContents = generateContentMock.mock.calls[0][0].contents;
+    // Sıra: [user, model(functionCall), user(functionResponse)] — Gemini'nin
+    // resmi örneğiyle (ai.google.dev) BİREBİR aynı yapı.
+    expect(sentContents).toHaveLength(3);
+    const modelToolCallContent = sentContents[1];
+    expect(modelToolCallContent.role).toBe("model");
+    expect(modelToolCallContent.parts[0].functionCall).toEqual({
+      name: "queryParcelData",
+      args: { limit: 5 },
+    });
+  });
+
   it("tools verilirse, DOĞRU functionDeclarations formatında gönderilir", async () => {
     generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
     const { geminiProvider } = await import("./GeminiProvider");

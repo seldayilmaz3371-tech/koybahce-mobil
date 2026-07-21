@@ -72,11 +72,38 @@ async function callGeminiWithRetry<T>(operation: () => Promise<T>): Promise<T> {
  * `'user'`/`'model'` kabul ediyor (resmi tip tanımlarından
  * doğrulandı) — `role: "tool"` mesajları burada FİLTRELENİYOR (Gemini
  * bunun yerine `functionResponse` Part'ı bekliyor).
+ *
+ * 🔴 GERÇEK BUG DÜZELTMESİ (AI X-Ray denetiminde bulundu, kanıtlandı
+ * — bkz. `AIMessage.toolCalls`'ın belgesi): ÖNCEDEN, `role: "model"`
+ * mesajları SADECE `m.content`'i (metin) bir `text` Part'ına
+ * çeviriyordu — mesajın `toolCalls`'ı VARSA bile bu HİÇ dikkate
+ * alınmıyordu. Bu, modelin kendi function-call talebinin history'den
+ * TAMAMEN KAYBOLMASINA yol açıyordu — Gemini'nin resmi sözleşmesi
+ * (`functionResponse`'un HEMEN ÖNCESİNDE eşleşen bir `functionCall`
+ * içeren "model" turu OLMASI gerektiği) ihlal ediliyordu, bu da
+ * gerçek kullanımda 400 Bad Request ile sonuçlanıyordu. DÜZELTME:
+ * `toolCalls` varsa, HER biri için bir `functionCall` Part'ı üretilir
+ * ve (varsa) metin Part'ıyla BİRLİKTE gönderilir.
  */
 function buildContents(messages: AIMessage[], pendingToolResults?: AIToolResult[]): Content[] {
   const contents: Content[] = messages
     .filter((m) => m.role !== "tool")
-    .map((m) => ({ role: m.role, parts: [{ text: m.content }] }));
+    .map((m) => {
+      const parts: Part[] = [];
+      if (m.content) {
+        parts.push({ text: m.content });
+      }
+      if (m.toolCalls && m.toolCalls.length > 0) {
+        for (const call of m.toolCalls) {
+          parts.push({ functionCall: { name: call.toolName, args: call.arguments } });
+        }
+      }
+      // Teorik olarak content VE toolCalls ikisi de boş olmamalı (çağıran
+      // katman ya metin ya araç çağrısı üretir) — ama BOŞ bir contents
+      // Part dizisi Gemini API'sinde geçersiz bir istek olurdu, bu yüzden
+      // güvenli bir fallback: boş metin.
+      return { role: m.role, parts: parts.length > 0 ? parts : [{ text: "" }] };
+    });
 
   if (pendingToolResults && pendingToolResults.length > 0) {
     const parts: Part[] = pendingToolResults.map((r) => ({
