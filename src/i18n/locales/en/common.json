@@ -15,11 +15,18 @@
     "AI_010": "Could not connect to AI — please check your internet connection.",
     "AI_011": "The AI request took too long and timed out. Please try again.",
     "AI_012": "AI tried to use a tool that isn't available. Please try rephrasing your question.",
+    "DM_001": "Backup could not be created. Please try again.",
+    "DM_002": "This file is not a valid Bahçem Mobile backup.",
+    "DM_003": "Safety backup could not be created — restore was cancelled to protect your data.",
+    "DM_004": "Database restore failed.",
+    "DM_005": "Database was restored, but some photos could not be restored.",
+    "DM_006": "No file was selected.",
     "SYS_001": "Something went wrong. Please try again."
   },
   "settings": {
     "screenTitle": "Settings",
-    "aiSectionLabel": "AI"
+    "aiSectionLabel": "AI",
+    "dataManagementSectionLabel": "Data Management"
   },
   "aiSettings": {
     "screenTitle": "AI Settings",
@@ -40,6 +47,26 @@
   "aiDiagnostic": {
     "screenTitle": "AI Diagnostic Info",
     "openButton": "AI Diagnostic Info"
+  },
+  "dataManagement": {
+    "screenTitle": "Data Management",
+    "createBackupButton": "Create Full Backup",
+    "restoreBackupButton": "Restore from Backup",
+    "creatingBackup": "Creating backup…",
+    "backupSuccessTitle": "Backup created successfully",
+    "backupFailureTitle": "Backup could not be created",
+    "restoreConfirmTitle": "Your current data will be replaced.",
+    "restoreConfirmBody": "A safety backup will be created automatically before continuing.",
+    "restoreConfirmButton": "Continue",
+    "restoreCancelButton": "Cancel",
+    "validatingBackup": "Validating backup file…",
+    "creatingSafetyBackup": "Creating safety backup…",
+    "restoringDatabase": "Restoring database…",
+    "restoringPhotos": "Restoring photos ({{done}}/{{total}})…",
+    "restoreSuccessTitle": "Restore completed successfully",
+    "restoreFailureTitle": "Restore failed",
+    "backupContentsSummary": "{{photoCount}} photos included",
+    "backButton": "Back"
   },
   "aiChat": {
     "screenTitle": "AI Assistant",

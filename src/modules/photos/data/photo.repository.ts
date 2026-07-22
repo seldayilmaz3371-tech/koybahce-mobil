@@ -48,6 +48,12 @@ class PhotoRepository extends BaseRepository implements IPhotoRepository {
     return rows.map(mapRowToPhoto);
   }
 
+  /** bkz. `IPhotoRepository.listAll()`'ın belgesi — SADECE tam yedekleme akışı için. */
+  async listAll(): Promise<Photo[]> {
+    const rows = await this.query<PhotoRow>(`SELECT * FROM photos WHERE is_active = 1 ORDER BY created_at ASC`);
+    return rows.map(mapRowToPhoto);
+  }
+
   async getById(id: string): Promise<Photo | null> {
     const row = await this.queryOne<PhotoRow>(`SELECT * FROM photos WHERE id = ?`, [id]);
     return row ? mapRowToPhoto(row) : null;

@@ -44,6 +44,7 @@ import { HarvestScreen } from "../modules/harvest/HarvestScreen";
 import { BulkOperationsScreen } from "../modules/bulkOperations/BulkOperationsScreen";
 import { DashboardScreen } from "../modules/dashboard/DashboardScreen";
 import { SettingsScreen } from "../modules/settings/SettingsScreen";
+import { DataManagementScreen } from "../modules/dataManagement/DataManagementScreen";
 import { useTreeForRoute } from "./useTreeForRoute";
 import { ROUTE_PATTERNS, buildPath } from "./routes";
 
@@ -354,7 +355,18 @@ function DashboardScreenRoute() {
 
 function SettingsScreenRoute() {
   const navigate = useNavigate();
-  return <SettingsScreen onViewAiSettings={() => navigate(buildPath.aiSettings())} />;
+  return (
+    <SettingsScreen
+      onViewAiSettings={() => navigate(buildPath.aiSettings())}
+      onViewDataManagement={() => navigate(buildPath.dataManagement())}
+    />
+  );
+}
+
+/** `/settings/data-management` — Sprint 10.13. `onBack`, AI Ayarları ile AYNI ilke (her zaman Ayarlar hub'ına). */
+function DataManagementScreenRoute() {
+  const navigate = useNavigate();
+  return <DataManagementScreen onBack={() => navigate(buildPath.settings())} />;
 }
 
 /**
@@ -584,6 +596,7 @@ export function AppRouter() {
         <Route path={ROUTE_PATTERNS.settings} element={<SettingsScreenRoute />} />
         <Route path={ROUTE_PATTERNS.dashboard} element={<DashboardScreenRoute />} />
         <Route path={ROUTE_PATTERNS.aiSettings} element={<AiSettingsScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.dataManagement} element={<DataManagementScreenRoute />} />
         <Route path={ROUTE_PATTERNS.aiDiagnostics} element={<AiDiagnosticScreenRoute />} />
         <Route path="*" element={<Navigate to={buildPath.parcels()} replace />} />
       </Routes>

@@ -123,6 +123,36 @@ export function resetConnectionCacheForTesting(): void {
   connectionPromise = null;
 }
 
+/**
+ * bkz. Sprint 10.13 (Veri Yönetimi — Yedekten Geri Yükleme).
+ * GERÇEK KISIT (resmi dokümantasyondan doğrulandı — capacitor-community/
+ * sqlite, docs/ImportExportJson.md): "Prior to execute this method,
+ * the connection to the database MUST be closed." `importFromJson`,
+ * `SQLiteDBConnection` (bağlantı nesnesi) SEVİYESİNDE DEĞİL, ana
+ * `SQLiteConnection` (plugin) seviyesinde mevcut (resmi tip
+ * tanımlarından doğrulandı) — bu yüzden `getDatabase()`'in döndürdüğü
+ * bağlantı üzerinden ÇAĞRILAMAZ, buradaki modül-seviyesi
+ * `sqliteConnection` nesnesi üzerinden çağrılmalı.
+ *
+ * Bu fonksiyon: (1) mevcut bağlantıyı GÜVENLE kapatır, (2) import'u
+ * çalıştırır, (3) bağlantı önbelleğini sıfırlar ki bir sonraki
+ * `getDatabase()` çağrısı GERÇEKTEN yeni (geri yüklenmiş) veriyle
+ * sıfırdan bağlanır. `overwrite: true` (JSON payload'ının kendi
+ * içinde, çağıran tarafından eklenir) ile BİRLİKTE kullanılmalı —
+ * aksi halde AYNI şema versiyonunda import SESSİZCE hiçbir şey
+ * yapmaz (resmi dokümantasyonda kanıtlanmış bir davranış).
+ */
+export async function importDatabaseFromJson(jsonString: string): Promise<void> {
+  if (connectionPromise) {
+    const db = await connectionPromise;
+    await db.close();
+  }
+  await sqliteConnection.importFromJson(jsonString);
+  // Önbellek sıfırlanıyor — bir sonraki getDatabase() çağrısı,
+  // GERÇEKTEN import edilmiş (yeni) veriyle sıfırdan bağlanacak.
+  connectionPromise = null;
+}
+
 /** Uygulamanın hangi platformda çalıştığını raporlar — tanılama/loglama amaçlı. */
 export function getRuntimePlatform(): string {
   return Capacitor.getPlatform();

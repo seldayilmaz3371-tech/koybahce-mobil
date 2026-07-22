@@ -27,16 +27,31 @@ afterEach(() => {
 
 describe("SettingsScreen", () => {
   it("AI bölümünü listeler", () => {
-    render(<SettingsScreen onViewAiSettings={vi.fn()} />);
+    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} />);
     expect(screen.getByText("AI")).toBeTruthy();
   });
 
   it("AI bölümüne tıklamak onViewAiSettings'i çağırır", () => {
     const onViewAiSettings = vi.fn();
-    render(<SettingsScreen onViewAiSettings={onViewAiSettings} />);
+    render(<SettingsScreen onViewAiSettings={onViewAiSettings} onViewDataManagement={vi.fn()} />);
 
     fireEvent.click(screen.getByText("AI"));
 
     expect(onViewAiSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it("🔴 Sprint 10.13: 'Data Management' bölümünü GERÇEKTEN listeler", () => {
+    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} />);
+
+    expect(screen.getByText("Data Management")).toBeTruthy();
+  });
+
+  it("🔴 Sprint 10.13: 'Data Management' bölümüne tıklamak, GERÇEKTEN onViewDataManagement'i çağırır", () => {
+    const onViewDataManagement = vi.fn();
+    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={onViewDataManagement} />);
+
+    fireEvent.click(screen.getByText("Data Management"));
+
+    expect(onViewDataManagement).toHaveBeenCalledTimes(1);
   });
 });

@@ -8,11 +8,13 @@
  * ileride buna izin vermeli."
  *
  * Bu ekran, gelecekteki TÜM ayar bölümlerinin listeleneceği HUB'dır
- * (`/settings`). Bugün sadece **AI** girişi var — diğer bölümler
- * (Bildirimler/Dil/Tema/GPS/Kamera/Senkronizasyon/Yedekleme) HENÜZ
- * geliştirilmedi (YAGNI — spekülatif boş girişler eklenmedi). Yeni
- * bir bölüm eklendiğinde, bu listeye YENİ bir satır eklemek yeterli
- * olacak — route mimarisi (`/settings/*`) buna hazır.
+ * (`/settings`). Sprint 10.13'te **Veri Yönetimi** eklendi (SADECE
+ * Yedekle/Geri Yükle — kullanıcının kararı, kapsam bilinçli olarak
+ * küçük tutuldu). Diğer bölümler (Bildirimler/Dil/Tema/GPS/Kamera/
+ * Senkronizasyon) HENÜZ geliştirilmedi (YAGNI — spekülatif boş
+ * girişler eklenmedi). Yeni bir bölüm eklendiğinde, bu listeye YENİ
+ * bir satır eklemek yeterli olacak — route mimarisi (`/settings/*`)
+ * buna hazır.
  *
  * `onBack` YOK — bu ekranın kendi iç view-state'i (create/edit) yok,
  * geri tuşu tamamen route wrapper seviyesinde (`SettingsScreenRoute`)
@@ -26,9 +28,10 @@ import { useTranslation } from "react-i18next";
 
 interface SettingsScreenProps {
   onViewAiSettings: () => void;
+  onViewDataManagement: () => void;
 }
 
-export function SettingsScreen({ onViewAiSettings }: SettingsScreenProps) {
+export function SettingsScreen({ onViewAiSettings, onViewDataManagement }: SettingsScreenProps) {
   const { t } = useTranslation();
 
   return (
@@ -39,6 +42,11 @@ export function SettingsScreen({ onViewAiSettings }: SettingsScreenProps) {
         <li>
           <button type="button" className="parcel-list__item" onClick={onViewAiSettings}>
             <span className="parcel-list__name">{t("settings.aiSectionLabel")}</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" className="parcel-list__item" onClick={onViewDataManagement}>
+            <span className="parcel-list__name">{t("settings.dataManagementSectionLabel")}</span>
           </button>
         </li>
       </ul>

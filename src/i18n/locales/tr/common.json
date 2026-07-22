@@ -15,11 +15,18 @@
     "AI_010": "AI'ye bağlanılamadı — lütfen internet bağlantınızı kontrol edin.",
     "AI_011": "AI isteği çok uzun sürdü ve zaman aşımına uğradı. Lütfen tekrar deneyin.",
     "AI_012": "AI, mevcut olmayan bir araç kullanmaya çalıştı. Lütfen sorunuzu farklı ifade edin.",
+    "DM_001": "Yedek oluşturulamadı. Lütfen tekrar deneyin.",
+    "DM_002": "Bu dosya geçerli bir Bahçem Mobile yedeği değil.",
+    "DM_003": "Güvenlik yedeği oluşturulamadı — verilerinizi korumak için geri yükleme iptal edildi.",
+    "DM_004": "Veritabanı geri yüklenemedi.",
+    "DM_005": "Veritabanı geri yüklendi, ancak bazı fotoğraflar geri yüklenemedi.",
+    "DM_006": "Hiçbir dosya seçilmedi.",
     "SYS_001": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
   },
   "settings": {
     "screenTitle": "Ayarlar",
-    "aiSectionLabel": "AI"
+    "aiSectionLabel": "AI",
+    "dataManagementSectionLabel": "Veri Yönetimi"
   },
   "aiSettings": {
     "screenTitle": "AI Ayarları",
@@ -40,6 +47,26 @@
   "aiDiagnostic": {
     "screenTitle": "AI Teşhis Bilgisi",
     "openButton": "AI Teşhis Bilgisi"
+  },
+  "dataManagement": {
+    "screenTitle": "Veri Yönetimi",
+    "createBackupButton": "Tam Yedek Oluştur",
+    "restoreBackupButton": "Yedekten Geri Yükle",
+    "creatingBackup": "Yedek oluşturuluyor…",
+    "backupSuccessTitle": "Yedek başarıyla oluşturuldu",
+    "backupFailureTitle": "Yedek oluşturulamadı",
+    "restoreConfirmTitle": "Mevcut verileriniz değiştirilecektir.",
+    "restoreConfirmBody": "Devam etmeden önce otomatik güvenlik yedeği oluşturulacaktır.",
+    "restoreConfirmButton": "Devam Et",
+    "restoreCancelButton": "İptal",
+    "validatingBackup": "Yedek dosyası doğrulanıyor…",
+    "creatingSafetyBackup": "Güvenlik yedeği oluşturuluyor…",
+    "restoringDatabase": "Veritabanı geri yükleniyor…",
+    "restoringPhotos": "Fotoğraflar geri yükleniyor ({{done}}/{{total}})…",
+    "restoreSuccessTitle": "Geri yükleme başarıyla tamamlandı",
+    "restoreFailureTitle": "Geri yükleme başarısız",
+    "backupContentsSummary": "{{photoCount}} fotoğraf dahil edildi",
+    "backButton": "Geri"
   },
   "aiChat": {
     "screenTitle": "AI Asistan",

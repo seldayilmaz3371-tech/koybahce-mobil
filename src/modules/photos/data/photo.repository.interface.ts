@@ -17,6 +17,14 @@ import type { NewPhotoInput, Photo } from "../domain/photo.types";
 export interface IPhotoRepository {
   /** Bir gözleme bağlı tüm fotoğraflar, kronolojik (taken_at ASC — çekim sırasına göre, en yeni önce DEĞİL). */
   listByObservation(observationId: string): Promise<Photo[]>;
+  /**
+   * bkz. Sprint 10.13 (Veri Yönetimi — Yedekle/Geri Yükle). Sistemdeki
+   * TÜM aktif fotoğrafları (herhangi bir gözleme özel filtre OLMADAN)
+   * döner — SADECE tam yedekleme akışının ihtiyacı için (Kural 4: bu
+   * genel amaçlı bir "listele" metodu değil, dar kapsamlı, açıkça
+   * gerekçeli bir ekleme).
+   */
+  listAll(): Promise<Photo[]>;
   getById(id: string): Promise<Photo | null>;
   create(input: NewPhotoInput): Promise<Photo>;
   deactivate(id: string): Promise<void>;

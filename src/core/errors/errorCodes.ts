@@ -51,6 +51,14 @@ export const ErrorCode = {
   // eşlenmemişti, genel SYS_001'e düşüyordu.
   AI_012: "AI_012", // AI, var olmayan bir araç çağırmaya çalıştı (iç tutarsızlık)
 
+  // bkz. Sprint 10.13 (Veri Yönetimi — Yedekle/Geri Yükle).
+  DM_001: "DM_001", // Yedek oluşturma başarısız (veritabanı export/fotoğraf okuma/ZIP oluşturma aşamalarından biri başarısız)
+  DM_002: "DM_002", // Seçilen ZIP dosyası geçerli bir Bahçem Mobile yedeği değil (manifest imzası eksik/hatalı)
+  DM_003: "DM_003", // Otomatik güvenlik yedeği oluşturulamadı — geri yükleme İPTAL edildi (kullanıcı verisi korunuyor)
+  DM_004: "DM_004", // Veritabanı geri yükleme başarısız
+  DM_005: "DM_005", // Fotoğraf geri yükleme başarısız (veritabanı ZATEN geri yüklendi — kısmi başarı)
+  DM_006: "DM_006", // Kullanıcı dosya seçimini iptal etti (hata DEĞİL, ama akışın normal şekilde sonlanması için bir kod gerekiyor)
+
   SYS_001: "SYS_001", // Beklenmeyen/sınıflandırılamayan hata
 } as const;
 

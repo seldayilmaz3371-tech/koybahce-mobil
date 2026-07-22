@@ -432,6 +432,29 @@ describe("AppRouter — AI ve Ayarlar Navigasyonu (Sprint 7.1, GERÇEK navigasyo
     expect(window.location.hash).toBe("#/settings");
   });
 
+  it("🔴 Sprint 10.13: Parsel Listesi → 'Settings' → 'Data Management' → GERÇEK navigasyon zinciriyle açılır", async () => {
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Settings")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Settings"));
+    await waitFor(() => expect(screen.getByText("Data Management")).toBeTruthy());
+    fireEvent.click(screen.getByText("Data Management"));
+
+    await waitFor(() => expect(screen.getByText("Create Full Backup")).toBeTruthy());
+    expect(window.location.hash).toBe("#/settings/data-management");
+  });
+
+  it("🔴 Sprint 10.13: Veri Yönetimi → 'Back' HER ZAMAN /settings'e döner (AI Ayarları ile AYNI ilke)", async () => {
+    window.location.hash = "#/settings/data-management";
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Create Full Backup")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Back"));
+
+    await waitFor(() => expect(screen.getByText("Data Management")).toBeTruthy());
+    expect(window.location.hash).toBe("#/settings");
+  });
+
   it("AI Chat → 'AI Settings' bağlantısı DOĞRU rotaya gider (Chat'ten gelse bile /settings'e döner, tutarlı UX kanıtı)", async () => {
     window.location.hash = "#/ai/chat";
     render(<AppRouter />);
