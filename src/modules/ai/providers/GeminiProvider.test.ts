@@ -256,10 +256,15 @@ describe("GeminiProvider — analyzeImage (Sprint 9.2)", () => {
   });
 });
 
-describe("GeminiProvider — Diagnostic Entegrasyonu (Sprint 10.7, AI Diagnostic Build)", () => {
-  it("sendMessage() BAŞARILI olduğunda, aiDiagnostics GERÇEKTEN provider/apiKeyStatus/stage kaydeder", async () => {
+describe("GeminiProvider — Diagnostic Entegrasyonu (Sprint 10.7/10.9, AI Diagnostic Build)", () => {
+  it("sendMessage() BAŞARILI olduğunda, aiDiagnostics GERÇEKTEN provider/model/apiKeyStatus/stage kaydeder", async () => {
     const { aiDiagnostics } = await import("../diagnostics/aiDiagnostics");
     aiDiagnostics.reset();
+    // bkz. Sprint 10.9 — `startNewRequest()` artık `getActiveAiProvider()`'da
+    // çağrılıyor (GERÇEK production akışı), `GeminiProvider`'ın kendisinde
+    // DEĞİL — bu test, o katmanı simüle ediyor (`requestStartedAt`'in dolu
+    // olması için, aksi halde `durationMs` hesaplanamaz).
+    aiDiagnostics.startNewRequest();
     generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
     const { geminiProvider } = await import("./GeminiProvider");
 
@@ -267,6 +272,7 @@ describe("GeminiProvider — Diagnostic Entegrasyonu (Sprint 10.7, AI Diagnostic
 
     const snapshot = aiDiagnostics.getSnapshot();
     expect(snapshot.providerName).toBe("gemini");
+    expect(snapshot.model).toBe("gemini-flash-latest");
     expect(snapshot.apiKeyStatus).toBe("configured");
     expect(snapshot.stage).toBe("parsed");
     expect(snapshot.durationMs).not.toBeNull();

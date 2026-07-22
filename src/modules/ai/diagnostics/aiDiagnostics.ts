@@ -35,9 +35,13 @@ export type AiRequestStage =
   | "timeout";
 
 export interface AiDiagnosticSnapshot {
+  /** bkz. Sprint 10.9. Her isteğin kısa, benzersiz bir kimliği — kullanıcının aynı anda birden fazla isteği (ör. hızlı ard arda gönderme) birbirinden ayırt edebilmesi için. */
+  requestId: string | null;
   /** "empty" = kullanıcı hiç girmemiş, "configured" = SecureStorage'da bir değer var (GEÇERLİLİĞİ doğrulanmadı — sadece VARLIĞI). */
   apiKeyStatus: "empty" | "configured" | "unknown";
   providerName: string | null;
+  /** bkz. Sprint 10.9 — GERÇEK istekte kullanılan model adı (ör. "gemini-flash-latest"). */
+  model: string | null;
   stage: AiRequestStage;
   httpStatusCode: number | null;
   /** GERÇEK `ApiError` nesnesinin (varsa) ham alanları — mapAiError'ın YORUMU değil, SDK'nın kendi verdiği HAM veri. */
@@ -63,8 +67,10 @@ export interface AiDiagnosticSnapshot {
 
 function emptySnapshot(): AiDiagnosticSnapshot {
   return {
+    requestId: null,
     apiKeyStatus: "unknown",
     providerName: null,
+    model: null,
     stage: "idle",
     httpStatusCode: null,
     rawError: null,
@@ -79,11 +85,29 @@ function emptySnapshot(): AiDiagnosticSnapshot {
 }
 
 let current: AiDiagnosticSnapshot = emptySnapshot();
+let requestCounter = 0;
 
 export const aiDiagnostics = {
-  /** Yeni bir isteğe başlarken ÖNCEKİ isteğin verisini temizler. */
+  /**
+   * Yeni bir isteğe başlarken ÖNCEKİ isteğin verisini temizler.
+   *
+   * bkz. Sprint 10.9, GERÇEK BULGU (kullanıcının gerçek cihaz
+   * testlerinde "Stage hiçbir zaman değişmiyor, hep idle kalıyor"
+   * gözlemiyle KANITLANDI): ÖNCEDEN bu fonksiyon SADECE
+   * `GeminiProvider.sendMessage()`/`analyzeImage()`'ın İÇİNDE
+   * çağrılıyordu. Ama `getActiveAiProvider()`'ın kendi izin kontrolü
+   * (AI_NOT_ENABLED/AI_INTERNET_PERMISSION_DENIED/
+   * AI_PROVIDER_NOT_REGISTERED) BAŞARISIZ olduğunda, akış
+   * `GeminiProvider`'a HİÇ ULAŞAMIYORDU — bu yüzden `stage` HER ZAMAN
+   * "idle" kalıyordu, kullanıcı gerçek nedeni GÖREMİYORDU. DÜZELTME:
+   * artık `getActiveAiProvider()`'ın KENDİSİ de bu fonksiyonu
+   * çağırıyor (bkz. o dosyanın güncellenmiş kodu) — izin kontrolü
+   * başarısız olsa bile stage artık `idle`'da TAKILI KALMIYOR.
+   */
   startNewRequest(): void {
+    requestCounter += 1;
     current = emptySnapshot();
+    current.requestId = `req-${Date.now()}-${requestCounter}`;
     current.requestStartedAt = Date.now();
     current.stage = "provider_obtained";
   },
@@ -94,6 +118,10 @@ export const aiDiagnostics = {
 
   recordProvider(providerName: string): void {
     current.providerName = providerName;
+  },
+
+  recordModel(model: string): void {
+    current.model = model;
   },
 
   recordStage(stage: AiRequestStage): void {

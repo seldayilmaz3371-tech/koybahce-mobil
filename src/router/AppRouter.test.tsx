@@ -685,7 +685,7 @@ describe("AppRouter — AI Diagnostic Build Navigasyonu (Sprint 10.7)", () => {
     await waitFor(() => expect(screen.getByText("AI Diagnostic Info")).toBeTruthy());
     fireEvent.click(screen.getByText("AI Diagnostic Info"));
 
-    await waitFor(() => expect(screen.getByText("Provider:")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Provider")).toBeTruthy());
     expect(window.location.hash).toBe("#/ai/diagnostics");
   });
 
@@ -697,6 +697,6 @@ describe("AppRouter — AI Diagnostic Build Navigasyonu (Sprint 10.7)", () => {
     render(<AppRouter />);
 
     await waitFor(() => expect(screen.getByText("AI Diagnostic Info")).toBeTruthy());
-    expect(screen.getByText("Provider:")).toBeTruthy();
+    expect(screen.getByText("Provider")).toBeTruthy();
   });
 });

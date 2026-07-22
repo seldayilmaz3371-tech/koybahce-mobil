@@ -207,8 +207,8 @@ class GeminiProvider implements AIProvider {
       pendingToolResults?: AIToolResult[];
     } = {}
   ): Promise<AIProviderResponse> {
-    aiDiagnostics.startNewRequest();
     aiDiagnostics.recordProvider(this.providerName);
+    aiDiagnostics.recordModel(GEMINI_MODEL);
     try {
       const apiKey = await this.getApiKey();
       const client = new GoogleGenAI({ apiKey });
@@ -252,8 +252,8 @@ class GeminiProvider implements AIProvider {
     prompt: string,
     systemInstruction?: string
   ): Promise<string> {
-    aiDiagnostics.startNewRequest();
     aiDiagnostics.recordProvider(this.providerName);
+    aiDiagnostics.recordModel(GEMINI_MODEL);
     // bkz. Sprint 10.7, Madde 8 — "Fotoğraf boyutu / Base64 boyutu."
     // `imageBase64.length` karakter sayısı = byte sayısı (base64
     // ASCII karakterlerden oluşur, UTF-16 çift-byte riski YOK).

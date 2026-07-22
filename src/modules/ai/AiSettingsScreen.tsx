@@ -76,32 +76,38 @@ export function AiSettingsScreen({ onBack }: AiSettingsScreenProps) {
     <main className="status-screen">
       <h1 className="status-screen__title">{t("aiSettings.screenTitle")}</h1>
 
-      <label className="status-card">
-        <input
-          type="checkbox"
-          checked={settings.isEnabled}
-          onChange={(e) => updateSettings({ isEnabled: e.target.checked })}
-        />
-        {" " + t("aiSettings.isEnabledLabel")}
-      </label>
+      <div className="form-field--checkbox status-card">
+        <label>
+          <input
+            type="checkbox"
+            checked={settings.isEnabled}
+            onChange={(e) => updateSettings({ isEnabled: e.target.checked })}
+          />
+          {t("aiSettings.isEnabledLabel")}
+        </label>
+      </div>
 
-      <label className="status-card">
-        <input
-          type="checkbox"
-          checked={settings.internetPermission}
-          onChange={(e) => updateSettings({ internetPermission: e.target.checked })}
-        />
-        {" " + t("aiSettings.internetPermissionLabel")}
-      </label>
+      <div className="form-field--checkbox status-card">
+        <label>
+          <input
+            type="checkbox"
+            checked={settings.internetPermission}
+            onChange={(e) => updateSettings({ internetPermission: e.target.checked })}
+          />
+          {t("aiSettings.internetPermissionLabel")}
+        </label>
+      </div>
 
-      <label className="status-card">
-        <input
-          type="checkbox"
-          checked={settings.debugMode}
-          onChange={(e) => updateSettings({ debugMode: e.target.checked })}
-        />
-        {" " + t("aiSettings.debugModeLabel")}
-      </label>
+      <div className="form-field--checkbox status-card">
+        <label>
+          <input
+            type="checkbox"
+            checked={settings.debugMode}
+            onChange={(e) => updateSettings({ debugMode: e.target.checked })}
+          />
+          {t("aiSettings.debugModeLabel")}
+        </label>
+      </div>
 
       <div className="status-card">
         <p className="status-card__label">{t("aiSettings.apiKeyLabel")}</p>
