@@ -30,7 +30,12 @@
     "apiKeyConfigured": "API key is configured.",
     "saveApiKeyButton": "Save",
     "removeApiKeyButton": "Remove Key",
-    "removeApiKeyConfirm": "Remove your Gemini API key? AI features will stop working until you add a new one."
+    "removeApiKeyConfirm": "Remove your Gemini API key? AI features will stop working until you add a new one.",
+    "devApiKeySectionTitle": "API Key Management (Developer)",
+    "devApiKeyNone": "No key configured",
+    "devApiKeyInputLabel": "New Gemini API Key",
+    "devApiKeyInputPlaceholder": "Paste a new API key",
+    "devApiKeyChangeButton": "Change Key"
   },
   "aiDiagnostic": {
     "screenTitle": "AI Diagnostic Info",

@@ -22,6 +22,8 @@
  * olması için — kapatıp açmak gerektirmez).
  */
 
+import { maskApiKey } from "../../../shared/utils/apiKeyMasking";
+
 export type AiRequestStage =
   | "idle"
   | "provider_obtained"
@@ -154,11 +156,7 @@ export const aiDiagnostics = {
    * anahtarları ~39 karakter, ama savunmacı bir sınır) tamamı maskelenir.
    */
   recordApiKeyMasked(apiKey: string): void {
-    if (apiKey.length <= 8) {
-      current.apiKeyMasked = "*".repeat(apiKey.length);
-      return;
-    }
-    current.apiKeyMasked = `${apiKey.slice(0, 4)}****${apiKey.slice(-4)}`;
+    current.apiKeyMasked = maskApiKey(apiKey);
   },
 
   recordProvider(providerName: string): void {

@@ -148,3 +148,49 @@ describe("AiSettingsScreen — Teşhis Modu Toggle (Sprint 10.7, AI Diagnostic B
     expect(settings.debugMode).toBe(true);
   });
 });
+
+describe("AiSettingsScreen — API Key Yönetimi (Developer) (Sprint 10.12, KULLANICININ AÇIK TALEBİ)", () => {
+  it("debugMode KAPALIYSA (varsayılan), 'API Key Management (Developer)' bölümü HİÇ görünmez", async () => {
+    render(<AiSettingsScreen onBack={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("AI Settings")).toBeTruthy());
+
+    expect(screen.queryByText("API Key Management (Developer)")).toBeNull();
+  });
+
+  it("🔴 debugMode AÇIKSA, bölüm GERÇEKTEN görünür VE aktif anahtarın maskeli halini gösterir", async () => {
+    await aiSettingsRepository.getOrCreate();
+    await aiSettingsRepository.update({ debugMode: true });
+    vi.mocked(secureStorage.get).mockResolvedValue("AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ1234");
+
+    render(<AiSettingsScreen onBack={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText("API Key Management (Developer)")).toBeTruthy());
+    expect(screen.getByText("AIza****1234")).toBeTruthy();
+  });
+
+  it("🔴 hiç anahtar YOKKEN, 'No key configured' GERÇEKTEN gösterilir", async () => {
+    await aiSettingsRepository.getOrCreate();
+    await aiSettingsRepository.update({ debugMode: true });
+    vi.mocked(secureStorage.get).mockResolvedValue(null);
+
+    render(<AiSettingsScreen onBack={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText("No key configured")).toBeTruthy());
+  });
+
+  it("🔴 'Change Key' AKIŞI: yeni bir anahtar yapıştırıp kaydetmek, GERÇEKTEN saveApiKey()'i (secureStorage.set) çağırır — mevcut bir anahtar OLSA BİLE önce KALDIRMAYA gerek YOK", async () => {
+    await aiSettingsRepository.getOrCreate();
+    await aiSettingsRepository.update({ debugMode: true, isEnabled: true });
+    vi.mocked(secureStorage.get).mockResolvedValue("eski-anahtar-1234");
+
+    render(<AiSettingsScreen onBack={vi.fn()} />);
+    await waitFor(() => expect(screen.getByLabelText("New Gemini API Key")).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("New Gemini API Key"), { target: { value: "yeni-anahtar-5678" } });
+    await act(async () => {
+      fireEvent.click(screen.getByText("Change Key"));
+    });
+
+    expect(secureStorage.set).toHaveBeenCalledWith("gemini_api_key", "yeni-anahtar-5678");
+  });
+});

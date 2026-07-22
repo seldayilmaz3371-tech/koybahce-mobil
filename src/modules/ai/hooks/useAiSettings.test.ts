@@ -75,3 +75,41 @@ describe("useAiSettings", () => {
     await waitFor(() => expect(result.current.settings?.apiKeyConfigured).toBe(false));
   });
 });
+
+describe("useAiSettings — apiKeyMasked (Sprint 10.12, Developer Mode API Key Yönetimi)", () => {
+  it("hiç anahtar YOKSA, apiKeyMasked null'dır", async () => {
+    vi.mocked(secureStorage.get).mockResolvedValue(null);
+    const { result } = renderHook(() => useAiSettings());
+
+    await waitFor(() => expect(result.current.status).toBe("ready"));
+
+    expect(result.current.apiKeyMasked).toBeNull();
+  });
+
+  it("🔴 saveApiKey() SONRASI, apiKeyMasked GERÇEK anahtarın maskeli halini GERÇEKTEN gösterir (TAZE okunur, cache YOK)", async () => {
+    vi.mocked(secureStorage.get).mockResolvedValue(null);
+    const { result } = renderHook(() => useAiSettings());
+    await waitFor(() => expect(result.current.status).toBe("ready"));
+
+    // saveApiKey SONRASI, secureStorage.get'in GERÇEKTEN yeni anahtarı
+    // dönmesini simüle ediyoruz (gerçek SecureStorage davranışı).
+    vi.mocked(secureStorage.get).mockResolvedValue("AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ1234");
+    await result.current.saveApiKey("AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ1234");
+
+    await waitFor(() => expect(result.current.apiKeyMasked).toBe("AIza****1234"));
+    // TAM anahtar HİÇBİR ZAMAN state'te görünmemeli.
+    expect(result.current.apiKeyMasked).not.toContain("BCDEFGHIJKLMNOPQRSTUVWXYZ");
+  });
+
+  it("removeApiKey() SONRASI, apiKeyMasked GERÇEKTEN null'a döner", async () => {
+    vi.mocked(secureStorage.get).mockResolvedValue("gizli-anahtar-123");
+    const { result } = renderHook(() => useAiSettings());
+    await waitFor(() => expect(result.current.status).toBe("ready"));
+    await waitFor(() => expect(result.current.apiKeyMasked).not.toBeNull());
+
+    vi.mocked(secureStorage.get).mockResolvedValue(null);
+    await result.current.removeApiKey();
+
+    await waitFor(() => expect(result.current.apiKeyMasked).toBeNull());
+  });
+});

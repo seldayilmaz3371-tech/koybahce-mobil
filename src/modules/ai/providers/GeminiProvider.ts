@@ -139,7 +139,28 @@ function createRequestAbortController(): { controller: AbortController; timeoutH
  * 5-6'da (400 hataları) yaşanan kota tüketimi, Test 8-9'daki
  * RESOURCE_EXHAUSTED (429) hatasının gerçek bir katkı nedenidir.
  */
+/**
+ * bkz. Sprint 10.12, GERÇEK KÖK NEDEN DÜZELTMESİ (kesin kod kanıtı):
+ * `AbortController.abort()` (Sprint 10.11'de eklenen timeout
+ * mekanizması) tetiklendiğinde, fırlatılan hata bir DOM `AbortError`
+ * (`DOMException`) — bu, gerçek bir `ApiError` DEĞİL, `status` alanı
+ * YOK. Bu fonksiyon `status === null` durumunda `true` (retry
+ * edilebilir) döndürüyordu — bu yüzden HER 45 saniyelik timeout,
+ * GERÇEKTEN 3 kez (1 ilk + 2 retry) tekrar deneniyordu, yani ~135
+ * saniye boyunca 3 AYRI gerçek Gemini isteği açık kalıyordu. Bu,
+ * tool-calling akışlarının (2 round-trip = potansiyel olarak 6 gerçek
+ * istek) basit sohbete (1 round-trip = potansiyel 3 istek) göre çok
+ * daha fazla gerçek API çağrısı yapmasına yol açan, KANITLANMIŞ bir
+ * kota/rate-limit tüketim kaynağıdır.
+ */
 function isRetryableGeminiError(error: unknown): boolean {
+  if (error instanceof Error && error.name === "AbortError") {
+    // Timeout'un kendisi zaten "yanıt gelmedi" demek — tekrar denemek
+    // aynı süreyi tekrar bekletir, hem kullanıcı deneyimini kötüleştirir
+    // hem de gerçek API çağrı sayısını (ve kota/rate-limit tüketimini)
+    // gereksiz yere katlar.
+    return false;
+  }
   const status =
     error instanceof Error && "status" in error && typeof (error as { status: unknown }).status === "number"
       ? (error as { status: number }).status
@@ -151,8 +172,8 @@ function isRetryableGeminiError(error: unknown): boolean {
     const nonRetryableStatuses = [400, 401, 403, 429];
     return !nonRetryableStatuses.includes(status);
   }
-  // `status` alanı yoksa (gerçek bir `ApiError` değil — ör. ağ
-  // hatası/timeout), önceki davranış korunuyor: retry edilebilir
+  // `status` alanı yoksa VE AbortError da DEĞİLSE (gerçek bir ağ
+  // hatası gibi), önceki davranış korunuyor: retry edilebilir
   // varsayılır (geçici ağ sorunları için doğru davranış).
   return true;
 }

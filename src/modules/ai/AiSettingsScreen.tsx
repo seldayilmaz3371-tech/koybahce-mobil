@@ -33,9 +33,16 @@ interface AiSettingsScreenProps {
 
 export function AiSettingsScreen({ onBack }: AiSettingsScreenProps) {
   const { t } = useTranslation();
-  const { settings, status, errorCode, updateSettings, saveApiKey, removeApiKey } = useAiSettings();
+  const { settings, status, errorCode, apiKeyMasked, updateSettings, saveApiKey, removeApiKey } = useAiSettings();
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [isSavingKey, setIsSavingKey] = useState(false);
+  // bkz. Sprint 10.12, "API Key değiştir butonu olsun. Yeni API Key
+  // yapıştırılabilsin." — mevcut "apiKeyConfigured" akışı SADECE
+  // "Kaldır" sunuyordu (değiştirmek için önce kaldırıp sonra tekrar
+  // eklemek gerekiyordu). Bu, AYRI bir "Developer" akışı — mevcut
+  // Release-görünür akışa DOKUNMADAN.
+  const [devApiKeyInput, setDevApiKeyInput] = useState("");
+  const [isSavingDevKey, setIsSavingDevKey] = useState(false);
 
   const handleSaveApiKey = async () => {
     if (!apiKeyInput.trim() || isSavingKey) return;
@@ -52,6 +59,25 @@ export function AiSettingsScreen({ onBack }: AiSettingsScreenProps) {
     const confirmed = window.confirm(t("aiSettings.removeApiKeyConfirm"));
     if (!confirmed) return;
     await removeApiKey();
+  };
+
+  // bkz. Sprint 10.12 — "Kaydet ile anında aktif olsun. APK yeniden
+  // derlenmeden/uygulamayı yeniden başlatmadan kullanılabilsin." Bu,
+  // ZATEN GERÇEKLEŞEN bir davranış (Sprint 6'nın kararı: GeminiProvider
+  // API anahtarını HİÇBİR ZAMAN cache'lemiyor, her sendMessage()
+  // çağrısında SecureStorage'dan TAZE okuyor) — `saveApiKey()`'in
+  // KENDİSİ (üstteki `handleSaveApiKey` ile AYNI fonksiyon), mevcut
+  // bir anahtarın ÜZERİNE yazmak için de kullanılabilir, önce
+  // kaldırmaya GEREK yok.
+  const handleSaveDevApiKey = async () => {
+    if (!devApiKeyInput.trim() || isSavingDevKey) return;
+    setIsSavingDevKey(true);
+    try {
+      await saveApiKey(devApiKeyInput.trim());
+      setDevApiKeyInput("");
+    } finally {
+      setIsSavingDevKey(false);
+    }
   };
 
   if (status === "idle" || status === "loading") {
@@ -142,6 +168,32 @@ export function AiSettingsScreen({ onBack }: AiSettingsScreenProps) {
       <button type="button" className="lock-screen__button" onClick={onBack} style={{ marginTop: 8 }}>
         {t("common.back")}
       </button>
+
+      {settings.debugMode ? (
+        <div className="status-card" style={{ marginTop: 16, border: "2px dashed var(--color-primary)" }}>
+          <p className="status-card__label">{t("aiSettings.devApiKeySectionTitle")}</p>
+          <p className="status-card__value" style={{ fontSize: 14, fontWeight: 400, marginBottom: 8 }}>
+            {apiKeyMasked ?? t("aiSettings.devApiKeyNone")}
+          </p>
+          <input
+            type="password"
+            aria-label={t("aiSettings.devApiKeyInputLabel")}
+            value={devApiKeyInput}
+            onChange={(e) => setDevApiKeyInput(e.target.value)}
+            disabled={isSavingDevKey}
+            placeholder={t("aiSettings.devApiKeyInputPlaceholder")}
+          />
+          <button
+            type="button"
+            className="lock-screen__button"
+            onClick={handleSaveDevApiKey}
+            disabled={isSavingDevKey || !devApiKeyInput.trim()}
+            style={{ marginTop: 8 }}
+          >
+            {t("aiSettings.devApiKeyChangeButton")}
+          </button>
+        </div>
+      ) : null}
     </main>
   );
 }

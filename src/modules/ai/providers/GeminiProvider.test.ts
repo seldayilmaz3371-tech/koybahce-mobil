@@ -300,6 +300,19 @@ describe("GeminiProvider — Retry Stratejisi (Web Projesinden BİREBİR Taşın
 
     expect(generateContentMock).toHaveBeenCalledTimes(3); // 1 ilk deneme + 2 retry
   }, 10000);
+
+  it("🔴 Sprint 10.12, GERÇEK KÖK NEDEN DÜZELTMESİ: AbortError (timeout'un kendi hatası) ARTIK RETRY EDİLMİYOR — ÖNCEDEN her 45sn'lik timeout GERÇEKTEN 3 kez (1+2 retry) deneniyordu, bu da tool-calling akışlarında (2 round-trip) GERÇEK API çağrı sayısını katlayıp 429/RESOURCE_EXHAUSTED riskini artırıyordu", async () => {
+    const abortError = new Error("The operation was aborted");
+    abortError.name = "AbortError";
+    generateContentMock.mockRejectedValue(abortError);
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await expect(geminiProvider.sendMessage([{ role: "user", content: "test" }])).rejects.toThrow();
+
+    // ÖNCEDEN: 3 kez denenirdi (status alanı olmadığı için "retry
+    // edilebilir" sayılıyordu). ŞİMDİ: tek denemede duruyor.
+    expect(generateContentMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("GeminiProvider — analyzeImage (Sprint 9.2)", () => {

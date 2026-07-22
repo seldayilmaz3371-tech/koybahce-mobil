@@ -30,7 +30,12 @@
     "apiKeyConfigured": "API anahtarı yapılandırıldı.",
     "saveApiKeyButton": "Kaydet",
     "removeApiKeyButton": "Anahtarı Kaldır",
-    "removeApiKeyConfirm": "Gemini API anahtarınız kaldırılsın mı? Yeni bir anahtar ekleyene kadar AI özellikleri çalışmaz."
+    "removeApiKeyConfirm": "Gemini API anahtarınız kaldırılsın mı? Yeni bir anahtar ekleyene kadar AI özellikleri çalışmaz.",
+    "devApiKeySectionTitle": "API Key Yönetimi (Developer)",
+    "devApiKeyNone": "Yapılandırılmış anahtar yok",
+    "devApiKeyInputLabel": "Yeni Gemini API Anahtarı",
+    "devApiKeyInputPlaceholder": "Yeni bir API anahtarı yapıştırın",
+    "devApiKeyChangeButton": "Anahtarı Değiştir"
   },
   "aiDiagnostic": {
     "screenTitle": "AI Teşhis Bilgisi",
