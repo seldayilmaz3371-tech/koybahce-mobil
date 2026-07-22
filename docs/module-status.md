@@ -217,7 +217,19 @@ Modül 5 **kalıcı olarak donduruldu**. Sadece kritik güvenlik açığı/üret
 AI Ayarları (güvenli varsayılanlar + Teşhis Modu toggle'ı, Sprint 10.7) + Provider Registry (Gemini, çoklu provider desteğine hazır) + Tool Registry (6 salt-okunur araç) + Context Engine (anahtar kelime tabanlı, RAG'a hazır arayüz) + Konuşma Depolama + Salt-Okunur Sohbet + Fotoğraf Analizi + **AI Diagnostic Build** (Sprint 10.7 — merkezi teşhis kaydedici + Diagnostic ekranı, sadece Teşhis Modu açıkken erişilebilir). Sesli Asistan/RAG implementasyonu/Conversation Memory implementasyonu/Bitki-Hastalık tanıma/Yazma Araçları **bilinçli olarak kapsam dışı**.
 
 ### Sprint 10.7 Notu (2026-07-21) — AI Diagnostic Build
-Kullanıcının gerçek cihaz test sonuçları (AI Sohbet'te her soruda genel hata, Fotoğraf Analizi'nde sonsuz bekleme), Sprint 10.6'nın "Production Ready" iddiasını doğrulayamadı. Bu sprint **yeni bir AI özelliği değil** — mevcut davranışı (doğru ya da hatalı) kesin teknik kanıtla gözlemlenebilir kılan bir teşhis altyapısı. `mapAiError()`'ın kendi (muhtemelen hatalı) sınıflandırma mantığına **bilinçli olarak dokunulmadı** — gerçek cihaz verisi görülene kadar erteledi. Gerçek bir timeout eksikliği bulunup düzeltildi (SDK'nın resmi `httpOptions.timeout` mekanizması, 45sn). Detay: `docs/sprint-10.7-ai-diagnostic-build-technical-report.md`.
+Kullanıcının gerçek cihaz test sonuçları (AI Sohbet'te her soruda genel hata, Fotoğraf Analizi'nde sonsuz bekleme), Sprint 10.6'nın "Production Ready" iddiasını doğrulayamadı. Bu sprint **yeni bir AI özelliği değil** — mevcut davranışı (doğru ya da hatalı) kesin teknik kanıtla gözlemlenebilir kılan bir teşhis altyapısı. `mapAiError()`'ın kendi (muhtemelen hatalı) sınıflandırma mantığına **bilinçli olarak dokunulmadı** — gerçek cihaz verisi görülene kadar erteledi. Gerçek bir timeout eksikliği bulunup düzeltildi (SDK'nın resmi `httpOptions.timeout` mekanizması, 45sn — Sprint 10.11'de bu mekanizmanın kendisinin bozuk olduğu kanıtlandı, bkz. aşağı). Detay: `docs/sprint-10.7-ai-diagnostic-build-technical-report.md`.
+
+### Sprint 10.8 Notu — Diagnostic Ekranı Okunabilirlik Düzeltmesi
+Gerçek CSS bug bulundu: `AiSettingsScreen`'deki 3 checkbox bloğu `<label className="status-card">` kullanıyordu — `.status-card`'ın hiçbir `display` kuralı yoktu, `<label>`'ın varsayılan `inline` davranışı kartların üst üste binmesine yol açıyordu. Established `.form-field--checkbox` deseniyle düzeltildi. Diagnostic ekranındaki sınırsız uzunluktaki stack trace 6 satırla sınırlandı.
+
+### Sprint 10.9 Notu — Kesin Kanıtlı Kök Neden: AI_002 ve Diagnostic "idle" Sorunu
+`getActiveAiProvider.ts:34` — `internetPermission=false` (şema varsayılanı `DEFAULT 0`) iken `AI_INTERNET_PERMISSION_DENIED` fırlatılıyordu. `aiDiagnostics.startNewRequest()` sadece `GeminiProvider`'ın içinde çağrılıyordu — izin kontrolü başarısız olduğunda `GeminiProvider`'a hiç ulaşılmıyordu, bu yüzden Diagnostic ekranı sonsuza kadar "idle" gösteriyordu. Düzeltme: `startNewRequest()` artık `getActiveAiProvider()`'ın kendisinde (tek nokta).
+
+### Sprint 10.10 Notu — thought_signature Kesin Kök Neden Düzeltmesi
+Resmi SDK tip tanımlarından kanıtlandı: `thoughtSignature`, `Part`'ın `functionCall` ile kardeş bir alanı — `response.functionCalls` getter'ı buna yapısal olarak erişemiyordu, 2. round-trip'te bu imza kayboluyor, Gemini 400 (`AI_009`) ile reddediyordu. `response.candidates[0].content.parts` doğrudan okunacak şekilde düzeltildi. Ayrıca `isRetryableGeminiError`'ın aynı format uyumsuzluğu (400 hatalarının yanlışlıkla retry edilip kota tüketmesi, `AI_007`/429) düzeltildi.
+
+### Sprint 10.11 Notu — httpOptions.timeout SDK Bug'ı Düzeltmesi
+Güncel bir GitHub Issue (`googleapis/js-genai#1277`) kanıtladı: `config.httpOptions.timeout`, `models.generateContent` için **bozuk** — hiçbir zaman devreye girmiyor. Bu, Fotoğraf Analizi'nin ve `queryTreeData` gibi tool-calling akışlarının 2. round-trip'inin "awaiting_response"ta sonsuza kadar takılı kalmasının kesin açıklamasıydı. Gerçek bir `AbortController` + `config.abortSignal`'a geçildi (SDK'nın ayrı, çalışan bir mekanizması). `[AI]` etiketli detaylı loglama ve Diagnostic ekranına `toolDurationMs` eklendi.
 
 ### Sprint Geçmişi
 | Sprint | İçerik | Durum |
@@ -229,10 +241,14 @@ Kullanıcının gerçek cihaz test sonuçları (AI Sohbet'te her soruda genel ha
 | 7.4 | Beta versiyon altyapısı | ✅ Onaylandı |
 | 7.5 | Release Signing mimarisi belgeleri | ✅ Onaylandı |
 | 10.6 | AI Production Ready — Tool-calling düzeltmesi + hata görünürlüğü + Hasat aracı + prompt kalitesi | ✅ Tamamlandı |
-| 10.7 | AI Diagnostic Build — kesin teknik teşhis altyapısı (gerçek cihaz doğrulaması bekliyor) | ✅ Tamamlandı |
+| 10.7 | AI Diagnostic Build — kesin teknik teşhis altyapısı | ✅ Tamamlandı |
+| 10.8 | Diagnostic ekranı okunabilirlik + AiSettings CSS bug düzeltmesi | ✅ Tamamlandı |
+| 10.9 | AI_002 kesin kök neden + Diagnostic "idle" sorunu düzeltmesi | ✅ Tamamlandı |
+| 10.10 | thought_signature kesin kök neden düzeltmesi | ✅ Tamamlandı |
+| 10.11 | httpOptions.timeout SDK bug'ı → gerçek AbortController | ✅ Tamamlandı, gerçek cihaz doğrulaması bekliyor |
 
 ### Sonraki Adım
-Kullanıcının kendi cihazında Teşhis Modu'nu açıp gerçek hataları yeniden üretmesi → elde edilen gerçek `Error Code`/`stage`/`httpStatusCode` verisiyle kesin düzeltmenin planlanması → İmzalama → Gerçek Cihaz TAM doğrulaması → Production Ready kararı.
+Kullanıcının kendi cihazında `queryTreeData` ve Fotoğraf Analizi'ni tekrar test etmesi → `AbortController` düzeltmesinin gerçekten "awaiting_response" takılmasını çözüp çözmediğinin doğrulanması → İmzalama → Gerçek Cihaz TAM doğrulaması → Production Ready kararı.
 
 ### Dondurma Kuralı
 Henüz uygulanmıyor — modül aktif geliştirme/doğrulama aşamasında.
