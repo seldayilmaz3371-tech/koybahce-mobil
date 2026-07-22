@@ -21,6 +21,21 @@ export interface AIToolDefinition {
 export interface AIToolCallRequest {
   toolName: string;
   arguments: Record<string, unknown>;
+  /**
+   * bkz. Sprint 10.10. GERÇEK KÖK NEDEN (resmi `@google/genai` tip
+   * tanımlarından KANITLANDI): Gemini'nin "thinking" yetenekli
+   * modelleri (`gemini-flash-latest`'in arkasındaki Gemini 3.5 dahil),
+   * bir function-call yanıtı verirken bunu bir "thought" ile
+   * ilişkilendirir — bu ilişki, `Part.thoughtSignature` alanında
+   * (functionCall ile AYNI Part'ta, KARDEŞ bir alan) taşınır. SDK'nın
+   * kendi belgesi: "Optional. An opaque signature for the thought so
+   * it can be REUSED IN SUBSEQUENT REQUESTS." Bu imza, 2. round-trip'e
+   * (tool sonucu geri gönderilirken) GERİ EKLENMEZSE, Gemini "Function
+   * call is missing a thought_signature" hatasıyla (400 Bad Request,
+   * INVALID_ARGUMENT) isteği REDDEDİYOR — kullanıcının gerçek cihaz
+   * testinde AI_009 olarak gözlemlediği hata TAM OLARAK budur.
+   */
+  thoughtSignature?: string;
 }
 
 export interface AIToolResult {

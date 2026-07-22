@@ -83,6 +83,37 @@ describe("AiDiagnosticScreen — Anlamlı Boş Durum İfadeleri (Sprint 10.9, KU
     expect(screen.getByText("Girilmiş (geçerliliği doğrulanmadı)")).toBeTruthy();
     expect(screen.queryByText("Henüz oluşturulmadı")).toBeNull();
   });
+
+  it("🔴 Sprint 10.10, Madde 5: apiKeyMasked KAYITLIYSA, GENEL 'Girilmiş' ifadesi YERİNE maskeli anahtar gösterilir", async () => {
+    aiDiagnostics.recordApiKeyStatus("configured");
+    aiDiagnostics.recordApiKeyMasked("AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ1234");
+
+    render(<AiDiagnosticScreen onBack={vi.fn()} debugMode={true} />);
+
+    await waitFor(() => expect(screen.getByText("AIza****1234")).toBeTruthy());
+    expect(screen.queryByText("Girilmiş (geçerliliği doğrulanmadı)")).toBeNull();
+  });
+
+  it("🔴 Sprint 10.10, Madde 7-8: toolCallsRequested KAYITLIYSA, HANGİ aracın çağrıldığı VE thought_signature durumu GERÇEKTEN gösterilir", async () => {
+    aiDiagnostics.recordToolCallsRequested([
+      { name: "queryParcelData", hasThoughtSignature: false },
+      { name: "queryTreeData", hasThoughtSignature: true },
+    ]);
+
+    render(<AiDiagnosticScreen onBack={vi.fn()} debugMode={true} />);
+
+    await waitFor(() => expect(screen.getByText("queryParcelData")).toBeTruthy());
+    expect(screen.getByText("queryTreeData")).toBeTruthy();
+    expect(screen.getByText("thought_signature YOK")).toBeTruthy();
+    expect(screen.getByText("thought_signature VAR")).toBeTruthy();
+  });
+
+  it("hiçbir tool çağrılmamışsa, Tool Calling bölümü HİÇ görünmez (gereksiz boş kart olmaz)", async () => {
+    render(<AiDiagnosticScreen onBack={vi.fn()} debugMode={true} />);
+
+    await waitFor(() => expect(screen.getByText("Provider")).toBeTruthy());
+    expect(screen.queryByText("Tool Calling")).toBeNull();
+  });
 });
 
 describe("AiDiagnosticScreen — 'Back' Butonu", () => {

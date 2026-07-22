@@ -71,7 +71,10 @@ describe("GeminiProvider — sendMessage", () => {
   it("model bir araç çağrısı talep ederse, DOĞRU toolName/arguments ile döner", async () => {
     generateContentMock.mockResolvedValue({
       text: undefined,
-      functionCalls: [{ name: "queryParcelData", args: { parcelId: "p1" } }],
+      // bkz. Sprint 10.10 — GERÇEK SDK yapısı: `functionCalls` getter'ı
+      // ARTIK kullanılmıyor (thoughtSignature'ı YAKALAYAMIYORDU), gerçek
+      // kod `candidates[0].content.parts`'ı okuyor.
+      candidates: [{ content: { role: "model", parts: [{ functionCall: { name: "queryParcelData", args: { parcelId: "p1" } } }] } }],
     });
     const { geminiProvider } = await import("./GeminiProvider");
 
@@ -80,7 +83,33 @@ describe("GeminiProvider — sendMessage", () => {
       { tools: [{ name: "queryParcelData", description: "Parsel bilgisi", parametersJsonSchema: { type: "object" } }] }
     );
 
-    expect(result.toolCalls).toEqual([{ toolName: "queryParcelData", arguments: { parcelId: "p1" } }]);
+    expect(result.toolCalls).toEqual([{ toolName: "queryParcelData", arguments: { parcelId: "p1" }, thoughtSignature: undefined }]);
+  });
+
+  it("🔴 GERÇEK KÖK NEDEN DÜZELTMESİ (Sprint 10.10): model bir thoughtSignature İLE araç çağırırsa, bu GERÇEKTEN yakalanır (ÖNCEDEN response.functionCalls getter'ı bunu YAPISAL OLARAK yakalayamıyordu)", async () => {
+    generateContentMock.mockResolvedValue({
+      text: undefined,
+      candidates: [
+        {
+          content: {
+            role: "model",
+            parts: [
+              {
+                functionCall: { name: "queryParcelData", args: { parcelId: "p1" } },
+                thoughtSignature: "BASE64_ENCODED_THOUGHT_ABC123",
+              },
+            ],
+          },
+        },
+      ],
+    });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    const result = await geminiProvider.sendMessage([{ role: "user", content: "P1 parselinin bilgilerini ver" }], {
+      tools: [{ name: "queryParcelData", description: "Parsel bilgisi", parametersJsonSchema: { type: "object" } }],
+    });
+
+    expect(result.toolCalls[0].thoughtSignature).toBe("BASE64_ENCODED_THOUGHT_ABC123");
   });
 
   it("`role: 'tool'` mesajları Gemini'ye GÖNDERİLMEZ (Content.role sadece user/model kabul eder — filtrelenir)", async () => {
@@ -139,6 +168,47 @@ describe("GeminiProvider — sendMessage", () => {
     });
   });
 
+  it("🔴 GERÇEK KÖK NEDEN DÜZELTMESİ (Sprint 10.10): thoughtSignature VARSA, 2. round-trip'e GERÇEKTEN geri gönderilir (Gemini'nin 'thought_signature eksik' 400 hatasının düzeltmesi)", async () => {
+    generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await geminiProvider.sendMessage(
+      [
+        { role: "user", content: "soru" },
+        {
+          role: "model",
+          content: "",
+          toolCalls: [{ toolName: "queryParcelData", arguments: { limit: 5 }, thoughtSignature: "SIG_XYZ" }],
+        },
+      ],
+      { pendingToolResults: [{ toolName: "queryParcelData", result: { count: 3 } }] }
+    );
+
+    const sentContents = generateContentMock.mock.calls[0][0].contents;
+    const modelToolCallContent = sentContents[1];
+    // thoughtSignature, functionCall'ın İÇİNDE DEĞİL, Part'ın KENDİSİNDE
+    // (functionCall ile KARDEŞ bir alan) — resmi tip tanımlarından
+    // doğrulandı, testte de AYNI YAPI kontrol ediliyor.
+    expect(modelToolCallContent.parts[0].thoughtSignature).toBe("SIG_XYZ");
+    expect(modelToolCallContent.parts[0].functionCall).toEqual({ name: "queryParcelData", args: { limit: 5 } });
+  });
+
+  it("thoughtSignature YOKSA, Part'a hiç eklenmez (gereksiz 'undefined' alan gönderilmez)", async () => {
+    generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await geminiProvider.sendMessage(
+      [
+        { role: "user", content: "soru" },
+        { role: "model", content: "", toolCalls: [{ toolName: "queryParcelData", arguments: { limit: 5 } }] },
+      ],
+      { pendingToolResults: [{ toolName: "queryParcelData", result: { count: 3 } }] }
+    );
+
+    const sentContents = generateContentMock.mock.calls[0][0].contents;
+    expect("thoughtSignature" in sentContents[1].parts[0]).toBe(false);
+  });
+
   it("tools verilirse, DOĞRU functionDeclarations formatında gönderilir", async () => {
     generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
     const { geminiProvider } = await import("./GeminiProvider");
@@ -170,14 +240,42 @@ describe("GeminiProvider — sendMessage", () => {
   });
 });
 
-describe("GeminiProvider — Retry Stratejisi (Web Projesinden BİREBİR Taşınan Mantık)", () => {
-  it("kota hatası (RESOURCE_EXHAUSTED) YENİDEN DENENMEZ — tek denemede hata fırlatır", async () => {
-    generateContentMock.mockRejectedValue(new Error('{"code":429,"message":"RESOURCE_EXHAUSTED"}'));
+describe("GeminiProvider — Retry Stratejisi (Web Projesinden BİREBİR Taşınan Mantık, Sprint 10.10'da GERÇEK ApiError formatına düzeltildi)", () => {
+  it("kota hatası (429/RESOURCE_EXHAUSTED, GERÇEK ApiError.status formatında) YENİDEN DENENMEZ — tek denemede hata fırlatır", async () => {
+    class FakeApiError extends Error {
+      status: number;
+      constructor() {
+        super("You exceeded your current quota");
+        this.name = "ApiError";
+        this.status = 429;
+      }
+    }
+    generateContentMock.mockRejectedValue(new FakeApiError());
     const { geminiProvider } = await import("./GeminiProvider");
 
     await expect(geminiProvider.sendMessage([{ role: "user", content: "test" }])).rejects.toThrow();
 
     expect(generateContentMock).toHaveBeenCalledTimes(1); // retry YOK
+  });
+
+  it("🔴 GERÇEK KÖK NEDEN DÜZELTMESİ (Sprint 10.10): 400 hatası (ör. 'thought_signature eksik') ARTIK RETRY EDİLMİYOR — ÖNCEDEN her 400 hatası GEREKSİZ yere 3 kez Gemini'ye istek gönderip kota TÜKETİYORDU (kullanıcının gerçek cihaz test sırasıyla tutarlı: 400 hataları SONRASI 429/RESOURCE_EXHAUSTED)", async () => {
+    class FakeApiError extends Error {
+      status: number;
+      constructor() {
+        super("Function call is missing a thought_signature in functionCall parts");
+        this.name = "ApiError";
+        this.status = 400;
+      }
+    }
+    generateContentMock.mockRejectedValue(new FakeApiError());
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await expect(geminiProvider.sendMessage([{ role: "user", content: "test" }])).rejects.toThrow();
+
+    // ÖNCEDEN: bu hata YANLIŞLIKLA "retry edilebilir" sayılıyordu (message
+    // içinde '"code":400' aranıyordu, GERÇEK ApiError.message'da bu format
+    // YOK) — 3 kez (1+2 retry) istek gönderiliyordu. ŞİMDİ: tek denemede duruyor.
+    expect(generateContentMock).toHaveBeenCalledTimes(1);
   });
 
   it("geçici bir hata (ör. ağ hatası) YENİDEN DENENİR, sonunda başarılı olursa sonuç döner", async () => {
@@ -246,8 +344,16 @@ describe("GeminiProvider — analyzeImage (Sprint 9.2)", () => {
     expect(generateContentMock).not.toHaveBeenCalled();
   });
 
-  it("kota hatası (RESOURCE_EXHAUSTED) YENİDEN DENENMEZ (sendMessage ile AYNI retry mantığı)", async () => {
-    generateContentMock.mockRejectedValue(new Error('{"code":429,"message":"RESOURCE_EXHAUSTED"}'));
+  it("kota hatası (429/RESOURCE_EXHAUSTED, GERÇEK ApiError.status formatında) YENİDEN DENENMEZ (sendMessage ile AYNI retry mantığı)", async () => {
+    class FakeApiError extends Error {
+      status: number;
+      constructor() {
+        super("You exceeded your current quota");
+        this.name = "ApiError";
+        this.status = 429;
+      }
+    }
+    generateContentMock.mockRejectedValue(new FakeApiError());
     const { geminiProvider } = await import("./GeminiProvider");
 
     await expect(geminiProvider.analyzeImage("BASE64", "image/jpeg", "soru")).rejects.toThrow();
@@ -287,6 +393,20 @@ describe("GeminiProvider — Diagnostic Entegrasyonu (Sprint 10.7/10.9, AI Diagn
     await expect(geminiProvider.sendMessage([{ role: "user", content: "soru" }])).rejects.toThrow();
 
     expect(aiDiagnostics.getSnapshot().apiKeyStatus).toBe("empty");
+  });
+
+  it("🔴 Sprint 10.10, Madde 5: sendMessage() BAŞARILI olduğunda, aiDiagnostics GERÇEK anahtarı MASKELİ olarak kaydeder (TAM anahtar ASLA görünmez)", async () => {
+    const { aiDiagnostics } = await import("../diagnostics/aiDiagnostics");
+    aiDiagnostics.reset();
+    // beforeEach'in varsayılanı "test-api-key" (13 karakter).
+    generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
+    const { geminiProvider } = await import("./GeminiProvider");
+
+    await geminiProvider.sendMessage([{ role: "user", content: "soru" }]);
+
+    const snapshot = aiDiagnostics.getSnapshot();
+    expect(snapshot.apiKeyMasked).toBe("test****-key");
+    expect(snapshot.apiKeyMasked).not.toContain("api");
   });
 
   it("sendMessage() BAŞARISIZ olduğunda, aiDiagnostics GERÇEK ApiError alanlarını (message/status) kaydeder", async () => {

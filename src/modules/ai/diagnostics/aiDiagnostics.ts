@@ -39,6 +39,18 @@ export interface AiDiagnosticSnapshot {
   requestId: string | null;
   /** "empty" = kullanıcı hiç girmemiş, "configured" = SecureStorage'da bir değer var (GEÇERLİLİĞİ doğrulanmadı — sadece VARLIĞI). */
   apiKeyStatus: "empty" | "configured" | "unknown";
+  /**
+   * bkz. Sprint 10.10, Madde 5 — "Gerçekten kullanılan API Key nasıl
+   * doğrulandı? Maskeli göster." GÜVENLİK: hiçbir zaman anahtarın tam
+   * hali saklanmaz/gösterilmez — sadece ilk 4 + son 4 karakter (ör.
+   * "AIza****XY9Z"). Bu, kullanıcının "gerçekten tek bir anahtar mı
+   * kullanılıyor" sorusunu, anahtarın kendisini ifşa etmeden
+   * cevaplamaya yarar — iki farklı istekte bu değer FARKLIYSA, gerçekten
+   * farklı bir anahtar kullanılıyor demektir (kod seviyesinde tek bir
+   * sabit SecureStorage anahtarı olduğu ayrıca doğrulandı — bkz.
+   * `native/secureStorage.ts`, `SecureStorageKey.GEMINI_API_KEY`).
+   */
+  apiKeyMasked: string | null;
   providerName: string | null;
   /** bkz. Sprint 10.9 — GERÇEK istekte kullanılan model adı (ör. "gemini-flash-latest"). */
   model: string | null;
@@ -58,6 +70,15 @@ export interface AiDiagnosticSnapshot {
   durationMs: number | null;
   timedOut: boolean;
   retryCount: number;
+  /**
+   * bkz. Sprint 10.10, Madde 7-8 — "Tool seçildi mi? Hangi tool?"
+   * Modelin İLK round-trip'te talep ettiği araç çağrıları — her biri
+   * için `hasThoughtSignature`, Gemini'nin bu çağrıyı bir
+   * `thoughtSignature` ile birlikte döndürüp döndürmediğini gösterir
+   * (kesin kanıtlanmış kök nedenin gelecekte tekrar teşhis
+   * edilebilmesi için).
+   */
+  toolCallsRequested: { name: string; hasThoughtSignature: boolean }[];
   /** Sadece Fotoğraf Analizi akışında dolu. */
   photo: {
     fileSizeBytes: number | null;
@@ -69,6 +90,7 @@ function emptySnapshot(): AiDiagnosticSnapshot {
   return {
     requestId: null,
     apiKeyStatus: "unknown",
+    apiKeyMasked: null,
     providerName: null,
     model: null,
     stage: "idle",
@@ -80,6 +102,7 @@ function emptySnapshot(): AiDiagnosticSnapshot {
     durationMs: null,
     timedOut: false,
     retryCount: 0,
+    toolCallsRequested: [],
     photo: null,
   };
 }
@@ -116,6 +139,20 @@ export const aiDiagnostics = {
     current.apiKeyStatus = status;
   },
 
+  /**
+   * bkz. Sprint 10.10, Madde 5. `apiKey`'in GERÇEK, tam değeri asla
+   * saklanmaz — sadece ilk 4 + son 4 karakter, aradaki her şey "*"
+   * ile maskelenir. Anahtar 8 karakterden kısaysa (gerçekte Gemini
+   * anahtarları ~39 karakter, ama savunmacı bir sınır) tamamı maskelenir.
+   */
+  recordApiKeyMasked(apiKey: string): void {
+    if (apiKey.length <= 8) {
+      current.apiKeyMasked = "*".repeat(apiKey.length);
+      return;
+    }
+    current.apiKeyMasked = `${apiKey.slice(0, 4)}****${apiKey.slice(-4)}`;
+  },
+
   recordProvider(providerName: string): void {
     current.providerName = providerName;
   },
@@ -134,6 +171,11 @@ export const aiDiagnostics = {
 
   recordPhotoSizes(fileSizeBytes: number, base64SizeBytes: number): void {
     current.photo = { fileSizeBytes, base64SizeBytes };
+  },
+
+  /** bkz. Sprint 10.10, Madde 7-8. Modelin talep ettiği araç çağrılarını (isim + thoughtSignature varlığı) kaydeder. */
+  recordToolCallsRequested(calls: { name: string; hasThoughtSignature: boolean }[]): void {
+    current.toolCallsRequested = calls;
   },
 
   /** GERÇEK `ApiError` (ya da herhangi bir hata) nesnesinin HAM alanlarını kaydeder — Madde 5. */

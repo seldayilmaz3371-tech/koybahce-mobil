@@ -28,6 +28,21 @@ describe("aiDiagnostics", () => {
     expect(aiDiagnostics.getSnapshot().apiKeyStatus).toBe("configured");
   });
 
+  it("recordApiKeyMasked, GERÇEK anahtarı İLK 4 + SON 4 karakterle maskeler (Sprint 10.10, Madde 5)", () => {
+    aiDiagnostics.recordApiKeyMasked("AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ1234");
+
+    const snapshot = aiDiagnostics.getSnapshot();
+    expect(snapshot.apiKeyMasked).toBe("AIza****1234");
+    // Hiçbir zaman TAM anahtar snapshot'ta GÖRÜNMEMELİ.
+    expect(snapshot.apiKeyMasked).not.toContain("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  });
+
+  it("recordApiKeyMasked, 8 karakter VEYA daha kısa anahtarları TAMAMEN maskeler", () => {
+    aiDiagnostics.recordApiKeyMasked("short1");
+
+    expect(aiDiagnostics.getSnapshot().apiKeyMasked).toBe("******");
+  });
+
   it("recordStage, İSTEĞİN hangi aşamada olduğunu GERÇEKTEN kaydeder", () => {
     aiDiagnostics.recordStage("request_prepared");
     expect(aiDiagnostics.getSnapshot().stage).toBe("request_prepared");

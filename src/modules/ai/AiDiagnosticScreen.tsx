@@ -128,7 +128,7 @@ export function AiDiagnosticScreen({ onBack, debugMode }: AiDiagnosticScreenProp
               ? "Henüz kontrol edilmedi"
               : snapshot.apiKeyStatus === "empty"
                 ? "Boş (girilmemiş)"
-                : "Girilmiş (geçerliliği doğrulanmadı)"
+                : (snapshot.apiKeyMasked ?? "Girilmiş (geçerliliği doğrulanmadı)")
           }
         />
         <DiagnosticRow label="SDK" value={SDK_VERSION} />
@@ -150,6 +150,19 @@ export function AiDiagnosticScreen({ onBack, debugMode }: AiDiagnosticScreenProp
         <DiagnosticRow label="Duration" value={snapshot.durationMs !== null ? `${snapshot.durationMs} ms` : "Henüz tamamlanmadı"} />
         <DiagnosticRow label="Retry Count" value={String(snapshot.retryCount)} />
       </div>
+
+      {snapshot.toolCallsRequested.length > 0 ? (
+        <div className="status-card">
+          <p className="status-card__label">Tool Calling</p>
+          {snapshot.toolCallsRequested.map((call, index) => (
+            <DiagnosticRow
+              key={`${call.name}-${index}`}
+              label={call.name}
+              value={call.hasThoughtSignature ? "thought_signature VAR" : "thought_signature YOK"}
+            />
+          ))}
+        </div>
+      ) : null}
 
       {snapshot.photo ? (
         <div className="status-card">

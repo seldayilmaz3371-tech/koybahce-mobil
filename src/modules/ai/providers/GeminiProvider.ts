@@ -86,11 +86,40 @@ const RETRY_BASE_DELAY_MS = 1000;
  */
 const REQUEST_TIMEOUT_MS = 45_000;
 
-/** Web projesinin `isRetryableGeminiError`'ından BİREBİR taşındı. */
+/**
+ * bkz. Sprint 10.10, GERÇEK KÖK NEDEN DÜZELTMESİ (kesin kanıtla
+ * doğrulandı — bkz. kök neden raporu, "mapAiError/ApiError
+ * uyumsuzluğu"). ÖNCEDEN bu fonksiyon `error.message`'ın İÇİNDE
+ * `'"code":400'` gibi bir JSON alt-dizesi arıyordu — ama gerçek
+ * `ApiError` sınıfı (resmi tip tanımlarından doğrulandı), durum
+ * kodunu AYRI, sayısal bir `status` alanında taşıyor, `message`'ın
+ * içine JSON olarak GÖMMÜYOR. Bu yüzden hiçbir marker ASLA
+ * eşleşmiyordu — TÜM hatalar (400/401/403/429 dahil) "retry
+ * edilebilir" olarak YANLIŞ sınıflandırılıyordu.
+ *
+ * SOMUT ETKİSİ (kullanıcının gerçek cihaz test sırasıyla tutarlı):
+ * Her "thought_signature eksik" (400) hatası, GERÇEKTEN 3 kez (1 ilk
+ * deneme + `MAX_RETRY_ATTEMPTS=2` retry) Gemini'ye istek
+ * gönderiyordu — bu, kota tüketimini 3 katına çıkarıyordu. Test
+ * 5-6'da (400 hataları) yaşanan kota tüketimi, Test 8-9'daki
+ * RESOURCE_EXHAUSTED (429) hatasının gerçek bir katkı nedenidir.
+ */
 function isRetryableGeminiError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error);
-  const nonRetryableMarkers = ["RESOURCE_EXHAUSTED", '"code":429', '"code":400', '"code":401', '"code":403'];
-  return !nonRetryableMarkers.some((marker) => message.includes(marker));
+  const status =
+    error instanceof Error && "status" in error && typeof (error as { status: unknown }).status === "number"
+      ? (error as { status: number }).status
+      : null;
+  if (status !== null) {
+    // 400 (geçersiz istek — ör. thought_signature eksik), 401/403
+    // (kimlik doğrulama), 429 (rate limit/kota) — hiçbiri retry ile
+    // düzelmez, aynı hatayı tekrar üretir (kota israfı).
+    const nonRetryableStatuses = [400, 401, 403, 429];
+    return !nonRetryableStatuses.includes(status);
+  }
+  // `status` alanı yoksa (gerçek bir `ApiError` değil — ör. ağ
+  // hatası/timeout), önceki davranış korunuyor: retry edilebilir
+  // varsayılır (geçici ağ sorunları için doğru davranış).
+  return true;
 }
 
 /** Web projesinin `callGeminiWithRetry`'inden BİREBİR taşındı. */
@@ -146,7 +175,17 @@ function buildContents(messages: AIMessage[], pendingToolResults?: AIToolResult[
       }
       if (m.toolCalls && m.toolCalls.length > 0) {
         for (const call of m.toolCalls) {
-          parts.push({ functionCall: { name: call.toolName, args: call.arguments } });
+          // bkz. Sprint 10.10, GERÇEK KÖK NEDEN DÜZELTMESİ.
+          // `thoughtSignature`, `functionCall`'ın KENDİSİNİN bir
+          // alanı DEĞİL, `Part`'ın (functionCall ile KARDEŞ) bir
+          // alanı — resmi tip tanımlarından doğrulandı. Bu yüzden
+          // ayrı bir Part alanı olarak (functionCall'ın YANINA, İÇİNE
+          // DEĞİL) ekleniyor.
+          const part: Part = { functionCall: { name: call.toolName, args: call.arguments } };
+          if (call.thoughtSignature) {
+            part.thoughtSignature = call.thoughtSignature;
+          }
+          parts.push(part);
         }
       }
       // Teorik olarak content VE toolCalls ikisi de boş olmamalı (çağıran
@@ -196,6 +235,12 @@ class GeminiProvider implements AIProvider {
       // YAZILMAZ (Globalization Policy).
       throw new Error("AI_PROVIDER_API_KEY_NOT_CONFIGURED");
     }
+    // bkz. Sprint 10.10, Madde 5 — "Gerçekten kullanılan API Key nasıl
+    // doğrulandı? Maskeli göster." Kod seviyesinde TEK bir sabit
+    // SecureStorage anahtarı var (`SecureStorageKey.GEMINI_API_KEY`) —
+    // bu maskeli kayıt, kullanıcının gerçek cihazda "aynı anahtar mı
+    // kullanılıyor" sorusunu, anahtarı ifşa etmeden doğrulamasını sağlar.
+    aiDiagnostics.recordApiKeyMasked(apiKey);
     return apiKey;
   }
 
@@ -229,9 +274,31 @@ class GeminiProvider implements AIProvider {
       });
       aiDiagnostics.recordStage("response_received");
 
-      const toolCalls: AIToolCallRequest[] = (response.functionCalls ?? [])
-        .filter((fc) => fc.name)
-        .map((fc) => ({ toolName: fc.name as string, arguments: fc.args ?? {} }));
+      // bkz. Sprint 10.10, GERÇEK KÖK NEDEN DÜZELTMESİ (kesin kanıtla
+      // doğrulandı — bkz. `AIToolCallRequest.thoughtSignature`'ın
+      // belgesi). ÖNCEDEN `response.functionCalls` (SDK'nın kendi
+      // "convenience" getter'ı, SADECE `FunctionCall[]` döner) kullanılıyordu
+      // — bu, `thoughtSignature`'ı (bir `Part` alanı, `FunctionCall`'ın
+      // DEĞİL) YAPISAL OLARAK YAKALAYAMAZ (resmi tip tanımlarından
+      // doğrulandı: `functionCalls` getter'ı `FunctionCall[]` döner,
+      // `Part[]` değil). DÜZELTME: artık `response.candidates[0].content.parts`
+      // doğrudan okunuyor — her `functionCall` Part'ının kendi
+      // `thoughtSignature`'ı (varsa) BİRLİKTE çıkarılıyor.
+      const responseParts = response.candidates?.[0]?.content?.parts ?? [];
+      const toolCalls: AIToolCallRequest[] = responseParts
+        .filter((part): part is typeof part & { functionCall: NonNullable<typeof part.functionCall> } =>
+          Boolean(part.functionCall?.name)
+        )
+        .map((part) => ({
+          toolName: part.functionCall.name as string,
+          arguments: part.functionCall.args ?? {},
+          thoughtSignature: part.thoughtSignature,
+        }));
+
+      // bkz. Sprint 10.10, Madde 7-8 — "Tool seçildi mi? Hangi tool?"
+      aiDiagnostics.recordToolCallsRequested(
+        toolCalls.map((c) => ({ name: c.toolName, hasThoughtSignature: Boolean(c.thoughtSignature) }))
+      );
 
       aiDiagnostics.recordStage("parsed");
       aiDiagnostics.finishRequest();
