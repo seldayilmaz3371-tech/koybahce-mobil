@@ -4,7 +4,7 @@
 |---|---|
 | **Project** | Bahçem Mobile |
 | **Module** | Modül 6 — AI Altyapısı |
-| **Sprint** | 10.10 — thought_signature Kesin Kök Neden Düzeltmesi |
+| **Sprint** | 10.11 — httpOptions.timeout SDK Bug'ı Düzeltmesi |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
 | **Test Sonucu** | ✅ 730/730 başarılı — regresyon yok |
 | **Build** | ✅ **BUILD SUCCESSFUL** |
@@ -13,18 +13,21 @@
 | **Android Gradle Build** | ❌ Gerçekten denendi — bu ortamın network kısıtı (HTTP 403) nedeniyle yapılamadı |
 | **Şema Sürümü** | 12 (değişmedi) |
 | **Tarih** | 2026-07-22 |
-| **Git Commit** | `501598f` |
+| **Git Commit** | `6bb4dd1` |
 
-## Kesin Kanıtlanmış Kök Neden(ler)
+## Kesin Kanıtlanmış Kök Neden
 
-1. **HTTP 400/AI_009**: `thoughtSignature`, resmi SDK tip tanımlarında `Part`'ın `functionCall` ile kardeş bir alanı. `response.functionCalls` getter'ı buna yapısal olarak erişemiyordu — 2. round-trip'te bu imza kayboluyordu, Gemini isteği reddediyordu.
-2. **HTTP 429/AI_007**: `isRetryableGeminiError`, `mapAiError` ile aynı format uyumsuzluğunu taşıyordu — 400 hataları yanlışlıkla retry ediliyordu, her başarısız tool-calling denemesi 3 kata kadar kota tüketiyordu.
+Güncel GitHub Issue `googleapis/js-genai#1277`: `config.httpOptions.timeout`, `models.generateContent` için **bozuk** — hiçbir zaman devreye girmiyor. Bu, Fotoğraf Analizi'nin ve `queryTreeData` gibi tool-calling akışlarının 2. round-trip'inin "awaiting_response"ta sonsuza kadar takılı kalmasının kesin açıklaması.
 
-## Düzeltmeler
+## Düzeltme
 
-- `GeminiProvider.ts`: `response.candidates[0].content.parts`'tan `thoughtSignature` çıkarılıp 2. round-trip'e geri gönderiliyor; `isRetryableGeminiError` artık `error.status`'a bakıyor.
-- `AIProvider.interface.ts`: `AIToolCallRequest.thoughtSignature` eklendi.
-- Diagnostic ekranı: `apiKeyMasked` (Madde 5) ve `toolCallsRequested` (Madde 7-8) eklendi.
+`httpOptions.timeout` yerine gerçek bir `AbortController` + `config.abortSignal` (resmi SDK'nın ayrı, çalışan bir mekanizması).
+
+## Diğer Bulgular
+
+- `treeTool.execute({})` (parcelId olmadan) hızlı bir `{error}` sonucu döner — SQLite/execute seviyesinde sorun yok, sorun 2. round-trip'te (Gemini'ye geri gönderme).
+- `[AI]` etiketli detaylı loglama eklendi (Request Created → Provider Created → Gemini Request Started → Tool Started/Finished → Final Response Ready).
+- Diagnostic ekranına `toolDurationMs` (SQLite süresi) eklendi.
 
 ## Frozen Modules
 
