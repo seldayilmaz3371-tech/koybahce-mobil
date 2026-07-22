@@ -71,20 +71,55 @@ const MAX_RETRY_ATTEMPTS = 2;
 const RETRY_BASE_DELAY_MS = 1000;
 
 /**
- * bkz. Sprint 10.7 (AI Diagnostic Build) — GERÇEK BULGU: SDK çağrısında
- * daha önce HİÇBİR timeout mekanizması YOKTU — bir istek sunucudan
- * yanıt gelene kadar (veya bağlantı düşük seviyede kesilene kadar)
- * SINIRSIZ süre bekliyordu. Bu, Fotoğraf Analizi'nin "sonsuz bekleme"
- * belirtisinin güçlü kanıtlanmış nedeniydi (bkz. kök neden raporu).
- * `HttpOptions.timeout` (resmi `@google/genai` tip tanımlarından
- * doğrulandı — ms cinsinden, SDK'nın KENDİ native mekanizması) burada
- * kullanılıyor. 45 saniye — normal bir mobil ağ isteği için cömert,
- * ama "sonsuz" değil; bu değer TEŞHİS amaçlı seçildi (bir isteğin
- * GERÇEKTEN "asılı kaldığını" ölçülebilir kılmak için) — kalıcı bir
- * kullanıcı deneyimi kararı DEĞİL, ayrı bir sprintte yeniden
- * değerlendirilebilir.
+ * bkz. Sprint 10.11, GERÇEK KESİN KANIT (Sprint 10.7'nin `httpOptions.
+ * timeout` çözümü GERÇEKTEN ÇALIŞMIYORDU): Resmi, güncel bir
+ * `@google/genai` GitHub Issue'su (googleapis/js-genai#1277 —
+ * "Support for `config.httpOptions.timeout` option is BROKEN for
+ * `models.generateContent`" — "No matter what's set to
+ * `config.httpOptions.timeout` it doesn't have effect") bu SDK
+ * özelliğinin BİLİNEN, AÇIK bir bug olduğunu kanıtlıyor. Bu, gerçek
+ * cihazda Fotoğraf Analizi'nin ve tool-calling akışının
+ * "awaiting_response" aşamasında SONSUZA kadar takılı kalmasının
+ * (Retry: 0, Error: Yok — hiçbir hata ASLA oluşmuyor) kesin
+ * açıklamasıdır — `httpOptions.timeout` hiçbir zaman devreye girmiyordu.
+ *
+ * DÜZELTME: SDK'nın kendi (bozuk) timeout mekanizması yerine, gerçek
+ * bir `AbortController` kullanılıyor — `config.abortSignal` (resmi tip
+ * tanımlarından doğrulandı, `GenerateContentConfig`'in ayrı bir alanı)
+ * SDK'nın DOĞRUDAN desteklediği, `httpOptions.timeout`'tan FARKLI bir
+ * mekanizma. `AbortController.abort()`, JavaScript'in temel,
+ * platform-seviyesi bir API'sidir — SDK'nın kendi HTTP katmanındaki
+ * bug'ından ETKİLENMEZ.
  */
 const REQUEST_TIMEOUT_MS = 45_000;
+
+/**
+ * bkz. Sprint 10.11. Kullanıcının talep ettiği `[AI]` etiketli log
+ * stratejisi — gerçek cihaz Logcat'inde zincirin adım adım takip
+ * edilebilmesi için. `console.log` kullanılıyor (`console.error`
+ * DEĞİL — bunlar hata değil, normal akış bilgisi).
+ */
+function logAiStage(message: string): void {
+  console.log(`[AI] ${message}`);
+}
+
+/**
+ * bkz. Sprint 10.11, GERÇEK KÖK NEDEN DÜZELTMESİ. `httpOptions.timeout`
+ * yerine gerçek bir `AbortController` oluşturur — `REQUEST_TIMEOUT_MS`
+ * sonunda `abort()` çağrılır, bu da SDK'nın `fetch` çağrısını GERÇEKTEN
+ * iptal eder (SDK'nın bozuk `httpOptions.timeout`'undan bağımsız,
+ * platform-seviyesi bir mekanizma). Çağıran taraf, işlem bitince
+ * `clearTimeout` ile temizlemekten SORUMLUDUR (bellek sızıntısını
+ * önlemek için).
+ */
+function createRequestAbortController(): { controller: AbortController; timeoutHandle: ReturnType<typeof setTimeout> } {
+  const controller = new AbortController();
+  const timeoutHandle = setTimeout(() => {
+    logAiStage(`Request Timeout — ${REQUEST_TIMEOUT_MS}ms içinde yanıt gelmedi, istek İPTAL ediliyor`);
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+  return { controller, timeoutHandle };
+}
 
 /**
  * bkz. Sprint 10.10, GERÇEK KÖK NEDEN DÜZELTMESİ (kesin kanıtla
@@ -252,26 +287,36 @@ class GeminiProvider implements AIProvider {
       pendingToolResults?: AIToolResult[];
     } = {}
   ): Promise<AIProviderResponse> {
+    logAiStage("Request Created (sendMessage)");
     aiDiagnostics.recordProvider(this.providerName);
     aiDiagnostics.recordModel(GEMINI_MODEL);
     try {
       const apiKey = await this.getApiKey();
       const client = new GoogleGenAI({ apiKey });
       aiDiagnostics.recordStage("request_prepared");
+      logAiStage("Provider Created");
 
       aiDiagnostics.recordStage("request_sent");
+      logAiStage("Gemini Request Started");
       const response = await callGeminiWithRetry(() => {
         aiDiagnostics.recordStage("awaiting_response");
-        return client.models.generateContent({
-          model: GEMINI_MODEL,
-          contents: buildContents(messages, options.pendingToolResults),
-          config: {
-            systemInstruction: options.systemInstruction,
-            tools: buildTools(options.tools),
-            httpOptions: { timeout: REQUEST_TIMEOUT_MS },
-          },
-        });
+        const { controller, timeoutHandle } = createRequestAbortController();
+        return client.models
+          .generateContent({
+            model: GEMINI_MODEL,
+            contents: buildContents(messages, options.pendingToolResults),
+            config: {
+              systemInstruction: options.systemInstruction,
+              tools: buildTools(options.tools),
+              // bkz. Sprint 10.11 — `httpOptions.timeout` KANITLANMIŞ
+              // olarak çalışmıyor (bkz. yukarıdaki dosya-seviyesi not).
+              // Gerçek iptal mekanizması `abortSignal`.
+              abortSignal: controller.signal,
+            },
+          })
+          .finally(() => clearTimeout(timeoutHandle));
       });
+      logAiStage("Gemini Response Received");
       aiDiagnostics.recordStage("response_received");
 
       // bkz. Sprint 10.10, GERÇEK KÖK NEDEN DÜZELTMESİ (kesin kanıtla
@@ -299,14 +344,19 @@ class GeminiProvider implements AIProvider {
       aiDiagnostics.recordToolCallsRequested(
         toolCalls.map((c) => ({ name: c.toolName, hasThoughtSignature: Boolean(c.thoughtSignature) }))
       );
+      if (toolCalls.length > 0) {
+        logAiStage(`Tool Selected: ${toolCalls.map((c) => c.toolName).join(", ")}`);
+      }
 
       aiDiagnostics.recordStage("parsed");
       aiDiagnostics.finishRequest();
+      logAiStage("Final Response Ready (sendMessage)");
       return {
         text: response.text ?? null,
         toolCalls,
       };
     } catch (error) {
+      logAiStage(`Request Failed — ${error instanceof Error ? error.name : "UnknownError"}`);
       aiDiagnostics.recordRawError(error);
       aiDiagnostics.finishRequest();
       throw error;
@@ -319,6 +369,7 @@ class GeminiProvider implements AIProvider {
     prompt: string,
     systemInstruction?: string
   ): Promise<string> {
+    logAiStage("Request Created (analyzeImage)");
     aiDiagnostics.recordProvider(this.providerName);
     aiDiagnostics.recordModel(GEMINI_MODEL);
     // bkz. Sprint 10.7, Madde 8 — "Fotoğraf boyutu / Base64 boyutu."
@@ -328,26 +379,36 @@ class GeminiProvider implements AIProvider {
     const base64SizeBytes = imageBase64.length;
     const estimatedFileSizeBytes = Math.round(base64SizeBytes * 0.75);
     aiDiagnostics.recordPhotoSizes(estimatedFileSizeBytes, base64SizeBytes);
+    logAiStage(`Photo Size: ~${(estimatedFileSizeBytes / 1024 / 1024).toFixed(2)}MB (base64: ${(base64SizeBytes / 1024 / 1024).toFixed(2)}MB)`);
 
     try {
       const apiKey = await this.getApiKey();
       const client = new GoogleGenAI({ apiKey });
       aiDiagnostics.recordStage("request_prepared");
+      logAiStage("Provider Created");
 
       aiDiagnostics.recordStage("request_sent");
+      logAiStage("Gemini Request Started");
       const response = await callGeminiWithRetry(() => {
         aiDiagnostics.recordStage("awaiting_response");
-        return client.models.generateContent({
-          model: GEMINI_MODEL,
-          contents: [
-            {
-              role: "user",
-              parts: [{ inlineData: { data: imageBase64, mimeType } }, { text: prompt }],
-            },
-          ],
-          config: { systemInstruction, httpOptions: { timeout: REQUEST_TIMEOUT_MS } },
-        });
+        const { controller, timeoutHandle } = createRequestAbortController();
+        return client.models
+          .generateContent({
+            model: GEMINI_MODEL,
+            contents: [
+              {
+                role: "user",
+                parts: [{ inlineData: { data: imageBase64, mimeType } }, { text: prompt }],
+              },
+            ],
+            // bkz. Sprint 10.11 — `httpOptions.timeout` KANITLANMIŞ
+            // olarak çalışmıyor (bkz. dosya-seviyesi not). Gerçek
+            // iptal mekanizması `abortSignal`.
+            config: { systemInstruction, abortSignal: controller.signal },
+          })
+          .finally(() => clearTimeout(timeoutHandle));
       });
+      logAiStage("Gemini Response Received");
       aiDiagnostics.recordStage("response_received");
 
       // Fotoğraf Analizi'nde tool calling YOK (Sprint 9.2 kapsamı
@@ -360,8 +421,10 @@ class GeminiProvider implements AIProvider {
       }
       aiDiagnostics.recordStage("parsed");
       aiDiagnostics.finishRequest();
+      logAiStage("Final Response Ready (analyzeImage)");
       return response.text;
     } catch (error) {
+      logAiStage(`Request Failed — ${error instanceof Error ? error.name : "UnknownError"}`);
       aiDiagnostics.recordRawError(error);
       aiDiagnostics.finishRequest();
       throw error;

@@ -30,6 +30,7 @@ import { keywordContextEngine } from "../context/KeywordContextEngine";
 import type { ScreenContext } from "../context/IContextEngine.interface";
 import { buildSystemPrompt, buildUserTurnMessage } from "../prompt/promptBuilder";
 import { getActiveAiProvider } from "./getActiveAiProvider";
+import { aiDiagnostics } from "../diagnostics/aiDiagnostics";
 
 export interface SendUserMessageInput {
   conversationId: string;
@@ -89,7 +90,12 @@ class AiSessionService {
     if (response.toolCalls.length > 0) {
       const toolResults: AIToolResult[] = [];
       for (const call of response.toolCalls) {
+        console.log(`[AI] Tool Started: ${call.toolName}`, call.arguments);
+        const toolStartedAt = Date.now();
         const result = await toolRegistry.invoke(call.toolName, call.arguments);
+        const toolDurationMs = Date.now() - toolStartedAt;
+        aiDiagnostics.recordToolDuration(toolDurationMs);
+        console.log(`[AI] Tool Finished: ${call.toolName} (${toolDurationMs}ms)`);
         toolResults.push({ toolName: call.toolName, result });
       }
 

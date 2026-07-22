@@ -79,6 +79,13 @@ export interface AiDiagnosticSnapshot {
    * edilebilmesi için).
    */
   toolCallsRequested: { name: string; hasThoughtSignature: boolean }[];
+  /**
+   * bkz. Sprint 10.11, Diagnostic Geliştirmesi — "SQLite sorgusu kaç
+   * ms sürdü?" `toolRegistry.invoke()`'ın (SQLite'a erişen gerçek
+   * araç fonksiyonu) gerçek çalışma süresi. `null` = henüz hiç araç
+   * çalıştırılmadı.
+   */
+  toolDurationMs: number | null;
   /** Sadece Fotoğraf Analizi akışında dolu. */
   photo: {
     fileSizeBytes: number | null;
@@ -103,6 +110,7 @@ function emptySnapshot(): AiDiagnosticSnapshot {
     timedOut: false,
     retryCount: 0,
     toolCallsRequested: [],
+    toolDurationMs: null,
     photo: null,
   };
 }
@@ -176,6 +184,11 @@ export const aiDiagnostics = {
   /** bkz. Sprint 10.10, Madde 7-8. Modelin talep ettiği araç çağrılarını (isim + thoughtSignature varlığı) kaydeder. */
   recordToolCallsRequested(calls: { name: string; hasThoughtSignature: boolean }[]): void {
     current.toolCallsRequested = calls;
+  },
+
+  /** bkz. Sprint 10.11, Diagnostic Geliştirmesi. `toolRegistry.invoke()`'ın GERÇEK çalışma süresini (ms) kaydeder. */
+  recordToolDuration(durationMs: number): void {
+    current.toolDurationMs = durationMs;
   },
 
   /** GERÇEK `ApiError` (ya da herhangi bir hata) nesnesinin HAM alanlarını kaydeder — Madde 5. */

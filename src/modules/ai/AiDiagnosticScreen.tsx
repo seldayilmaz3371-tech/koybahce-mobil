@@ -161,6 +161,10 @@ export function AiDiagnosticScreen({ onBack, debugMode }: AiDiagnosticScreenProp
               value={call.hasThoughtSignature ? "thought_signature VAR" : "thought_signature YOK"}
             />
           ))}
+          <DiagnosticRow
+            label="SQLite Süresi"
+            value={snapshot.toolDurationMs !== null ? `${snapshot.toolDurationMs} ms` : "Henüz tamamlanmadı"}
+          />
         </div>
       ) : null}
 

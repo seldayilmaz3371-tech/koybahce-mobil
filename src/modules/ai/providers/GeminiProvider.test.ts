@@ -445,14 +445,18 @@ describe("GeminiProvider — Diagnostic Entegrasyonu (Sprint 10.7/10.9, AI Diagn
     expect(snapshot.photo?.fileSizeBytes).toBe(750); // ~%75 (base64 şişme oranının tersi)
   });
 
-  it("sendMessage(), GERÇEKTEN httpOptions.timeout parametresini SDK'ya GEÇİRİR (Sprint 10.7'nin gerçek timeout düzeltmesi)", async () => {
+  it("🔴 Sprint 10.11, GERÇEK KÖK NEDEN DÜZELTMESİ: sendMessage(), httpOptions.timeout YERİNE gerçek bir AbortSignal GEÇİRİR (httpOptions.timeout KANITLANMIŞ olarak çalışmıyor — googleapis/js-genai#1277)", async () => {
     generateContentMock.mockResolvedValue({ text: "cevap", functionCalls: undefined });
     const { geminiProvider } = await import("./GeminiProvider");
 
     await geminiProvider.sendMessage([{ role: "user", content: "soru" }]);
 
     const sentConfig = generateContentMock.mock.calls[0][0].config;
-    expect(sentConfig.httpOptions).toEqual({ timeout: 45_000 });
+    // httpOptions.timeout ARTIK gönderilmiyor (kanıtlanmış olarak işe
+    // yaramıyordu) — gerçek iptal mekanizması abortSignal.
+    expect(sentConfig.httpOptions).toBeUndefined();
+    expect(sentConfig.abortSignal).toBeInstanceOf(AbortSignal);
+    expect(sentConfig.abortSignal.aborted).toBe(false);
   });
 
   it("retry GERÇEKLEŞTİĞİNDE, aiDiagnostics retryCount'u GERÇEKTEN artırır", async () => {
