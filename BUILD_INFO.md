@@ -3,33 +3,34 @@
 | Alan | Değer |
 |---|---|
 | **Project** | Bahçem Mobile |
-| **Module** | Modül 6 — AI Altyapısı |
-| **Sprint** | 10.12 — AbortError Retry Düzeltmesi + Developer Mode API Key Yönetimi |
+| **Module** | Veri Yönetimi (Yedekle/Geri Yükle) — YENİ modül |
+| **Sprint** | 10.13 |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 738/738 başarılı — regresyon yok |
+| **Test Sonucu** | ✅ 790/790 başarılı (+48 yeni) — regresyon yok |
 | **Build** | ✅ **BUILD SUCCESSFUL** |
-| **Lint** | ✅ 0 uyarı/hata (231 dosya) |
-| **Cap Sync** | ✅ Başarılı (9 native plugin, değişmedi) |
+| **Lint** | ✅ 0 uyarı/hata (247 dosya) |
+| **Cap Sync** | ✅ Başarılı (11 native plugin, 2 yeni: `@capacitor/share`, `@capawesome/capacitor-file-picker`) |
 | **Android Gradle Build** | ❌ Gerçekten denendi — bu ortamın network kısıtı (HTTP 403) nedeniyle yapılamadı |
-| **Şema Sürümü** | 12 (değişmedi) |
+| **Şema Sürümü** | 12 (değişmedi — migration gerekmedi) |
 | **Tarih** | 2026-07-22 |
-| **Git Commit** | `f13b6fb` |
+| **Git Commit** | `c17af5e` |
 
-## Kesin Kanıtlanmış İkinci Kök Neden (429/RESOURCE_EXHAUSTED)
+## Yeni Bağımlılıklar
 
-`isRetryableGeminiError`, `AbortController.abort()`'un fırlattığı `AbortError`'ı (status alanı olmadığı için) yanlışlıkla "retry edilebilir" sayıyordu — her 45sn'lik timeout 3 kez deneniyordu, tool-calling akışlarında gerçek API çağrı sayısını katlıyordu.
+- `fflate` — ZIP oluşturma/açma
+- `@capacitor/share` — Android paylaşım menüsü
+- `@capawesome/capacitor-file-picker` — yedek dosyası seçimi
 
-## Yeni Özellik: Developer Mode API Key Yönetimi
+## Kritik Mimari Kararlar
 
-`AiSettingsScreen`'e, sadece `debugMode` açıkken görünen "API Key Management (Developer)" bölümü eklendi. Mevcut anahtar maskeli gösteriliyor, "Change Key" ile önce kaldırmaya gerek kalmadan yeni anahtar anında aktif oluyor (`GeminiProvider` zaten cache'lemiyordu — Sprint 6'nın mevcut davranışı).
-
-## Dürüstlük Notu
-
-"Kullanılan Project" ve "First Byte Received" Diagnostic ekranına eklenmedi — bunlar istemci-taraflı kod seviyesinde kanıtlanabilir şekilde elde edilemiyor (API key string'i proje bilgisini kodlamıyor; mevcut SDK'nın non-streaming API'si first-byte granülerliği sağlamıyor).
+1. **"Ses kayıtları" özelliği projede yok** — kod tabanı tarandı, hiçbir tabloda bulunamadı. Sahte destek eklenmedi.
+2. **Veritabanı ham dosya kopyalama yerine resmi `exportToJson()`/`importFromJson()`** — şifreleme anahtarı sorunu bypass edildi.
+3. **Gerçek kısıt bulundu:** `importFromJson`, bağlantı nesnesinde değil ana plugin seviyesinde; ayrıca "önce bağlantı kapatılmalı" (resmi dokümantasyon kısıtı) — `connection.ts`'e güvenli bir sarmalayıcı eklendi.
+4. **Güvenlik notu:** Export edilen JSON düz metin — yedek dosyası kullanıcı tarafından güvenli saklanmalı.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
-| Modül 1-5, 7-10 | ✅ Onaylandı |
-| Modül 6 — AI (kesin kanıtlı düzeltme + Developer Mode) | 🟡 Bu teslimat — gerçek cihaz doğrulaması bekliyor |
+| Modül 1-10 (AI dahil) | ✅ Onaylandı |
+| Veri Yönetimi (Yedekle/Geri Yükle) | 🟡 Bu teslimat — gerçek cihaz doğrulaması bekliyor |
