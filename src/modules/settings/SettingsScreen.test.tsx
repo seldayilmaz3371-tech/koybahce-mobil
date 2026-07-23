@@ -27,13 +27,15 @@ afterEach(() => {
 
 describe("SettingsScreen", () => {
   it("AI bölümünü listeler", () => {
-    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} />);
+    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} />);
     expect(screen.getByText("AI")).toBeTruthy();
   });
 
   it("AI bölümüne tıklamak onViewAiSettings'i çağırır", () => {
     const onViewAiSettings = vi.fn();
-    render(<SettingsScreen onViewAiSettings={onViewAiSettings} onViewDataManagement={vi.fn()} />);
+    render(
+      <SettingsScreen onViewAiSettings={onViewAiSettings} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} />
+    );
 
     fireEvent.click(screen.getByText("AI"));
 
@@ -41,17 +43,36 @@ describe("SettingsScreen", () => {
   });
 
   it("🔴 Sprint 10.13: 'Data Management' bölümünü GERÇEKTEN listeler", () => {
-    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} />);
+    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} />);
 
     expect(screen.getByText("Data Management")).toBeTruthy();
   });
 
   it("🔴 Sprint 10.13: 'Data Management' bölümüne tıklamak, GERÇEKTEN onViewDataManagement'i çağırır", () => {
     const onViewDataManagement = vi.fn();
-    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={onViewDataManagement} />);
+    render(
+      <SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={onViewDataManagement} onViewLanguageSettings={vi.fn()} />
+    );
 
     fireEvent.click(screen.getByText("Data Management"));
 
     expect(onViewDataManagement).toHaveBeenCalledTimes(1);
+  });
+
+  it("🔴 Sprint 10.18: 'Language' bölümünü GERÇEKTEN listeler", () => {
+    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} />);
+
+    expect(screen.getByText("Language")).toBeTruthy();
+  });
+
+  it("🔴 Sprint 10.18: 'Language' bölümüne tıklamak, GERÇEKTEN onViewLanguageSettings'i çağırır", () => {
+    const onViewLanguageSettings = vi.fn();
+    render(
+      <SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={onViewLanguageSettings} />
+    );
+
+    fireEvent.click(screen.getByText("Language"));
+
+    expect(onViewLanguageSettings).toHaveBeenCalledTimes(1);
   });
 });

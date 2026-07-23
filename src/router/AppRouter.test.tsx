@@ -455,6 +455,29 @@ describe("AppRouter — AI ve Ayarlar Navigasyonu (Sprint 7.1, GERÇEK navigasyo
     expect(window.location.hash).toBe("#/settings");
   });
 
+  it("🔴 Sprint 10.18: Parsel Listesi → 'Settings' → 'Language' → GERÇEK navigasyon zinciriyle açılır", async () => {
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Settings")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Settings"));
+    await waitFor(() => expect(screen.getByText("Language")).toBeTruthy());
+    fireEvent.click(screen.getByText("Language"));
+
+    await waitFor(() => expect(screen.getByText("English", { exact: false })).toBeTruthy());
+    expect(window.location.hash).toBe("#/settings/language");
+  });
+
+  it("🔴 Sprint 10.18: Dil Ayarları → 'Back' HER ZAMAN /settings'e döner (diğer alt-ekranlarla AYNI ilke)", async () => {
+    window.location.hash = "#/settings/language";
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("English", { exact: false })).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Back"));
+
+    await waitFor(() => expect(screen.getByText("Language")).toBeTruthy());
+    expect(window.location.hash).toBe("#/settings");
+  });
+
   it("AI Chat → 'AI Settings' bağlantısı DOĞRU rotaya gider (Chat'ten gelse bile /settings'e döner, tutarlı UX kanıtı)", async () => {
     window.location.hash = "#/ai/chat";
     render(<AppRouter />);

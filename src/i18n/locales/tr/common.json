@@ -26,7 +26,8 @@
   "settings": {
     "screenTitle": "Ayarlar",
     "aiSectionLabel": "AI",
-    "dataManagementSectionLabel": "Veri Yönetimi"
+    "dataManagementSectionLabel": "Veri Yönetimi",
+    "languageSectionLabel": "Dil"
   },
   "aiSettings": {
     "screenTitle": "AI Ayarları",
@@ -47,6 +48,10 @@
   "aiDiagnostic": {
     "screenTitle": "AI Teşhis Bilgisi",
     "openButton": "AI Teşhis Bilgisi"
+  },
+  "languageSettings": {
+    "screenTitle": "Dil",
+    "backButton": "Geri"
   },
   "dataManagement": {
     "screenTitle": "Veri Yönetimi",

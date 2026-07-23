@@ -8,9 +8,8 @@
  * ileride buna izin vermeli."
  *
  * Bu ekran, gelecekteki TÜM ayar bölümlerinin listeleneceği HUB'dır
- * (`/settings`). Sprint 10.13'te **Veri Yönetimi** eklendi (SADECE
- * Yedekle/Geri Yükle — kullanıcının kararı, kapsam bilinçli olarak
- * küçük tutuldu). Diğer bölümler (Bildirimler/Dil/Tema/GPS/Kamera/
+ * (`/settings`). Sprint 10.13'te **Veri Yönetimi**, Sprint 10.18'de
+ * **Dil** eklendi. Diğer bölümler (Bildirimler/Tema/GPS/Kamera/
  * Senkronizasyon) HENÜZ geliştirilmedi (YAGNI — spekülatif boş
  * girişler eklenmedi). Yeni bir bölüm eklendiğinde, bu listeye YENİ
  * bir satır eklemek yeterli olacak — route mimarisi (`/settings/*`)
@@ -29,9 +28,10 @@ import { useTranslation } from "react-i18next";
 interface SettingsScreenProps {
   onViewAiSettings: () => void;
   onViewDataManagement: () => void;
+  onViewLanguageSettings: () => void;
 }
 
-export function SettingsScreen({ onViewAiSettings, onViewDataManagement }: SettingsScreenProps) {
+export function SettingsScreen({ onViewAiSettings, onViewDataManagement, onViewLanguageSettings }: SettingsScreenProps) {
   const { t } = useTranslation();
 
   return (
@@ -47,6 +47,11 @@ export function SettingsScreen({ onViewAiSettings, onViewDataManagement }: Setti
         <li>
           <button type="button" className="parcel-list__item" onClick={onViewDataManagement}>
             <span className="parcel-list__name">{t("settings.dataManagementSectionLabel")}</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" className="parcel-list__item" onClick={onViewLanguageSettings}>
+            <span className="parcel-list__name">{t("settings.languageSectionLabel")}</span>
           </button>
         </li>
       </ul>

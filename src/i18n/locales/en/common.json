@@ -26,7 +26,8 @@
   "settings": {
     "screenTitle": "Settings",
     "aiSectionLabel": "AI",
-    "dataManagementSectionLabel": "Data Management"
+    "dataManagementSectionLabel": "Data Management",
+    "languageSectionLabel": "Language"
   },
   "aiSettings": {
     "screenTitle": "AI Settings",
@@ -47,6 +48,10 @@
   "aiDiagnostic": {
     "screenTitle": "AI Diagnostic Info",
     "openButton": "AI Diagnostic Info"
+  },
+  "languageSettings": {
+    "screenTitle": "Language",
+    "backButton": "Back"
   },
   "dataManagement": {
     "screenTitle": "Data Management",
