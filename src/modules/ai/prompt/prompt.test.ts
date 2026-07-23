@@ -61,6 +61,35 @@ describe("buildSystemPrompt", () => {
     const prompt = buildSystemPrompt("tr");
     expect(prompt.toLowerCase()).toContain("cannot create");
   });
+
+  it("🔴 Sprint 10.17, GERÇEK KÖK NEDEN DÜZELTMESİ: GERÇEK bugünün tarihini (ISO 8601, YYYY-MM-DD) İÇERİR — ÖNCEDEN bu bilgi HİÇ verilmiyordu", () => {
+    const fixedDate = new Date("2026-07-23T15:30:00Z");
+
+    const prompt = buildSystemPrompt("tr", fixedDate);
+
+    expect(prompt).toContain("2026-07-23");
+  });
+
+  it("farklı bir currentDate VERİLİRSE, prompt GERÇEKTEN o tarihi yansıtır (test edilebilirlik kanıtı)", () => {
+    const prompt = buildSystemPrompt("tr", new Date("2027-01-05T00:00:00Z"));
+
+    expect(prompt).toContain("2027-01-05");
+    expect(prompt).not.toContain("2026-07-23");
+  });
+
+  it("currentDate VERİLMEZSE, GERÇEK sistem tarihini (varsayılan) kullanır — çökme YOK", () => {
+    const prompt = buildSystemPrompt("tr");
+
+    const todayIso = new Date().toISOString().slice(0, 10);
+    expect(prompt).toContain(todayIso);
+  });
+
+  it("modele, göreceli zaman ifadelerini KENDİSİNİN hesaplaması gerektiğini AÇIKÇA talimatlandırır", () => {
+    const prompt = buildSystemPrompt("tr");
+
+    expect(prompt.toLowerCase()).toContain("fromdate");
+    expect(prompt.toLowerCase()).toContain("relative time period");
+  });
 });
 
 describe("buildContextPromptSection", () => {
