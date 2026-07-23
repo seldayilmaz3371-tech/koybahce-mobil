@@ -3,34 +3,35 @@
 | Alan | Değer |
 |---|---|
 | **Project** | Bahçem Mobile |
-| **Module** | Veri Yönetimi (Yedekle/Geri Yükle) — YENİ modül |
-| **Sprint** | 10.13 |
+| **Module** | Modül 6 — AI Altyapısı |
+| **Sprint** | 10.15 — queryMaintenanceData Production Fix |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 790/790 başarılı (+48 yeni) — regresyon yok |
+| **Test Sonucu** | ✅ 804/804 başarılı (+14 yeni) — regresyon yok |
 | **Build** | ✅ **BUILD SUCCESSFUL** |
 | **Lint** | ✅ 0 uyarı/hata (247 dosya) |
-| **Cap Sync** | ✅ Başarılı (11 native plugin, 2 yeni: `@capacitor/share`, `@capawesome/capacitor-file-picker`) |
+| **Cap Sync** | ✅ Başarılı (11 native plugin, değişmedi) |
 | **Android Gradle Build** | ❌ Gerçekten denendi — bu ortamın network kısıtı (HTTP 403) nedeniyle yapılamadı |
 | **Şema Sürümü** | 12 (değişmedi — migration gerekmedi) |
 | **Tarih** | 2026-07-22 |
-| **Git Commit** | `c17af5e` |
+| **Git Commit** | `2080883` |
 
-## Yeni Bağımlılıklar
+## Kesin Kanıtlanmış Kök Neden ve Düzeltme
 
-- `fflate` — ZIP oluşturma/açma
-- `@capacitor/share` — Android paylaşım menüsü
-- `@capawesome/capacitor-file-picker` — yedek dosyası seçimi
+`queryMaintenanceData`, `parcelId`/`treeId` olmadan çağrılamıyordu — kullanıcının 3 genel sorusu (hepsi parsel/ağaç belirtmeyen) bu tutarsızlıkla tam örtüşüyordu. Ek kanıt: `buildListClause` zaten `maintenanceType`/`fromDate`/`toDate` destekliyordu, sadece tool katmanına aktarılmamıştı.
 
-## Kritik Mimari Kararlar
+## Değişen Dosyalar
 
-1. **"Ses kayıtları" özelliği projede yok** — kod tabanı tarandı, hiçbir tabloda bulunamadı. Sahte destek eklenmedi.
-2. **Veritabanı ham dosya kopyalama yerine resmi `exportToJson()`/`importFromJson()`** — şifreleme anahtarı sorunu bypass edildi.
-3. **Gerçek kısıt bulundu:** `importFromJson`, bağlantı nesnesinde değil ana plugin seviyesinde; ayrıca "önce bağlantı kapatılmalı" (resmi dokümantasyon kısıtı) — `connection.ts`'e güvenli bir sarmalayıcı eklendi.
-4. **Güvenlik notu:** Export edilen JSON düz metin — yedek dosyası kullanıcı tarafından güvenli saklanmalı.
+- `maintenance.repository.ts`/`.interface.ts`: `listAll()`, `countAll()` eklendi — `buildListClause`'a **hiç dokunulmadı** (bilinçli tercih, sıfır risk).
+- `maintenance.tool.ts`: genel sorgu desteği, tür/tarih filtresi, parsel kimliği, gerçek toplam sayı — mevcut `recentCount`/`recentRecords` korundu.
+
+## Dokunulmayan Katmanlar (Bilinçli)
+
+`AiSessionService`, `GeminiProvider`, `ToolRegistry`, `Conversation Memory`, `Diagnostics`, `systemPrompt` — hiçbiri değiştirilmedi. Çok-round tool-calling mimarisi eklenmedi (önceki mimari doğrulama raporlarıyla tutarlı).
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
-| Modül 1-10 (AI dahil) | ✅ Onaylandı |
-| Veri Yönetimi (Yedekle/Geri Yükle) | 🟡 Bu teslimat — gerçek cihaz doğrulaması bekliyor |
+| Modül 1-5, 7-10 | ✅ Onaylandı |
+| Modül 6 — AI (kesin kanıtlı düzeltme) | 🟡 Bu teslimat — gerçek cihaz doğrulaması bekliyor |
+| Veri Yönetimi | 🟡 Gerçek cihaz doğrulaması bekliyor |
