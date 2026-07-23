@@ -95,8 +95,11 @@ export interface BulkCreateMaintenanceRecordsInput {
   status?: MaintenanceStatusValue;
   scheduledDate?: string | null;
   completedDate?: string | null;
+<<<<<<< HEAD
   startTime?: string | null;
   endTime?: string | null;
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   notes?: string | null;
 }
 

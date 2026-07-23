@@ -114,7 +114,10 @@ export function BulkOperationsScreen({ parcelId, onBack }: BulkOperationsScreenP
         onBack={() => setView({ mode: "menu" })}
         initialSelectedTreeIds={carriedTreeIds ?? undefined}
         onApplyAnotherOperation={handleApplyAnotherOperation}
+<<<<<<< HEAD
         initialMaintenanceType={view.initialType}
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
       />
     );
   }

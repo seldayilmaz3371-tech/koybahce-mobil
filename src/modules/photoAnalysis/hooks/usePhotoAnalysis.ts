@@ -14,12 +14,19 @@
  * başlandığında, gerçek bir ADR ile değerlendirilmelidir.
  */
 
+<<<<<<< HEAD
 import { useCallback, useRef, useState } from "react";
+=======
+import { useCallback, useState } from "react";
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 import { readFileAsBase64 } from "../../../native/filesystem";
 import { getActiveAiProvider } from "../../ai/session/getActiveAiProvider";
 import { buildPhotoAnalysisSystemPrompt } from "../photoAnalysisPrompt";
 import { mapAiError } from "../../../core/errors/mapAiError";
+<<<<<<< HEAD
 import { aiDiagnostics } from "../../ai/diagnostics/aiDiagnostics";
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 import type { ErrorCodeValue } from "../../../core/errors/errorCodes";
 
 type PhotoAnalysisStatus = "idle" | "analyzing" | "ready" | "error";
@@ -54,6 +61,7 @@ export function usePhotoAnalysis(): UsePhotoAnalysisResult {
   const [status, setStatus] = useState<PhotoAnalysisStatus>("idle");
   const [resultText, setResultText] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<ErrorCodeValue | null>(null);
+<<<<<<< HEAD
   // bkz. Sprint 10.5, Madde 3. `PhotoGalleryScreen`'in `isSavingRef`
   // deseninin AYNI gerekçesiyle: React `status` state'i ASENKRON/
   // batch'li güncellendiği için, aynı senkron JS turunda art arda
@@ -68,6 +76,10 @@ export function usePhotoAnalysis(): UsePhotoAnalysisResult {
   const analyze = useCallback(async (filePath: string) => {
     if (isAnalyzingRef.current) return;
     isAnalyzingRef.current = true;
+=======
+
+  const analyze = useCallback(async (filePath: string) => {
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
     setStatus("analyzing");
     setErrorCode(null);
     setResultText(null);
@@ -81,6 +93,7 @@ export function usePhotoAnalysis(): UsePhotoAnalysisResult {
 
       setResultText(text);
       setStatus("ready");
+<<<<<<< HEAD
       // bkz. Sprint 10.7, Madde 7 — "UI'ya aktarıldı" zincirin SON
       // halkası. `GeminiProvider` kendi içinde "parsed"e kadar
       // kaydediyor — bu satır, React state'inin GERÇEKTEN
@@ -91,6 +104,11 @@ export function usePhotoAnalysis(): UsePhotoAnalysisResult {
       setStatus("error");
     } finally {
       isAnalyzingRef.current = false;
+=======
+    } catch (error) {
+      setErrorCode(mapAiError(error));
+      setStatus("error");
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
     }
   }, []);
 

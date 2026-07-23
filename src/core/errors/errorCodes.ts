@@ -32,6 +32,7 @@ export const ErrorCode = {
   AI_003: "AI_003", // Sağlayıcı kayıtlı değil (iç tutarsızlık)
   AI_004: "AI_004", // API anahtarı yapılandırılmamış
   AI_005: "AI_005", // Fotoğraf analizi boş yanıt döndü (ör. güvenlik filtresi)
+<<<<<<< HEAD
   // bkz. Sprint 10.6 (Production Ready — Öncelik 2, AI X-Ray denetimi
   // sonucu). ÖNCEDEN bu hataların HEPSİ tek bir SYS_001'e düşüyordu —
   // hem kullanıcı hem geliştirici için teşhis imkansızdı. Marker'lar
@@ -58,6 +59,8 @@ export const ErrorCode = {
   DM_004: "DM_004", // Veritabanı geri yükleme başarısız
   DM_005: "DM_005", // Fotoğraf geri yükleme başarısız (veritabanı ZATEN geri yüklendi — kısmi başarı)
   DM_006: "DM_006", // Kullanıcı dosya seçimini iptal etti (hata DEĞİL, ama akışın normal şekilde sonlanması için bir kod gerekiyor)
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 
   SYS_001: "SYS_001", // Beklenmeyen/sınıflandırılamayan hata
 } as const;

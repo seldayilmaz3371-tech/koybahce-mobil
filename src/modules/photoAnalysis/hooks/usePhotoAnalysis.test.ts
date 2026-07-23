@@ -122,6 +122,7 @@ describe("usePhotoAnalysis", () => {
     expect(result.current.resultText).toBeNull();
   });
 });
+<<<<<<< HEAD
 
 describe("usePhotoAnalysis — Eşzamanlı Çağrı Önleme (Sprint 10.5, Madde 3)", () => {
   it("aynı fotoğraf için art arda analyze() çağrılırsa, provider.analyzeImage SADECE BİR KEZ çağrılır", async () => {
@@ -153,3 +154,5 @@ describe("usePhotoAnalysis — Eşzamanlı Çağrı Önleme (Sprint 10.5, Madde 
     expect(analyzeImageMock).toHaveBeenCalledTimes(2);
   });
 });
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3

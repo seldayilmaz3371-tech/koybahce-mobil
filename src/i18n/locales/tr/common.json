@@ -8,6 +8,7 @@
     "AI_003": "AI sağlayıcısı şu an kullanılamıyor.",
     "AI_004": "Lütfen AI Ayarları'ndan Gemini API anahtarınızı girin.",
     "AI_005": "AI bu fotoğrafı şu anda analiz edemedi. Lütfen tekrar deneyin.",
+<<<<<<< HEAD
     "AI_006": "Gemini API anahtarınız reddedildi. Lütfen AI Ayarları'ndan kontrol edin.",
     "AI_007": "Gemini kotanız tükendi. Lütfen Google AI hesabınızı kontrol edin veya daha sonra tekrar deneyin.",
     "AI_008": "Şu anda çok fazla istek var. Lütfen biraz bekleyip tekrar deneyin.",
@@ -21,6 +22,8 @@
     "DM_004": "Veritabanı geri yüklenemedi.",
     "DM_005": "Veritabanı geri yüklendi, ancak bazı fotoğraflar geri yüklenemedi.",
     "DM_006": "Hiçbir dosya seçilmedi.",
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
     "SYS_001": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
   },
   "settings": {
@@ -89,12 +92,15 @@
     "selectAllButton": "Tümünü Seç",
     "clearSelectionButton": "Seçimi Temizle",
     "selectedCount": "{{count}} ağaç seçildi",
+<<<<<<< HEAD
     "dateLabel": "Tarih",
     "timeLabel": "Saat",
     "irrigationDurationSectionTitle": "Sulama Süresi",
     "irrigationStartTimeLabel": "Başlangıç Saati",
     "irrigationEndTimeLabel": "Bitiş Saati",
     "irrigationDurationResult": "Toplam Süre: {{hours}} Saat {{minutes}} Dakika",
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
     "searchPlaceholder": "Ağaç numarası veya çeşit ara...",
     "noSearchResults": "Aramanızla eşleşen ağaç yok.",
     "observationFormTitle": "Toplu Gözlem",
@@ -110,6 +116,7 @@
     "undoError": "Bu işlem geri alınırken bir sorun oluştu. Lütfen tekrar deneyin.",
     "applyAnotherButton": "Aynı Ağaçlara Başka İşlem Uygula",
     "carriedSelectionNotice": "Önceki işlemden {{count}} ağaç aktarıldı.",
+<<<<<<< HEAD
     "lastUsedButton": "Son Kullanılan: {{operation}}",
     "dateLabel": "Tarih",
     "timeLabel": "Saat",
@@ -117,6 +124,9 @@
     "irrigationStartTimeLabel": "Başlangıç Saati",
     "irrigationEndTimeLabel": "Bitiş Saati",
     "irrigationDurationResult": "Toplam Süre: {{hours}} Saat {{minutes}} Dakika"
+=======
+    "lastUsedButton": "Son Kullanılan: {{operation}}"
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   },
   "dashboard": {
     "screenTitle": "Ana Sayfa",

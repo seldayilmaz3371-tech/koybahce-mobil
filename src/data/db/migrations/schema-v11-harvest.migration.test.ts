@@ -60,9 +60,17 @@ describe("Şema Migration — Sürüm 11 (Hasat)", () => {
 
     db.close();
   });
+<<<<<<< HEAD
   // NOT (Sprint 10.4): "CURRENT_SCHEMA_VERSION 11'e güncellenmiş" testi
   // BURADAN KALDIRILDI — Sprint 5.4'ün belgelediği kural gereği (bkz.
   // schema-v9-maintenance-plans.migration.test.ts'in kendi başlığı):
   // bu tür bir test SADECE en güncel migration dosyasında yaşamalı.
   // Artık `schema-v12-irrigation-time.migration.test.ts`'te.
+=======
+
+  it("CURRENT_SCHEMA_VERSION 11'e güncellenmiş", async () => {
+    const { CURRENT_SCHEMA_VERSION } = await import("./schema");
+    expect(CURRENT_SCHEMA_VERSION).toBe(11);
+  });
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 });

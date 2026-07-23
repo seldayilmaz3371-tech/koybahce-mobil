@@ -75,6 +75,7 @@ describe("getActiveAiProvider", () => {
     expect(result.settings.isEnabled).toBe(true);
   });
 });
+<<<<<<< HEAD
 
 describe("getActiveAiProvider — Diagnostic Entegrasyonu (Sprint 10.9, GERÇEK CİHAZ BULGUSU DÜZELTMESİ)", () => {
   it("🔴 KULLANICININ TAM OLARAK GÖRDÜĞÜ SENARYO: internetPermission=false (varsayılan) İKEN, aiDiagnostics ARTIK 'idle'da TAKILI KALMIYOR", async () => {
@@ -134,3 +135,5 @@ describe("getActiveAiProvider — Diagnostic Entegrasyonu (Sprint 10.9, GERÇEK 
     expect(aiDiagnostics.getSnapshot().requestId).not.toBeNull();
   });
 });
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3

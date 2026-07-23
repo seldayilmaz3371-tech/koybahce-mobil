@@ -277,8 +277,11 @@ class MaintenanceRepository extends BaseRepository implements IMaintenanceReposi
             status: input.status,
             scheduledDate: input.scheduledDate,
             completedDate: input.completedDate,
+<<<<<<< HEAD
             startTime: input.startTime,
             endTime: input.endTime,
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
             notes: input.notes,
           })
         );

@@ -6,6 +6,7 @@
  * tekrarından kaçın") — Fotoğraf Analizi (Sprint 9.2) de AYNI izin
  * kapısına (Bölüm 15 — güvenli varsayılanlar) ve AYNI provider alma
  * mantığına ihtiyaç duyuyor. Davranış DEĞİŞMEDİ — saf bir çıkarma.
+<<<<<<< HEAD
  *
  * bkz. Sprint 10.9, GERÇEK BULGU (kullanıcının gerçek cihaz
  * testleriyle KANITLANDI — Diagnostic ekranı her zaman
@@ -20,11 +21,16 @@
  * başta çağırıyor, her başarısızlık durumunda da `recordRawError()`
  * ile HAM hatayı kaydediyor — izin kontrolü nerede başarısız olursa
  * olsun, artık Diagnostic ekranında GERÇEKTEN gözlemlenebilir.
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
  */
 
 import { aiSettingsRepository } from "../data/aiSettings.repository";
 import { providerRegistry } from "../providers/ProviderRegistry";
+<<<<<<< HEAD
 import { aiDiagnostics } from "../diagnostics/aiDiagnostics";
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 import type { AIProvider } from "../providers/AIProvider.interface";
 import type { AiSettings } from "../domain/ai.types";
 
@@ -40,6 +46,7 @@ export interface ActiveAiProvider {
  * `AI_PROVIDER_NOT_REGISTERED`) — `mapAiError` bunları çevirir.
  */
 export async function getActiveAiProvider(): Promise<ActiveAiProvider> {
+<<<<<<< HEAD
   aiDiagnostics.startNewRequest();
   const settings = await aiSettingsRepository.getOrCreate();
 
@@ -52,13 +59,26 @@ export async function getActiveAiProvider(): Promise<ActiveAiProvider> {
     const error = new Error("AI_INTERNET_PERMISSION_DENIED");
     aiDiagnostics.recordRawError(error);
     throw error;
+=======
+  const settings = await aiSettingsRepository.getOrCreate();
+
+  if (!settings.isEnabled) {
+    throw new Error("AI_NOT_ENABLED");
+  }
+  if (!settings.internetPermission) {
+    throw new Error("AI_INTERNET_PERMISSION_DENIED");
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   }
 
   const provider = providerRegistry.get(settings.providerName);
   if (!provider) {
+<<<<<<< HEAD
     const error = new Error("AI_PROVIDER_NOT_REGISTERED");
     aiDiagnostics.recordRawError(error);
     throw error;
+=======
+    throw new Error("AI_PROVIDER_NOT_REGISTERED");
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   }
 
   return { provider, settings };

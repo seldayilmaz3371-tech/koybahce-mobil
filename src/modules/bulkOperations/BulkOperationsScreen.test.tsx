@@ -79,6 +79,7 @@ describe("BulkOperationsScreen", () => {
     expect(screen.getByText("Bulk Maintenance Record")).toBeTruthy();
   });
 });
+<<<<<<< HEAD
 
 describe("BulkOperationsScreen — Menü→Form Tür Aktarımı (Sprint 10.4 Düzeltme Paketi)", () => {
   it.each([
@@ -102,3 +103,5 @@ describe("BulkOperationsScreen — Menü→Form Tür Aktarımı (Sprint 10.4 Dü
     }
   );
 });
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3

@@ -76,6 +76,7 @@ function classifyAiError(error: unknown): ErrorCodeValue {
   if (message.includes("AI_PHOTO_ANALYSIS_EMPTY_RESPONSE")) {
     return ErrorCode.AI_005;
   }
+<<<<<<< HEAD
   if (message.includes("AI_TOOL_NOT_FOUND")) {
     return ErrorCode.AI_012;
   }
@@ -97,5 +98,7 @@ function classifyAiError(error: unknown): ErrorCodeValue {
   if (message.includes("AbortError") || message.toLowerCase().includes("timeout")) {
     return ErrorCode.AI_011;
   }
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   return ErrorCode.SYS_001;
 }

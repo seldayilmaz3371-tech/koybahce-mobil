@@ -1,6 +1,7 @@
 /**
  * BulkObservationForm
  * ======================
+<<<<<<< HEAD
  * bkz. Sprint 10.2/10.3/10.4. "Toplu Gözlem" — `BulkMaintenanceForm`
  * ile AYNI desen (Kural: kod tekrarından kaçın), `TreeSelectorList`/
  * `useTreeSelection` ORTAK bileşenleri paylaşılıyor.
@@ -13,6 +14,16 @@
  * `combineDateAndTimeToIso()` ile TEK bir ISO timestamp'e birleşir.
  * Migration GEREKMEDİ — `observations.observed_at` zaten TEXT, hiçbir
  * format kısıtı taşımıyor.
+=======
+ * bkz. Sprint 10.2/10.3. "Toplu Gözlem" — `BulkMaintenanceForm` ile
+ * AYNI desen (Kural: kod tekrarından kaçın), `TreeSelectorList`/
+ * `useTreeSelection` ORTAK bileşenleri paylaşılıyor.
+ *
+ * Sprint 10.3 eklentileri BulkMaintenanceForm ile BİREBİR AYNI —
+ * `initialSelectedTreeIds` (Ardışık İşlem Sihirbazı), son kullanılan
+ * işlem türünü kaydetme, "Aynı Ağaçlara Başka İşlem Uygula" butonu,
+ * Undo'nun yeniden değerlendirilmiş (sayı-net + ayrı onay) hali.
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
  *
  * GLOBALIZATION POLICY: Hiçbir metin doğrudan yazılmaz.
  */
@@ -23,9 +34,12 @@ import { TreeSelectorList, type TreeSelectionMode } from "./components/TreeSelec
 import { useTreeSelection } from "./hooks/useTreeSelection";
 import { SelectField } from "../../shared/components/form/SelectField";
 import { TextAreaField } from "../../shared/components/form/TextAreaField";
+<<<<<<< HEAD
 import { DateField } from "../../shared/components/form/DateField";
 import { TimeField } from "../../shared/components/form/TimeField";
 import { combineDateAndTimeToIso, nowAsDateInputValue, nowAsTimeInputValue } from "../../shared/utils/dateInputConversion";
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 import { observationRepository } from "../observations/data/observation.repository";
 import type { ObservationType } from "../observations/domain/observation.types";
 import { localPreferences, LocalPreferenceKey } from "../../native/preferences";
@@ -62,9 +76,12 @@ export function BulkObservationForm({
   const { t } = useTranslation();
   const [observationType, setObservationType] = useState<ObservationType>("general");
   const [note, setNote] = useState("");
+<<<<<<< HEAD
   // Sprint 10.4 — varsayılan "şimdi" (yerel saat), kullanıcı değiştirebilir.
   const [dateValue, setDateValue] = useState(nowAsDateInputValue);
   const [timeValue, setTimeValue] = useState(nowAsTimeInputValue);
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   const [selectionMode, setSelectionMode] = useState<TreeSelectionMode>(
     initialSelectedTreeIds && initialSelectedTreeIds.length > 0 ? "select" : "all"
   );
@@ -73,6 +90,13 @@ export function BulkObservationForm({
   const [result, setResult] = useState<ResultState>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+<<<<<<< HEAD
+=======
+  // Bkz. BulkMaintenanceForm.tsx'teki AYNI gerekçe — useTreeSelection'a
+  // verilen lazy initializer, useEffect GEREKTİRMEDEN "mount'ta bir kez"
+  // davranışını sağlıyor.
+
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   const targetTreeIds = selectionMode === "all" ? trees.map((tree) => tree.id) : Array.from(selection.selectedIds);
 
   const handleApply = async () => {
@@ -95,7 +119,11 @@ export function BulkObservationForm({
         treeIds: targetTreeIds,
         observationType,
         note: note.trim() || null,
+<<<<<<< HEAD
         observedAt: combineDateAndTimeToIso(dateValue, timeValue),
+=======
+        observedAt: new Date().toISOString(),
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
       });
       setResult({ createdIds: created.map((o) => o.id), count: created.length });
       try {
@@ -179,9 +207,12 @@ export function BulkObservationForm({
         options={OBSERVATION_TYPE_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
       />
 
+<<<<<<< HEAD
       <DateField id="bulk-observation-date" label={t("bulkOperations.dateLabel")} value={dateValue} onChange={setDateValue} required />
       <TimeField id="bulk-observation-time" label={t("bulkOperations.timeLabel")} value={timeValue} onChange={setTimeValue} required />
 
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
       <TextAreaField id="bulk-observation-note" label={t("observation.note")} value={note} onChange={setNote} />
 
       <TreeSelectorList trees={trees} mode={selectionMode} onModeChange={setSelectionMode} selection={selection} />

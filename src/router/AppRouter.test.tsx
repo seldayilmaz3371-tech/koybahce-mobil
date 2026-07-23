@@ -640,6 +640,7 @@ describe("AppRouter — Toplu İşlemler Navigasyonu (Sprint 10.3, GERÇEK navig
     await waitFor(() => expect(screen.getByText("Add Parcel")).toBeTruthy());
   });
 });
+<<<<<<< HEAD
 
 describe("AppRouter — Fotoğraf Analizi Navigasyonu (Sprint 10.5, GERÇEK navigasyon)", () => {
   it("Fotoğraflar → 'Analyze with AI' DOĞRU photo-bağlamlı rotaya gider", async () => {
@@ -723,3 +724,5 @@ describe("AppRouter — AI Diagnostic Build Navigasyonu (Sprint 10.7)", () => {
     expect(screen.getByText("Provider")).toBeTruthy();
   });
 });
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3

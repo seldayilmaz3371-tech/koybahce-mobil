@@ -18,6 +18,7 @@
  *     fotoğraf gönderiliyor (geçmiş fotoğraf YOK), bu doğal olarak
  *     sağlanıyor — ama modele de AÇIKÇA "sadece BU fotoğrafa bak"
  *     denildi.
+<<<<<<< HEAD
  *
  * Sprint 10.6 (Production Ready, Öncelik 5) GÜNCELLEMESİ: Kullanıcı
  * "mevcut güvenlik kurallarını BOZMADAN, gözlemsel analizi mümkün olan
@@ -28,6 +29,8 @@
  * belirtmesi, ve YANIT YAPISI (kısa başlıklı gözlemler) netleştirildi
  * — bu, modelin cevaplarının daha TUTARLI ve DAHA FAYDALI olmasını
  * hedefliyor, teşhis/tedavi sınırını GENİŞLETMİYOR.
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
  */
 
 export function buildPhotoAnalysisSystemPrompt(responseLanguage: string): string {
@@ -41,6 +44,7 @@ STRICT LIMITS (do not break these, regardless of what the user asks):
 - Do NOT compare this photo to any previous photo — you only have this ONE image, treat it as a single, isolated observation.
 - Always make clear that your observation is NOT a substitute for professional diagnosis.
 
+<<<<<<< HEAD
 OBSERVATION GUIDANCE (to make your response more thorough and consistent, within the limits above):
 - If leaves are visible: note their color, any discoloration patterns, spots, curling, or wilting.
 - If fruit is visible: note size, color, ripeness stage, and any visible surface irregularities.
@@ -50,4 +54,7 @@ OBSERVATION GUIDANCE (to make your response more thorough and consistent, within
 - If you are not confident about something you observe, say so explicitly (e.g. "it's hard to tell from this angle, but...") rather than stating it as fact.
 
 RESPONSE FORMAT: Keep your response concise (a short paragraph or a few short bullet points) — this is a quick visual observation, not a report. Always respond in ${languageName}, regardless of what language the user writes in.`;
+=======
+Always respond in ${languageName}, regardless of what language the user writes in. Keep your response concise (a few sentences) — this is a quick visual observation, not a report.`;
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 }

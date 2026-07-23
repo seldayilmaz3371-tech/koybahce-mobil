@@ -8,6 +8,7 @@
     "AI_003": "AI provider is not available right now.",
     "AI_004": "Please add your Gemini API key in AI Settings.",
     "AI_005": "AI couldn't analyze this photo right now. Please try again.",
+<<<<<<< HEAD
     "AI_006": "Your Gemini API key was rejected. Please check it in AI Settings.",
     "AI_007": "Your Gemini quota has been used up. Please check your Google AI account or try again later.",
     "AI_008": "Too many requests right now. Please wait a moment and try again.",
@@ -21,6 +22,8 @@
     "DM_004": "Database restore failed.",
     "DM_005": "Database was restored, but some photos could not be restored.",
     "DM_006": "No file was selected.",
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
     "SYS_001": "Something went wrong. Please try again."
   },
   "settings": {
@@ -89,12 +92,15 @@
     "selectAllButton": "Select All",
     "clearSelectionButton": "Clear Selection",
     "selectedCount": "{{count}} trees selected",
+<<<<<<< HEAD
     "dateLabel": "Date",
     "timeLabel": "Time",
     "irrigationDurationSectionTitle": "Irrigation Duration",
     "irrigationStartTimeLabel": "Start Time",
     "irrigationEndTimeLabel": "End Time",
     "irrigationDurationResult": "Total Duration: {{hours}}h {{minutes}}m",
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
     "searchPlaceholder": "Search by tree number or variety...",
     "noSearchResults": "No trees match your search.",
     "observationFormTitle": "Bulk Observation",
@@ -110,6 +116,7 @@
     "undoError": "Something went wrong while undoing this operation. Please try again.",
     "applyAnotherButton": "Apply Another Operation to Same Trees",
     "carriedSelectionNotice": "{{count}} trees carried over from previous operation.",
+<<<<<<< HEAD
     "lastUsedButton": "Last Used: {{operation}}",
     "dateLabel": "Date",
     "timeLabel": "Time",
@@ -117,6 +124,9 @@
     "irrigationStartTimeLabel": "Start Time",
     "irrigationEndTimeLabel": "End Time",
     "irrigationDurationResult": "Total Duration: {{hours}}h {{minutes}}m"
+=======
+    "lastUsedButton": "Last Used: {{operation}}"
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   },
   "dashboard": {
     "screenTitle": "Dashboard",

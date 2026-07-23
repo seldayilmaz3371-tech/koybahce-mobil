@@ -189,6 +189,7 @@ describe("BulkMaintenanceForm — 'Biçme' Kararı (Sprint 10.2 mimari kararı)"
     expect(records[0].maintenanceType).toBe("other");
   });
 });
+<<<<<<< HEAD
 
 describe("BulkMaintenanceForm — Geriye Dönük Tarih/Saat (Sprint 10.4, Madde 1)", () => {
   it("Tarih/Saat alanları VARSAYILAN olarak DOLU gelir (boş DEĞİL)", async () => {
@@ -295,3 +296,5 @@ describe("BulkMaintenanceForm — Sulama Başlangıç/Bitiş Saati (Sprint 10.4,
     expect(records[0].endTime).toBeNull();
   });
 });
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3

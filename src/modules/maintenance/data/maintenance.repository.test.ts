@@ -527,6 +527,7 @@ describe("MaintenanceRepository — deactivateMany (Sprint 10.2, Toplu İşlemle
     await expect(maintenanceRepository.deactivateMany([])).resolves.not.toThrow();
   });
 });
+<<<<<<< HEAD
 
 describe("MaintenanceRepository — Sulama Başlangıç/Bitiş Saati (Sprint 10.4)", () => {
   it("create() startTime/endTime'ı GERÇEKTEN kaydeder ve geri okuyabilir", async () => {
@@ -726,3 +727,5 @@ describe("maintenanceRepository — countAll() (Sprint 10.15, GERÇEK toplam say
     expect(count).toBe(0);
   });
 });
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3

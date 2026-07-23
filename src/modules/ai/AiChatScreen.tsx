@@ -32,7 +32,11 @@ interface AiChatScreenProps {
 /** CSS'teki `.ai-chat__textarea`'nın `max-height`'iyle BİREBİR eşleşmeli (~10 satır). */
 const TEXTAREA_MAX_HEIGHT_PX = 240;
 
+<<<<<<< HEAD
 export function AiChatScreen({ screenContext, onBack, onViewSettings, debugMode, onViewDiagnostics }: AiChatScreenProps) {
+=======
+export function AiChatScreen({ screenContext, onBack, onViewSettings }: AiChatScreenProps) {
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   const { t } = useTranslation();
   const { messages, status, errorCode, sendMessage } = useAiChat(screenContext);
   const [inputValue, setInputValue] = useState("");

@@ -71,7 +71,11 @@ export const DATABASE_NAME = "bahcem_mobile";
  * eklendiğinde bu sayı da birlikte artırılmalıdır — `createConnection()`
  * çağrısına bu değer verilir.
  */
+<<<<<<< HEAD
 export const CURRENT_SCHEMA_VERSION = 12;
+=======
+export const CURRENT_SCHEMA_VERSION = 11;
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 
 export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
   {
@@ -359,6 +363,7 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
       `CREATE INDEX IF NOT EXISTS idx_harvest_records_harvest_date ON harvest_records(harvest_date);`,
     ],
   },
+<<<<<<< HEAD
   {
     toVersion: 12,
     statements: [
@@ -384,4 +389,6 @@ export const SCHEMA_MIGRATIONS: capSQLiteVersionUpgrade[] = [
       `ALTER TABLE maintenance_records ADD COLUMN end_time TEXT;`,
     ],
   },
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 ];

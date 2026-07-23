@@ -93,6 +93,7 @@ describe("BulkObservationForm", () => {
     });
   });
 });
+<<<<<<< HEAD
 
 describe("BulkObservationForm — Geriye Dönük Tarih/Saat (Sprint 10.4, Madde 1)", () => {
   it("Tarih/Saat alanları VARSAYILAN olarak DOLU gelir", async () => {
@@ -122,3 +123,5 @@ describe("BulkObservationForm — Geriye Dönük Tarih/Saat (Sprint 10.4, Madde 
     expect(observations[0].observedAt).toContain("2026-07-01");
   });
 });
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3

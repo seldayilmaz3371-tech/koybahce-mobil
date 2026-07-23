@@ -451,6 +451,39 @@ class GeminiProvider implements AIProvider {
       throw error;
     }
   }
+
+  async analyzeImage(
+    imageBase64: string,
+    mimeType: string,
+    prompt: string,
+    systemInstruction?: string
+  ): Promise<string> {
+    const apiKey = await this.getApiKey();
+    const client = new GoogleGenAI({ apiKey });
+
+    const response = await callGeminiWithRetry(() =>
+      client.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: [
+          {
+            role: "user",
+            parts: [{ inlineData: { data: imageBase64, mimeType } }, { text: prompt }],
+          },
+        ],
+        config: { systemInstruction },
+      })
+    );
+
+    // Fotoğraf Analizi'nde tool calling YOK (Sprint 9.2 kapsamı
+    // dışında) — sadece metin bekleniyor. `response.text` boşsa
+    // (nadir, ör. güvenlik filtresi engeli) AÇIK bir hata fırlatılır
+    // — UI katmanı bunu çevrilmiş bir mesaja eşler, "sessizce boş
+    // sonuç" GÖSTERİLMEZ.
+    if (!response.text) {
+      throw new Error("AI_PHOTO_ANALYSIS_EMPTY_RESPONSE");
+    }
+    return response.text;
+  }
 }
 
 export const geminiProvider: AIProvider = new GeminiProvider();

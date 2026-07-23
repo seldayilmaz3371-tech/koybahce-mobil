@@ -30,6 +30,7 @@ import { keywordContextEngine } from "../context/KeywordContextEngine";
 import type { ScreenContext } from "../context/IContextEngine.interface";
 import { buildSystemPrompt, buildUserTurnMessage } from "../prompt/promptBuilder";
 import { getActiveAiProvider } from "./getActiveAiProvider";
+<<<<<<< HEAD
 import { aiDiagnostics } from "../diagnostics/aiDiagnostics";
 
 /**
@@ -50,6 +51,8 @@ import { aiDiagnostics } from "../diagnostics/aiDiagnostics";
  * filtreli tekrar dene") kapsamak için yeterli, ama sınırsız değil.
  */
 const MAX_TOOL_ROUNDS = 3;
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 
 export interface SendUserMessageInput {
   conversationId: string;

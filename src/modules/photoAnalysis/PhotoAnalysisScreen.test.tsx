@@ -2,7 +2,11 @@
 /**
  * PhotoAnalysisScreen Bileşen Testleri
  * =======================================
+<<<<<<< HEAD
  * bkz. Sprint 9.2/10.5.
+=======
+ * bkz. Sprint 9.2.
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
  */
 
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -25,6 +29,7 @@ vi.mock("../../native/filesystem", () => ({
   readFileAsBase64: vi.fn().mockResolvedValue("SAHTE_BASE64"),
 }));
 
+<<<<<<< HEAD
 // bkz. Sprint 10.5 — `AppRouter.test.tsx`'in KANITLANMIŞ mock deseni
 // (her test dosyası KENDİ backButtonListeners dizisini kurar).
 const backButtonListeners: Array<() => void> = [];
@@ -37,6 +42,8 @@ vi.mock("@capacitor/app", () => ({
   },
 }));
 
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
 const ALL_SCHEMA_STATEMENTS = SCHEMA_MIGRATIONS.flatMap((m) => m.statements);
 
 const fakePhoto: Photo = {
@@ -59,7 +66,10 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
+<<<<<<< HEAD
   backButtonListeners.length = 0;
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   const executor = createTestDatabaseExecutor(ALL_SCHEMA_STATEMENTS);
   setDatabaseExecutorProviderForTesting(async () => executor);
 });
@@ -121,6 +131,7 @@ describe("PhotoAnalysisScreen", () => {
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 });
+<<<<<<< HEAD
 
 describe("PhotoAnalysisScreen — Sprint 10.5, Madde 7 (Kullanıcı Talep Ettiği Test Senaryoları)", () => {
   it("aynı fotoğraf için art arda analiz BAŞLATMAYA ÇALIŞMA — buton analiz başlar başlamaz KAYBOLUR, TEKRAR tıklanamaz", async () => {
@@ -200,3 +211,5 @@ describe("PhotoAnalysisScreen — Teşhis Bilgisi Butonu (Sprint 10.7, AI Diagno
     expect(onViewDiagnostics).toHaveBeenCalledTimes(1);
   });
 });
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3

@@ -30,7 +30,10 @@ export const ROUTE_PATTERNS = {
   aiDiagnostics: "/ai/diagnostics",
   settings: "/settings",
   aiSettings: "/settings/ai",
+<<<<<<< HEAD
   dataManagement: "/settings/data-management",
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   dashboard: "/dashboard",
 } as const;
 
@@ -53,7 +56,10 @@ export const buildPath = {
   aiDiagnostics: () => "/ai/diagnostics",
   settings: () => "/settings",
   aiSettings: () => "/settings/ai",
+<<<<<<< HEAD
   dataManagement: () => "/settings/data-management",
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
   dashboard: () => "/dashboard",
 } as const;
 

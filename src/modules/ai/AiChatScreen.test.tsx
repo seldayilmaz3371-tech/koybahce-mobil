@@ -257,6 +257,7 @@ describe("AiChatScreen — Mobil UX (Sprint 7.3)", () => {
     expect((screen.getByText("Send") as HTMLButtonElement).disabled).toBe(true);
   });
 });
+<<<<<<< HEAD
 
 describe("AiChatScreen — Teşhis Bilgisi Butonu (Sprint 10.7, AI Diagnostic Build)", () => {
   it("debugMode VERİLMEZSE (varsayılan), Teşhis Bilgisi butonu HİÇ görünmez", async () => {
@@ -278,3 +279,5 @@ describe("AiChatScreen — Teşhis Bilgisi Butonu (Sprint 10.7, AI Diagnostic Bu
     expect(onViewDiagnostics).toHaveBeenCalledTimes(1);
   });
 });
+=======
+>>>>>>> 48d254dae2e565c80e11bdcf516d3ea27581e3b3
