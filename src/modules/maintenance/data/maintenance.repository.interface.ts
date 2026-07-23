@@ -43,6 +43,26 @@ export interface IMaintenanceRepository {
   listByParcel(parcelId: string, options?: MaintenanceListOptions): Promise<MaintenanceRecord[]>;
   /** Sadece belirli bir ağaca bağlı bakım kayıtları (referans ağaçlar dahil — özel bir ayrım yok). */
   listByTree(treeId: string, options?: MaintenanceListOptions): Promise<MaintenanceRecord[]>;
+  /**
+   * bkz. Sprint 10.15 (AI Maintenance Tool düzeltmesi). Sistemdeki TÜM
+   * aktif bakım kayıtları (herhangi bir parsel/ağaç sınırlaması
+   * OLMADAN) — SADECE AI'nin genel sorgu ihtiyacı için (ör. "bugün
+   * hangi parsellere sulama yapıldı?"). `listByParcel`/`listByTree`'nin
+   * WHERE mantığına (`buildListClause`) HİÇ dokunulmadı — bu, established
+   * `photoRepository.listAll()` deseniyle tutarlı, AYRI bir metot.
+   */
+  listAll(options?: MaintenanceListOptions): Promise<MaintenanceRecord[]>;
+  /**
+   * bkz. Sprint 10.15. GERÇEK toplam kayıt sayısını (LIMIT'ten
+   * BAĞIMSIZ) döner — `listAll()`/`listByParcel()`/`listByTree()`'nin
+   * LIMIT'li sorgusuyla AYNI SQL'i PAYLAŞMAZ (kullanıcının açık
+   * talebi: "COUNT ile LIST aynı SQL üzerinden üretilmesin").
+   * `scopeColumn`/`scopeValue` verilirse parsel/ağaç bazlı sayım,
+   * verilmezse sistem geneli sayım yapar.
+   */
+  countAll(
+    options?: MaintenanceListOptions & { scopeColumn?: "parcel_id" | "tree_id"; scopeValue?: string }
+  ): Promise<number>;
   getById(id: string): Promise<MaintenanceRecord | null>;
   create(input: NewMaintenanceRecordInput): Promise<MaintenanceRecord>;
   /**

@@ -100,6 +100,43 @@ function buildListClause(
   return { whereClause: conditions.join(" AND "), values };
 }
 
+/**
+ * bkz. Sprint 10.15 (AI Maintenance Tool düzeltmesi). `buildListClause()`
+ * ile AYNI filtre mantığını (activeOnly/maintenanceType/fromDate/toDate)
+ * uyguluyor, ama scope (parcel_id/tree_id) İÇERMİYOR — GENEL sorgu için.
+ *
+ * NEDEN `buildListClause()` DEĞİŞTİRİLMEDİ/PAYLAŞILMADI: Bu sprint'in
+ * açık talimatı "gereksiz refactor yapma, mimariyi değiştirme" —
+ * `buildListClause()`'u scope-opsiyonel hale getirmek, established,
+ * ÇALIŞAN `listByParcel`/`listByTree`'nin davranışını bozma riski
+ * taşırdı (aynı fonksiyonun iki AYRI çağrı şekli, iki AYRI test
+ * senaryosu gerektirir). Küçük bir filtre-mantığı tekrarı (10 satır),
+ * bu riski tamamen ortadan kaldırıyor — bilinçli bir tercih.
+ */
+function buildGeneralWhereClause(options: MaintenanceListOptions): { whereClause: string; values: unknown[] } {
+  const activeOnly = options.activeOnly ?? true;
+  const conditions: string[] = [];
+  const values: unknown[] = [];
+
+  if (activeOnly) {
+    conditions.push("is_active = 1");
+  }
+  if (options.maintenanceType) {
+    conditions.push("maintenance_type = ?");
+    values.push(options.maintenanceType);
+  }
+  if (options.fromDate) {
+    conditions.push("COALESCE(completed_date, scheduled_date) >= ?");
+    values.push(options.fromDate);
+  }
+  if (options.toDate) {
+    conditions.push("COALESCE(completed_date, scheduled_date) <= ?");
+    values.push(options.toDate);
+  }
+
+  return { whereClause: conditions.length > 0 ? conditions.join(" AND ") : "1 = 1", values };
+}
+
 class MaintenanceRepository extends BaseRepository implements IMaintenanceRepository {
   protected readonly tableName = "maintenance_records";
 
@@ -127,6 +164,46 @@ class MaintenanceRepository extends BaseRepository implements IMaintenanceReposi
       [...values, limit, offset]
     );
     return rows.map(mapRowToMaintenanceRecord);
+  }
+
+  /** bkz. `IMaintenanceRepository.listAll()`'ın belgesi — SADECE AI'nin genel sorgu ihtiyacı için, Sprint 10.15. */
+  async listAll(options: MaintenanceListOptions = {}): Promise<MaintenanceRecord[]> {
+    const limit = options.limit ?? DEFAULT_LIST_LIMIT;
+    const offset = options.offset ?? 0;
+    const { whereClause, values } = buildGeneralWhereClause(options);
+
+    const rows = await this.query<MaintenanceRecordRow>(
+      `SELECT * FROM maintenance_records WHERE ${whereClause}
+       ORDER BY COALESCE(completed_date, scheduled_date) DESC LIMIT ? OFFSET ?`,
+      [...values, limit, offset]
+    );
+    return rows.map(mapRowToMaintenanceRecord);
+  }
+
+  /**
+   * bkz. `IMaintenanceRepository.countAll()`'ın belgesi — Sprint 10.15.
+   * GERÇEK toplam sayı, `LIMIT`'li liste sorgusundan TAMAMEN AYRI bir
+   * `SELECT COUNT(*)` ifadesiyle (kullanıcının açık talebi: "COUNT ile
+   * LIST aynı SQL üzerinden üretilmesin").
+   */
+  async countAll(
+    options: MaintenanceListOptions & { scopeColumn?: "parcel_id" | "tree_id"; scopeValue?: string } = {}
+  ): Promise<number> {
+    const { scopeColumn, scopeValue, ...filterOptions } = options;
+    if (scopeColumn && scopeValue) {
+      const { whereClause, values } = buildListClause(scopeColumn, scopeValue, filterOptions);
+      const row = await this.queryOne<{ count: number }>(
+        `SELECT COUNT(*) as count FROM maintenance_records WHERE ${whereClause}`,
+        values
+      );
+      return row?.count ?? 0;
+    }
+    const { whereClause, values } = buildGeneralWhereClause(filterOptions);
+    const row = await this.queryOne<{ count: number }>(
+      `SELECT COUNT(*) as count FROM maintenance_records WHERE ${whereClause}`,
+      values
+    );
+    return row?.count ?? 0;
   }
 
   async getById(id: string): Promise<MaintenanceRecord | null> {

@@ -613,3 +613,116 @@ describe("MaintenanceRepository — Sulama Başlangıç/Bitiş Saati (Sprint 10.
     expect(updated?.endTime).toBe("08:00");
   });
 });
+
+describe("maintenanceRepository — listAll() (Sprint 10.15, AI genel sorgu ihtiyacı)", () => {
+  it("🔴 BİRDEN FAZLA parseldeki kayıtları, HERHANGİ bir parcelId/treeId FİLTRESİ OLMADAN GERÇEKTEN döner", async () => {
+    const parcelA = await parcelRepository.create({ name: "PA", cropType: "olive", areaDekar: 5 });
+    const parcelB = await parcelRepository.create({ name: "PB", cropType: "olive", areaDekar: 3 });
+    await maintenanceRepository.create({ parcelId: parcelA.id, maintenanceType: MaintenanceType.Irrigation });
+    await maintenanceRepository.create({ parcelId: parcelB.id, maintenanceType: MaintenanceType.Fertilization });
+
+    const all = await maintenanceRepository.listAll();
+
+    expect(all.length).toBeGreaterThanOrEqual(2);
+    const parcelIds = all.map((r) => r.parcelId);
+    expect(parcelIds).toContain(parcelA.id);
+    expect(parcelIds).toContain(parcelB.id);
+  });
+
+  it("listAll(), MEVCUT listByParcel/listByTree davranışını hiç DEĞİŞTİRMEZ (bağımsız kod yolu)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: MaintenanceType.Irrigation });
+
+    const byParcel = await maintenanceRepository.listByParcel(parcel.id);
+    const all = await maintenanceRepository.listAll();
+
+    expect(byParcel.length).toBe(1);
+    expect(all.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("maintenanceType filtresi listAll() ile GERÇEKTEN çalışır", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: MaintenanceType.Irrigation });
+    await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: MaintenanceType.Fertilization });
+
+    const irrigationOnly = await maintenanceRepository.listAll({ maintenanceType: MaintenanceType.Irrigation });
+
+    expect(irrigationOnly.every((r) => r.maintenanceType === MaintenanceType.Irrigation)).toBe(true);
+  });
+
+  it("fromDate/toDate filtresi listAll() ile GERÇEKTEN çalışır", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await maintenanceRepository.create({
+      parcelId: parcel.id,
+      maintenanceType: MaintenanceType.Irrigation,
+      status: MaintenanceStatus.Completed,
+      completedDate: "2026-01-01",
+    });
+    await maintenanceRepository.create({
+      parcelId: parcel.id,
+      maintenanceType: MaintenanceType.Irrigation,
+      status: MaintenanceStatus.Completed,
+      completedDate: "2026-06-15",
+    });
+
+    const filtered = await maintenanceRepository.listAll({ fromDate: "2026-06-01", toDate: "2026-06-30" });
+
+    expect(filtered.every((r) => r.completedDate === "2026-06-15")).toBe(true);
+    expect(filtered.some((r) => r.completedDate === "2026-01-01")).toBe(false);
+  });
+
+  it("activeOnly VARSAYILAN true — deactivate edilmiş kayıtlar listAll()'da GÖRÜNMEZ", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    const record = await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: MaintenanceType.Irrigation });
+    await maintenanceRepository.deactivate(record.id);
+
+    const all = await maintenanceRepository.listAll();
+
+    expect(all.some((r) => r.id === record.id)).toBe(false);
+  });
+});
+
+describe("maintenanceRepository — countAll() (Sprint 10.15, GERÇEK toplam sayı — LIMIT'ten bağımsız)", () => {
+  it("🔴 GERÇEK KANIT: LIMIT'i AŞAN sayıda kayıt VARSA, countAll() GERÇEK toplamı döner (listAll()'ın LIMIT'li uzunluğu DEĞİL)", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    // 7 kayıt oluştur, listAll()'ı 3 ile sınırlı çağıracağız.
+    for (let i = 0; i < 7; i++) {
+      await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: MaintenanceType.Irrigation });
+    }
+
+    const limited = await maintenanceRepository.listAll({ limit: 3 });
+    const totalCount = await maintenanceRepository.countAll();
+
+    expect(limited.length).toBe(3); // LIMIT'e uyuyor
+    expect(totalCount).toBe(7); // GERÇEK toplam, LIMIT'ten ETKİLENMİYOR
+  });
+
+  it("countAll(), scopeColumn/scopeValue VERİLİRSE parsel bazlı GERÇEK sayım yapar", async () => {
+    const parcelA = await parcelRepository.create({ name: "PA", cropType: "olive", areaDekar: 5 });
+    const parcelB = await parcelRepository.create({ name: "PB", cropType: "olive", areaDekar: 3 });
+    await maintenanceRepository.create({ parcelId: parcelA.id, maintenanceType: MaintenanceType.Irrigation });
+    await maintenanceRepository.create({ parcelId: parcelA.id, maintenanceType: MaintenanceType.Pruning });
+    await maintenanceRepository.create({ parcelId: parcelB.id, maintenanceType: MaintenanceType.Irrigation });
+
+    const countA = await maintenanceRepository.countAll({ scopeColumn: "parcel_id", scopeValue: parcelA.id });
+
+    expect(countA).toBe(2);
+  });
+
+  it("countAll(), maintenanceType filtresiyle BİRLİKTE GERÇEKTEN çalışır", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: MaintenanceType.Irrigation });
+    await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: MaintenanceType.Irrigation });
+    await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: MaintenanceType.Pruning });
+
+    const irrigationCount = await maintenanceRepository.countAll({ maintenanceType: MaintenanceType.Irrigation });
+
+    expect(irrigationCount).toBe(2);
+  });
+
+  it("hiç kayıt YOKKEN countAll() 0 döner (çökme yok)", async () => {
+    const count = await maintenanceRepository.countAll();
+
+    expect(count).toBe(0);
+  });
+});

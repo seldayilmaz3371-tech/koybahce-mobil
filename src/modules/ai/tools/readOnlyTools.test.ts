@@ -106,6 +106,70 @@ describe("maintenanceTool", () => {
 
     expect(result.recentCount).toBe(1);
   });
+
+  it("🔴 Sprint 10.15, GERÇEK KÖK NEDEN DÜZELTMESİ: ne parcelId NE treeId VERİLMEDEN çağrılırsa, ARTIK hata DÖNMEZ — sistem geneli sorgu yapar", async () => {
+    const parcelA = await parcelRepository.create({ name: "PA", cropType: "olive", areaDekar: 5 });
+    const parcelB = await parcelRepository.create({ name: "PB", cropType: "olive", areaDekar: 3 });
+    await maintenanceRepository.create({ parcelId: parcelA.id, maintenanceType: "irrigation" });
+    await maintenanceRepository.create({ parcelId: parcelB.id, maintenanceType: "fertilization" });
+
+    const result = (await maintenanceTool.execute({})) as {
+      totalCount: number;
+      recentRecords: { parcelId: string }[];
+    };
+
+    expect(result.totalCount).toBeGreaterThanOrEqual(2);
+    const returnedParcelIds = result.recentRecords.map((r) => r.parcelId);
+    expect(returnedParcelIds).toContain(parcelA.id);
+    expect(returnedParcelIds).toContain(parcelB.id);
+  });
+
+  it("🔴 Sprint 10.15: HER dönen kayıt, GERÇEKTEN hangi parsele ait olduğunu (parcelId) içerir — kullanıcı 'Hangi parsel?' sordurmadan cevap alabilir", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: "irrigation" });
+
+    const result = (await maintenanceTool.execute({ parcelId: parcel.id })) as {
+      recentRecords: { parcelId: string }[];
+    };
+
+    expect(result.recentRecords[0].parcelId).toBe(parcel.id);
+  });
+
+  it("🔴 Sprint 10.15: totalCount, GERÇEK toplam sayıyı döner — LIMIT'e (5) TAKILMAZ", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    for (let i = 0; i < 8; i++) {
+      await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: "irrigation" });
+    }
+
+    const result = (await maintenanceTool.execute({ parcelId: parcel.id })) as {
+      totalCount: number;
+      recentCount: number;
+    };
+
+    expect(result.totalCount).toBe(8); // GERÇEK toplam
+    expect(result.recentCount).toBe(5); // LIMIT'li liste (established davranış KORUNDU)
+  });
+
+  it("🔴 Sprint 10.15: maintenanceType filtresi AI tarafından GERÇEKTEN kullanılabilir", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: "irrigation" });
+    await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: "pruning" });
+
+    const result = (await maintenanceTool.execute({ maintenanceType: "irrigation" })) as {
+      recentRecords: { type: string }[];
+    };
+
+    expect(result.recentRecords.every((r) => r.type === "irrigation")).toBe(true);
+  });
+
+  it("mevcut (parcelId İLE çağrılan) davranış TAMAMEN KORUNDU — geriye dönük uyumluluk", async () => {
+    const parcel = await parcelRepository.create({ name: "P", cropType: "olive", areaDekar: 5 });
+    await maintenanceRepository.create({ parcelId: parcel.id, maintenanceType: "irrigation" });
+
+    const result = (await maintenanceTool.execute({ parcelId: parcel.id })) as { recentCount: number };
+
+    expect(result.recentCount).toBe(1);
+  });
 });
 
 describe("financeTool", () => {
