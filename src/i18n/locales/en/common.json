@@ -27,7 +27,8 @@
     "screenTitle": "Settings",
     "aiSectionLabel": "AI",
     "dataManagementSectionLabel": "Data Management",
-    "languageSectionLabel": "Language"
+    "languageSectionLabel": "Language",
+    "notificationsSectionLabel": "Notifications"
   },
   "aiSettings": {
     "screenTitle": "AI Settings",
@@ -51,6 +52,13 @@
   },
   "languageSettings": {
     "screenTitle": "Language",
+    "backButton": "Back"
+  },
+  "notificationSettings": {
+    "screenTitle": "Notifications",
+    "toggleLabel": "Maintenance reminders",
+    "toggleDescription": "Get a local reminder on the date each maintenance plan is due.",
+    "permissionDeniedMessage": "Notification permission was denied. You can enable it from your device's app settings.",
     "backButton": "Back"
   },
   "dataManagement": {

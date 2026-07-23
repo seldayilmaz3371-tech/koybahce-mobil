@@ -27,14 +27,14 @@ afterEach(() => {
 
 describe("SettingsScreen", () => {
   it("AI bölümünü listeler", () => {
-    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} />);
+    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} onViewNotificationSettings={vi.fn()} />);
     expect(screen.getByText("AI")).toBeTruthy();
   });
 
   it("AI bölümüne tıklamak onViewAiSettings'i çağırır", () => {
     const onViewAiSettings = vi.fn();
     render(
-      <SettingsScreen onViewAiSettings={onViewAiSettings} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} />
+      <SettingsScreen onViewAiSettings={onViewAiSettings} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} onViewNotificationSettings={vi.fn()} />
     );
 
     fireEvent.click(screen.getByText("AI"));
@@ -43,7 +43,7 @@ describe("SettingsScreen", () => {
   });
 
   it("🔴 Sprint 10.13: 'Data Management' bölümünü GERÇEKTEN listeler", () => {
-    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} />);
+    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} onViewNotificationSettings={vi.fn()} />);
 
     expect(screen.getByText("Data Management")).toBeTruthy();
   });
@@ -51,7 +51,7 @@ describe("SettingsScreen", () => {
   it("🔴 Sprint 10.13: 'Data Management' bölümüne tıklamak, GERÇEKTEN onViewDataManagement'i çağırır", () => {
     const onViewDataManagement = vi.fn();
     render(
-      <SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={onViewDataManagement} onViewLanguageSettings={vi.fn()} />
+      <SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={onViewDataManagement} onViewLanguageSettings={vi.fn()} onViewNotificationSettings={vi.fn()} />
     );
 
     fireEvent.click(screen.getByText("Data Management"));
@@ -60,7 +60,7 @@ describe("SettingsScreen", () => {
   });
 
   it("🔴 Sprint 10.18: 'Language' bölümünü GERÇEKTEN listeler", () => {
-    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} />);
+    render(<SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={vi.fn()} onViewNotificationSettings={vi.fn()} />);
 
     expect(screen.getByText("Language")).toBeTruthy();
   });
@@ -68,11 +68,45 @@ describe("SettingsScreen", () => {
   it("🔴 Sprint 10.18: 'Language' bölümüne tıklamak, GERÇEKTEN onViewLanguageSettings'i çağırır", () => {
     const onViewLanguageSettings = vi.fn();
     render(
-      <SettingsScreen onViewAiSettings={vi.fn()} onViewDataManagement={vi.fn()} onViewLanguageSettings={onViewLanguageSettings} />
+      <SettingsScreen
+        onViewAiSettings={vi.fn()}
+        onViewDataManagement={vi.fn()}
+        onViewLanguageSettings={onViewLanguageSettings}
+        onViewNotificationSettings={vi.fn()}
+      />
     );
 
     fireEvent.click(screen.getByText("Language"));
 
     expect(onViewLanguageSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it("🔴 Sprint 10.19: 'Notifications' bölümünü GERÇEKTEN listeler", () => {
+    render(
+      <SettingsScreen
+        onViewAiSettings={vi.fn()}
+        onViewDataManagement={vi.fn()}
+        onViewLanguageSettings={vi.fn()}
+        onViewNotificationSettings={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Notifications")).toBeTruthy();
+  });
+
+  it("🔴 Sprint 10.19: 'Notifications' bölümüne tıklamak, GERÇEKTEN onViewNotificationSettings'i çağırır", () => {
+    const onViewNotificationSettings = vi.fn();
+    render(
+      <SettingsScreen
+        onViewAiSettings={vi.fn()}
+        onViewDataManagement={vi.fn()}
+        onViewLanguageSettings={vi.fn()}
+        onViewNotificationSettings={onViewNotificationSettings}
+      />
+    );
+
+    fireEvent.click(screen.getByText("Notifications"));
+
+    expect(onViewNotificationSettings).toHaveBeenCalledTimes(1);
   });
 });

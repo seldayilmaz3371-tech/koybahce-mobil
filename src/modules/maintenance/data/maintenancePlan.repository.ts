@@ -130,6 +130,14 @@ class MaintenancePlanRepository extends BaseRepository implements IMaintenancePl
     return rows.map(mapRowToMaintenancePlan);
   }
 
+  /** bkz. `IMaintenancePlanRepository.listAllActive()`'ın belgesi — SADECE bildirim zamanlama akışı için. */
+  async listAllActive(): Promise<MaintenancePlan[]> {
+    const rows = await this.query<MaintenancePlanRow>(
+      `SELECT * FROM maintenance_plans WHERE is_active = 1 ORDER BY next_due_date ASC`
+    );
+    return rows.map(mapRowToMaintenancePlan);
+  }
+
   async getById(id: string): Promise<MaintenancePlan | null> {
     const row = await this.queryOne<MaintenancePlanRow>(`SELECT * FROM maintenance_plans WHERE id = ?`, [id]);
     return row ? mapRowToMaintenancePlan(row) : null;

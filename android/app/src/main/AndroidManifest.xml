@@ -39,4 +39,11 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- bkz. Sprint 10.19 (Bildirimler — Bakım Hatırlatmaları). Android 13+
+         (API 33+, bu projenin targetSdkVersion'ı 36) için resmi olarak
+         ZORUNLU (developer.android.com/develop/ui/compose/notifications/
+         notification-permission, bu sprintte doğrulandı) — bu izin
+         olmadan, runtime izin isteği (requestNotificationPermission())
+         çalışmaz, HİÇBİR bildirim gösterilemez. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

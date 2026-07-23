@@ -27,7 +27,8 @@
     "screenTitle": "Ayarlar",
     "aiSectionLabel": "AI",
     "dataManagementSectionLabel": "Veri Yönetimi",
-    "languageSectionLabel": "Dil"
+    "languageSectionLabel": "Dil",
+    "notificationsSectionLabel": "Bildirimler"
   },
   "aiSettings": {
     "screenTitle": "AI Ayarları",
@@ -51,6 +52,13 @@
   },
   "languageSettings": {
     "screenTitle": "Dil",
+    "backButton": "Geri"
+  },
+  "notificationSettings": {
+    "screenTitle": "Bildirimler",
+    "toggleLabel": "Bakım hatırlatmaları",
+    "toggleDescription": "Her bakım planının vadesi geldiğinde cihazınızda bir hatırlatma alın.",
+    "permissionDeniedMessage": "Bildirim izni reddedildi. Cihazınızın uygulama ayarlarından açabilirsiniz.",
     "backButton": "Geri"
   },
   "dataManagement": {

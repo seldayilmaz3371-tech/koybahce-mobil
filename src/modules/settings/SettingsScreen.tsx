@@ -9,11 +9,11 @@
  *
  * Bu ekran, gelecekteki TÜM ayar bölümlerinin listeleneceği HUB'dır
  * (`/settings`). Sprint 10.13'te **Veri Yönetimi**, Sprint 10.18'de
- * **Dil** eklendi. Diğer bölümler (Bildirimler/Tema/GPS/Kamera/
- * Senkronizasyon) HENÜZ geliştirilmedi (YAGNI — spekülatif boş
- * girişler eklenmedi). Yeni bir bölüm eklendiğinde, bu listeye YENİ
- * bir satır eklemek yeterli olacak — route mimarisi (`/settings/*`)
- * buna hazır.
+ * **Dil**, Sprint 10.19'da **Bildirimler** eklendi. Diğer bölümler
+ * (Tema/GPS/Kamera/Senkronizasyon) HENÜZ geliştirilmedi (YAGNI —
+ * spekülatif boş girişler eklenmedi). Yeni bir bölüm eklendiğinde, bu
+ * listeye YENİ bir satır eklemek yeterli olacak — route mimarisi
+ * (`/settings/*`) buna hazır.
  *
  * `onBack` YOK — bu ekranın kendi iç view-state'i (create/edit) yok,
  * geri tuşu tamamen route wrapper seviyesinde (`SettingsScreenRoute`)
@@ -29,9 +29,15 @@ interface SettingsScreenProps {
   onViewAiSettings: () => void;
   onViewDataManagement: () => void;
   onViewLanguageSettings: () => void;
+  onViewNotificationSettings: () => void;
 }
 
-export function SettingsScreen({ onViewAiSettings, onViewDataManagement, onViewLanguageSettings }: SettingsScreenProps) {
+export function SettingsScreen({
+  onViewAiSettings,
+  onViewDataManagement,
+  onViewLanguageSettings,
+  onViewNotificationSettings,
+}: SettingsScreenProps) {
   const { t } = useTranslation();
 
   return (
@@ -52,6 +58,11 @@ export function SettingsScreen({ onViewAiSettings, onViewDataManagement, onViewL
         <li>
           <button type="button" className="parcel-list__item" onClick={onViewLanguageSettings}>
             <span className="parcel-list__name">{t("settings.languageSectionLabel")}</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" className="parcel-list__item" onClick={onViewNotificationSettings}>
+            <span className="parcel-list__name">{t("settings.notificationsSectionLabel")}</span>
           </button>
         </li>
       </ul>

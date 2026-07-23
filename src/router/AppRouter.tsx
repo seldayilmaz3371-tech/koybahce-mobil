@@ -46,6 +46,7 @@ import { DashboardScreen } from "../modules/dashboard/DashboardScreen";
 import { SettingsScreen } from "../modules/settings/SettingsScreen";
 import { DataManagementScreen } from "../modules/dataManagement/DataManagementScreen";
 import { LanguageSettingsScreen } from "../modules/settings/LanguageSettingsScreen";
+import { NotificationSettingsScreen } from "../modules/settings/NotificationSettingsScreen";
 import { useTreeForRoute } from "./useTreeForRoute";
 import { ROUTE_PATTERNS, buildPath } from "./routes";
 
@@ -361,8 +362,15 @@ function SettingsScreenRoute() {
       onViewAiSettings={() => navigate(buildPath.aiSettings())}
       onViewDataManagement={() => navigate(buildPath.dataManagement())}
       onViewLanguageSettings={() => navigate(buildPath.language())}
+      onViewNotificationSettings={() => navigate(buildPath.notifications())}
     />
   );
+}
+
+/** `/settings/notifications` — Sprint 10.19. `onBack`, diğer Ayarlar alt-ekranlarıyla AYNI ilke (her zaman Ayarlar hub'ına). */
+function NotificationSettingsScreenRoute() {
+  const navigate = useNavigate();
+  return <NotificationSettingsScreen onBack={() => navigate(buildPath.settings())} />;
 }
 
 /** `/settings/language` — Sprint 10.18. `onBack`, diğer Ayarlar alt-ekranlarıyla AYNI ilke (her zaman Ayarlar hub'ına). */
@@ -606,6 +614,7 @@ export function AppRouter() {
         <Route path={ROUTE_PATTERNS.aiSettings} element={<AiSettingsScreenRoute />} />
         <Route path={ROUTE_PATTERNS.dataManagement} element={<DataManagementScreenRoute />} />
         <Route path={ROUTE_PATTERNS.language} element={<LanguageSettingsScreenRoute />} />
+        <Route path={ROUTE_PATTERNS.notifications} element={<NotificationSettingsScreenRoute />} />
         <Route path={ROUTE_PATTERNS.aiDiagnostics} element={<AiDiagnosticScreenRoute />} />
         <Route path="*" element={<Navigate to={buildPath.parcels()} replace />} />
       </Routes>

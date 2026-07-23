@@ -34,6 +34,43 @@ async function createTestParcelAndTree(): Promise<{ parcelId: string; treeId: st
 }
 
 describe("MaintenancePlanRepository — Temel CRUD", () => {
+  it("🔴 Sprint 10.19: listAllActive(), BİRDEN FAZLA parseldeki TÜM aktif planları (parcel filtresi OLMADAN) döner, next_due_date ASC sıralı", async () => {
+    const { parcelId: parcel1 } = await createTestParcelAndTree();
+    const { parcelId: parcel2 } = await createTestParcelAndTree();
+    await maintenancePlanRepository.create({
+      parcelId: parcel1,
+      maintenanceType: MaintenanceType.Irrigation,
+      intervalDays: 7,
+      nextDueDate: "2026-08-15T00:00:00.000Z",
+    });
+    const earlierPlan = await maintenancePlanRepository.create({
+      parcelId: parcel2,
+      maintenanceType: MaintenanceType.Fertilization,
+      intervalDays: 14,
+      nextDueDate: "2026-08-01T00:00:00.000Z",
+    });
+
+    const result = await maintenancePlanRepository.listAllActive();
+
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe(earlierPlan.id); // erken tarih ÖNCE gelmeli
+  });
+
+  it("🔴 Sprint 10.19: listAllActive(), PASİFE ALINMIŞ planları HİÇ döndürmez", async () => {
+    const { parcelId } = await createTestParcelAndTree();
+    const plan = await maintenancePlanRepository.create({
+      parcelId,
+      maintenanceType: MaintenanceType.Pruning,
+      intervalDays: 30,
+      nextDueDate: "2026-09-01T00:00:00.000Z",
+    });
+    await maintenancePlanRepository.deactivate(plan.id);
+
+    const result = await maintenancePlanRepository.listAllActive();
+
+    expect(result).toHaveLength(0);
+  });
+
   it("create() sonrası getById() ile aynı kaydı döndürür", async () => {
     const { parcelId } = await createTestParcelAndTree();
     const created = await maintenancePlanRepository.create({

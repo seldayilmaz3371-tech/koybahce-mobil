@@ -32,6 +32,7 @@ export const ROUTE_PATTERNS = {
   aiSettings: "/settings/ai",
   dataManagement: "/settings/data-management",
   language: "/settings/language",
+  notifications: "/settings/notifications",
   dashboard: "/dashboard",
 } as const;
 
@@ -56,6 +57,7 @@ export const buildPath = {
   aiSettings: () => "/settings/ai",
   dataManagement: () => "/settings/data-management",
   language: () => "/settings/language",
+  notifications: () => "/settings/notifications",
   dashboard: () => "/dashboard",
 } as const;
 

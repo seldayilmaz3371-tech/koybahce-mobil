@@ -43,6 +43,17 @@ export const LocalPreferenceKey = {
    * migration oluşturma).
    */
   LAST_USED_BULK_OPERATION: "last_used_bulk_operation_v1",
+  /**
+   * bkz. Sprint 10.19 (Bildirimler — Bakım Hatırlatmaları). Kullanıcının
+   * bildirimleri AÇIK/KAPALI olarak ayarlardan seçtiği tercih —
+   * `"true"`/`"false"` string'i (established Preferences deseni, TÜM
+   * değerler string). Varsayılan (hiç ayarlanmamışsa): KAPALI —
+   * Bölüm 15'in "güvenli varsayılanlar" ilkesiyle tutarlı (established,
+   * `ai_settings`'in `internet_permission DEFAULT 0` kararıyla AYNI
+   * ruh — kullanıcı AÇIKÇA izin vermeden hiçbir native yetenek
+   * kullanılmaz).
+   */
+  NOTIFICATIONS_ENABLED: "notifications_enabled_v1",
 } as const;
 
 export type LocalPreferenceKeyName =

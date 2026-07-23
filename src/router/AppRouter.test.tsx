@@ -478,6 +478,29 @@ describe("AppRouter — AI ve Ayarlar Navigasyonu (Sprint 7.1, GERÇEK navigasyo
     expect(window.location.hash).toBe("#/settings");
   });
 
+  it("🔴 Sprint 10.19: Parsel Listesi → 'Settings' → 'Notifications' → GERÇEK navigasyon zinciriyle açılır", async () => {
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText("Settings")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Settings"));
+    await waitFor(() => expect(screen.getByText("Notifications")).toBeTruthy());
+    fireEvent.click(screen.getByText("Notifications"));
+
+    await waitFor(() => expect(screen.getByText(/Maintenance reminders/)).toBeTruthy());
+    expect(window.location.hash).toBe("#/settings/notifications");
+  });
+
+  it("🔴 Sprint 10.19: Bildirim Ayarları → 'Back' HER ZAMAN /settings'e döner (diğer alt-ekranlarla AYNI ilke)", async () => {
+    window.location.hash = "#/settings/notifications";
+    render(<AppRouter />);
+    await waitFor(() => expect(screen.getByText(/Maintenance reminders/)).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Back"));
+
+    await waitFor(() => expect(screen.getByText("Notifications")).toBeTruthy());
+    expect(window.location.hash).toBe("#/settings");
+  });
+
   it("AI Chat → 'AI Settings' bağlantısı DOĞRU rotaya gider (Chat'ten gelse bile /settings'e döner, tutarlı UX kanıtı)", async () => {
     window.location.hash = "#/ai/chat";
     render(<AppRouter />);

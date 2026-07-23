@@ -40,6 +40,16 @@ export interface IMaintenancePlanRepository {
   listByParcel(parcelId: string, options?: MaintenancePlanListOptions): Promise<MaintenancePlan[]>;
   /** Sadece belirli bir ağaca bağlı planlar. */
   listByTree(treeId: string, options?: MaintenancePlanListOptions): Promise<MaintenancePlan[]>;
+  /**
+   * bkz. Sprint 10.19 (Bildirimler — Bakım Hatırlatmaları). Sistemdeki
+   * TÜM aktif planları (herhangi bir parsel/ağaç filtresi OLMADAN),
+   * `next_due_date ASC` sıralı döner — SADECE bildirim zamanlama
+   * akışının ihtiyacı için (established `photoRepository.listAll()`
+   * deseniyle AYNI ilke — dar kapsamlı, açıkça gerekçeli bir ekleme).
+   * `DEFAULT_LIST_LIMIT` SINIRI YOK (bildirimler için TÜM aktif
+   * planların bilinmesi gerekir).
+   */
+  listAllActive(): Promise<MaintenancePlan[]>;
   getById(id: string): Promise<MaintenancePlan | null>;
   create(input: NewMaintenancePlanInput): Promise<MaintenancePlan>;
   update(id: string, changes: MaintenancePlanUpdateInput): Promise<void>;
