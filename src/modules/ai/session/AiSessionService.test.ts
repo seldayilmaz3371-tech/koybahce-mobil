@@ -159,6 +159,76 @@ describe("AiSessionService — Tool-Calling Round-Trip (GERÇEK 2 Aşamalı Akı
     expect(lastMessage.toolCalls).toEqual([{ toolName: "testQueryTool", arguments: {} }]);
   });
 
+  it("🔴 Sprint 10.16, GERÇEK KÖK NEDEN DÜZELTMESİ: model 2. round-trip'te DE bir tool çağırırsa (ör. filtresiz denemeden sonra filtreli tekrar deneme), bu ARTIK GERÇEKTEN işlenir — ÖNCEDEN bu durumda response.text boş kalırdı, hiçbir hata da oluşmazdı", async () => {
+    await enableAiWithInternet();
+    const testTool: AiTool = {
+      definition: { name: "multiRoundTool", description: "test", parametersJsonSchema: { type: "object" } },
+      execute: vi.fn().mockResolvedValue({ found: true }),
+    };
+    toolRegistry.register(testTool);
+
+    let callCount = 0;
+    const sendMessage = vi.fn(async (_messages: unknown, _options: unknown) => {
+      callCount++;
+      if (callCount === 1) {
+        // 1. round: model filtresiz çağırıyor.
+        return { text: null, toolCalls: [{ toolName: "multiRoundTool", arguments: {} }] };
+      }
+      if (callCount === 2) {
+        // 2. round: sonuç yetersiz, model FARKLI parametrelerle TEKRAR çağırıyor
+        // — bu, kullanıcının gerçek cihazda gözlemlediği "thought_signature VAR
+        // ama response boş" belirtisinin TAM olarak temsil ettiği senaryo.
+        return { text: null, toolCalls: [{ toolName: "multiRoundTool", arguments: { filtered: true } }] };
+      }
+      // 3. round: nihayet nihai metin cevabı.
+      return { text: "Bulundu: filtreli sonuç.", toolCalls: [] };
+    });
+    providerRegistry.register(fakeProvider(sendMessage));
+
+    const conversation = await aiConversationRepository.createConversation();
+    const result = await aiSessionService.sendUserMessage({
+      conversationId: conversation.id,
+      userQuery: "test sorusu",
+    });
+
+    // ÖNCEDEN: sendMessage 2 kez çağrılırdı, testTool.execute 1 kez
+    // çalışırdı, result.content BOŞ ("") olurdu (2. round'un toolCalls'ı
+    // hiç işlenmezdi). ŞİMDİ: GERÇEKTEN 3 round tamamlanıyor.
+    expect(sendMessage).toHaveBeenCalledTimes(3);
+    expect(testTool.execute).toHaveBeenCalledTimes(2);
+    expect(result.assistantMessage.content).toBe("Bulundu: filtreli sonuç.");
+  });
+
+  it("🔴 Sprint 10.16: model MAX_TOOL_ROUNDS'u AŞACAK kadar ısrarla tool çağırırsa, SONSUZ döngüye GİRMEZ — üst sınırda durur", async () => {
+    await enableAiWithInternet();
+    const testTool: AiTool = {
+      definition: { name: "infiniteTool", description: "test", parametersJsonSchema: { type: "object" } },
+      execute: vi.fn().mockResolvedValue({ tryAgain: true }),
+    };
+    toolRegistry.register(testTool);
+
+    // Model HER ZAMAN bir tool çağırmaya devam ediyor (asla metin üretmiyor) — gerçek bir "kaçak model" senaryosu.
+    const sendMessage = vi.fn(async () => ({
+      text: null,
+      toolCalls: [{ toolName: "infiniteTool", arguments: {} }],
+    }));
+    providerRegistry.register(fakeProvider(sendMessage));
+
+    const conversation = await aiConversationRepository.createConversation();
+    const result = await aiSessionService.sendUserMessage({
+      conversationId: conversation.id,
+      userQuery: "test sorusu",
+    });
+
+    // KESİN kanıt: üst sınır (MAX_TOOL_ROUNDS=3) sayesinde, sendMessage
+    // sınırsız değil, TAM OLARAK 4 kez çağrılıyor (1 ilk + 3 tool round'u)
+    // — sonsuz döngü GERÇEKTEN engellendi.
+    expect(sendMessage).toHaveBeenCalledTimes(4);
+    expect(testTool.execute).toHaveBeenCalledTimes(3);
+    // Üst sınıra ulaşıldığında, modelin SON ürettiği (yine boş) metin kaydedilir — çökme YOK.
+    expect(result.assistantMessage.content).toBe("");
+  });
+
   it("debugMode=true iken tool sonuçları 'tool' rolüyle DB'ye de kaydedilir", async () => {
     await enableAiWithInternet();
     await aiSettingsRepository.update({ debugMode: true });

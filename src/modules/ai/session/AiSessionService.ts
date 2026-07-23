@@ -32,6 +32,25 @@ import { buildSystemPrompt, buildUserTurnMessage } from "../prompt/promptBuilder
 import { getActiveAiProvider } from "./getActiveAiProvider";
 import { aiDiagnostics } from "../diagnostics/aiDiagnostics";
 
+/**
+ * bkz. Sprint 10.16, GERÇEK KÖK NEDEN DÜZELTMESİ (kesin kod kanıtı +
+ * gerçek cihaz test deseniyle güçlü dolaylı kanıt — bkz. Sprint 10.16
+ * teslim raporu). ÖNCEDEN bu akış SADECE TEK bir ek round-trip
+ * destekliyordu (`if` bloğu, döngü DEĞİL) — modelin, ilk tool
+ * sonucunu aldıktan SONRA (ör. istenen türde kayıt bulunamadığında,
+ * daha iyi bir filtreyle) İKİNCİ bir tool çağrısı yapmak istediği
+ * durumlarda, bu talep HİÇ işlenmiyordu — `response.text` boş
+ * kalıyordu, kullanıcı sessizce boş bir mesaj alıyordu (HİÇBİR
+ * exception fırlatılmadığı için hiçbir hata kodu da oluşmuyordu).
+ *
+ * Bu sabit, olası bir sonsuz döngüye karşı AÇIK bir üst sınır koyar —
+ * `MAX_RETRY_ATTEMPTS` (GeminiProvider.ts) ile AYNI isimlendirme
+ * deseni. 3 tur (1 ilk + 2 ek tool round'u), gerçek cihazda
+ * gözlemlenen senaryoları (ör. "önce filtresiz dene, sonuç yetersizse
+ * filtreli tekrar dene") kapsamak için yeterli, ama sınırsız değil.
+ */
+const MAX_TOOL_ROUNDS = 3;
+
 export interface SendUserMessageInput {
   conversationId: string;
   userQuery: string;
@@ -76,7 +95,7 @@ class AiSessionService {
       hasTools: toolDefinitions.length > 0,
     });
 
-    const providerMessages: AIMessage[] = [
+    let providerMessages: AIMessage[] = [
       ...limitedPriorTurns.map((m) => ({ role: m.role, content: m.content })),
       { role: "user" as const, content: userTurnMessage },
     ];
@@ -86,16 +105,22 @@ class AiSessionService {
       tools: toolDefinitions,
     });
 
-    // 4. Araç çağrısı talep edildiyse GERÇEKTEN çalıştır, sonucu geri gönder.
-    if (response.toolCalls.length > 0) {
+    // 4. Araç çağrısı talep edildiyse GERÇEKTEN çalıştır, sonucu geri
+    // gönder — bkz. dosya başlığındaki not: bu artık TEK seferlik
+    // değil, ÜST SINIRLI bir döngü (MAX_TOOL_ROUNDS). Modelin, bir
+    // önceki tool sonucuna dayanarak İKİNCİ (hatta üçüncü) bir tool
+    // çağrısı talep etmesi durumunda, bu talep artık GERÇEKTEN işlenir.
+    let round = 0;
+    while (response.toolCalls.length > 0 && round < MAX_TOOL_ROUNDS) {
+      round++;
       const toolResults: AIToolResult[] = [];
       for (const call of response.toolCalls) {
-        console.log(`[AI] Tool Started: ${call.toolName}`, call.arguments);
+        console.log(`[AI] Tool Started (round ${round}): ${call.toolName}`, call.arguments);
         const toolStartedAt = Date.now();
         const result = await toolRegistry.invoke(call.toolName, call.arguments);
         const toolDurationMs = Date.now() - toolStartedAt;
         aiDiagnostics.recordToolDuration(toolDurationMs);
-        console.log(`[AI] Tool Finished: ${call.toolName} (${toolDurationMs}ms)`);
+        console.log(`[AI] Tool Finished (round ${round}): ${call.toolName} (${toolDurationMs}ms)`);
         toolResults.push({ toolName: call.toolName, result });
       }
 
@@ -111,18 +136,16 @@ class AiSessionService {
       // 🔴 GERÇEK BUG DÜZELTMESİ (AI X-Ray denetiminde bulundu,
       // kanıtlandı — bkz. `AIMessage.toolCalls`'ın belgesi ve
       // `GeminiProvider.buildContents()`'in güncellenmiş yorumu).
-      // ÖNCEDEN, 2. round-trip'e SADECE `pendingToolResults`
-      // gönderiliyordu — modelin KENDİ function-call talebi (bu ilk
-      // `response`) history'ye HİÇ eklenmiyordu. Gemini'nin resmi
-      // sözleşmesi, bir `functionResponse`'un HEMEN ÖNCESİNDE eşleşen
-      // `functionCall`'ı içeren bir "model" turu OLMASINI ZORUNLU
-      // KILIYOR — bu satır olmadan Gemini 400 Bad Request döndürüyordu.
-      const messagesWithModelToolCall: AIMessage[] = [
+      // Modelin KENDİ function-call talebi (bu turun `response`'u)
+      // history'ye eklenir — Gemini'nin resmi sözleşmesi, bir
+      // `functionResponse`'un HEMEN ÖNCESİNDE eşleşen `functionCall`'ı
+      // içeren bir "model" turu OLMASINI ZORUNLU KILIYOR.
+      providerMessages = [
         ...providerMessages,
         { role: "model", content: response.text ?? "", toolCalls: response.toolCalls },
       ];
 
-      response = await provider.sendMessage(messagesWithModelToolCall, {
+      response = await provider.sendMessage(providerMessages, {
         systemInstruction,
         tools: toolDefinitions,
         pendingToolResults: toolResults,
