@@ -3,29 +3,37 @@
 | Alan | Değer |
 |---|---|
 | **Project** | Bahçem Mobile |
-| **Module** | Ayarlar Hub — Dil (Language) |
-| **Sprint** | 10.18 |
+| **Module** | Ayarlar Hub — Bildirimler (Bakım Hatırlatmaları) |
+| **Sprint** | 10.19 |
 | **App Version** | `0.1.0-beta.1` (değişmedi) |
-| **Test Sonucu** | ✅ 819/819 başarılı (+11 yeni) — regresyon yok |
+| **Test Sonucu** | ✅ 846/846 başarılı (+10 yeni bu turda, +34 önceden yazılmış doğrulandı) — regresyon yok |
 | **Build** | ✅ **BUILD SUCCESSFUL** |
-| **Lint** | ✅ 0 uyarı/hata (249 dosya) |
-| **Cap Sync** | ✅ Başarılı (11 native plugin, değişmedi) |
+| **Lint** | ✅ 0 uyarı/hata (255 dosya) |
+| **Cap Sync** | ✅ Başarılı (12 native plugin, `@capacitor/local-notifications` eklendi) |
 | **Android Gradle Build** | ❌ Gerçekten denendi — bu ortamın network kısıtı (HTTP 403) nedeniyle yapılamadı |
 | **Şema Sürümü** | 12 (değişmedi) |
 | **Tarih** | 2026-07-23 |
-| **Git Commit** | `931d4b3` |
+| **Git Commit** | `71f088e` |
 
 ## Kapsam Kararı
 
-AI modülü, kullanıcı kararıyla Feature Freeze (bakım modu) — Sprint 10.17 sonrası 19 senaryo gerçek cihazda başarılı. Roadmap yeniden değerlendirmesi sonrası, İmzalama (kullanıcının kendi ortamı) ve Hasat-Finans revizyonu (ayrı plan/ADR gerektiriyor) şu an başlatılamaz olduğundan, en düşük riskli hazır iş olarak **Dil** seçildi.
+SADECE bakım hatırlatmaları — `maintenance_plans.next_due_date` tabanlı, tamamen cihaz üzerinde zamanlanan yerel bildirimler. Sunucu tarafı push bildirim sistemi yok (offline-first ilkesiyle tutarlı).
+
+## Önemli Not
+
+Bu işin bir kısmı (native katman) bu session içinde daha önce yazılmış ama hiç commit edilmemişti — working tree'de bulundu, doğrulandı, üzerine inşa edilerek tamamlandı.
 
 ## Gerçek Bulgu
 
-Dil değiştirme backend altyapısı (`languagePreference.ts`, `supportedLanguages.ts`) ADR 0015/0020/0021 ile Sprint 6 civarında zaten tamamlanmıştı — sadece UI eksikti. Bu sprint hiçbir yeni mimari karar gerektirmedi.
+`AndroidManifest.xml`'de `POST_NOTIFICATIONS` izni eksikti — `targetSdkVersion=36` (Android 13+) için resmi olarak zorunlu (developer.android.com'dan doğrulandı). Eklendi.
+
+## Mimari Karar
+
+`Schedule.repeats: true` kullanılmıyor — bir bakım tamamlandığında `next_due_date` güncellenir, bu yüzden sabit aralıklı tekrarlama yanlış olurdu. Her plan için tek seferlik bir bildirim zamanlanır, planlar değiştiğinde tümü iptal edilip güncel veriyle yeniden zamanlanır.
 
 ## Frozen Modules
 
 | Modül | Durum |
 |---|---|
-| Modül 1-10, Veri Yönetimi, Dil | ✅ Onaylandı |
-| Modül 6 — AI | 🟢 Feature Freeze (bakım modu) — kullanıcı kararı, Sprint 10.17 sonrası kapsamlı doğrulandı |
+| Modül 1-10, Veri Yönetimi, Dil, Bildirimler | ✅ Onaylandı |
+| Modül 6 — AI | 🟢 Feature Freeze (bakım modu) — kullanıcı kararı |
